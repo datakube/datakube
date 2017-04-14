@@ -34,20 +34,21 @@ func main() {
 			Usage: "The Database Type to connect to (currently SQL is supported only)",
 			EnvVar: "DATABASE_TYPE",
 		},
+		cli.StringFlag{
+			Name: "schedule-duration",
+			Usage: "The Database Type to connect to (currently SQL is supported only)",
+			EnvVar: "SCHEDULE_DURATION",
+		},
 	}
 
 	app.Action = func(c *cli.Context) error {
 
-		databaseConfig := DatabaseConfiguration {
-			DatabaseName: 		c.String("database-name"),
-			DatabaseHost: 		c.String("database-host"),
-			DatabaseUserName: 	c.String("database-user"),
-			DatabasePassword: 	c.String("database-password"),
-			DatabaseType: 		c.String("database-type"),
-		}
+		globalConfiguration := initConfig(c)
 
-		hamster := NewHamster(databaseConfig);
-		hamster.run()
+		exit := make(chan struct{}, 1)
+		manager := NewManager(globalConfiguration)
+		manager.run(exit)
+
 		return nil;
 	}
 
@@ -57,3 +58,27 @@ func main() {
 	app.Run(os.Args);
 }
 
+func initConfig(c *cli.Context) GlobalConfiguration{
+
+	var dataBaseName 		= c.String("database-name")
+	var databaseHost		= c.String("database-host")
+	var databaseUser		= c.String("database-user")
+	var databaseType		= c.String("database-type")
+	var databasePassword		= c.String("database-type")
+	var scheduleDuration		= c.String("schedule-duration")
+
+	config := GlobalConfiguration {
+		Schedule: ScheduleConfiguration{
+			Interval: scheduleDuration,
+		},
+		Database: DatabaseConfiguration{
+			DatabaseName: dataBaseName,
+			DatabaseType: databaseType,
+			DatabasePassword: databasePassword,
+			DatabaseUserName: databaseUser,
+			DatabaseHost: databaseHost,
+		},
+	}
+
+	return config
+}
