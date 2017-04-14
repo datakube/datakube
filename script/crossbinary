@@ -1,0 +1,23 @@
+#!/bin/bash
+set -e
+
+if [ -z "$VERSION" ]; then
+    VERSION=$(git rev-parse HEAD)
+fi
+
+if [ -z "$DATE" ]; then
+    DATE=$(date -u '+%Y-%m-%d_%I:%M:%S%p')
+fi
+
+# Get rid of existing binaries
+rm -f dist/datahamster_worker*
+
+# Build 386 amd64 binaries
+OS_PLATFORM_ARG=(linux darwin windows)
+OS_ARCH_ARG=(386 amd64)
+for OS in ${OS_PLATFORM_ARG[@]}; do
+  for ARCH in ${OS_ARCH_ARG[@]}; do
+    echo "Building binary for $OS/$ARCH..."
+    GOARCH=$ARCH GOOS=$OS CGO_ENABLED=0 go build -ldflags "-s -w -X github.com/santode/datahamster/worker/version.Version=$VERSION -X github.com/santode/datahamster/worker/version.BuildDate=$DATE" -o "dist/datahamster-worker_$OS-$ARCH" .
+  done
+done
