@@ -35,6 +35,22 @@ func main() {
 			EnvVar: "DATABASE_TYPE",
 		},
 	}
+
+	app.Action = func(c *cli.Context) error {
+
+		databaseConfig := DatabaseConfiguration {
+			DatabaseName: 		c.String("database-name"),
+			DatabaseHost: 		c.String("database-host"),
+			DatabaseUserName: 	c.String("database-user"),
+			DatabasePassword: 	c.String("database-password"),
+			DatabaseType: 		c.String("database-type"),
+		}
+
+		hamster := NewHamster(databaseConfig);
+		hamster.run()
+		return nil;
+	}
+
 	app.Name = "Datahamster - Worker"
 	app.Usage = "Worker to automatically get databse dumps and forward them to the server"
 
