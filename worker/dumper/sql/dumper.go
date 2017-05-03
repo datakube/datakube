@@ -3,10 +3,10 @@ package sql
 import (
 	"database/sql"
 	"github.com/JamesStewy/go-mysqldump"
-	"github.com/santode/datahamster/worker/configuration"
-	"github.com/santode/datahamster/worker/dumper"
-	"github.com/santode/datahamster/worker/log"
-	"github.com/santode/datahamster/worker/types"
+	"github.com/SantoDE/datahamster/worker/configuration"
+	"github.com/SantoDE/datahamster/worker/dumper"
+	"github.com/SantoDE/datahamster/worker/log"
+	"github.com/SantoDE/datahamster/worker/types"
 	"time"
 )
 

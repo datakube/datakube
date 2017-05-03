@@ -1,0 +1,25 @@
+language: go
+
+go:
+  - 1.7.x
+  - master
+
+services:
+  - docker
+
+sudo: required
+
+env:
+  global:
+    - REPO: $TRAVIS_REPO_SLUG
+    - VERSION: $TRAVIS_TAG
+
+install:
+  - docker version
+  - go get github.com/golang/lint/golint
+  - cd worker && make integration-test-image
+
+script:
+  - make validate
+  - make test-unit
+  - make test-integration

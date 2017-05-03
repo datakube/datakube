@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/santode/datahamster/worker/configuration"
+	"github.com/SantoDE/datahamster/worker/configuration"
 )
 
 // Manager struct which holds the application configuration

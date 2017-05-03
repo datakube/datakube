@@ -3,8 +3,8 @@ package sql
 import (
 	"database/sql"
 	"fmt"
-	"github.com/santode/datahamster/worker/configuration"
-	"github.com/santode/datahamster/worker/log"
+	"github.com/SantoDE/datahamster/worker/configuration"
+	"github.com/SantoDE/datahamster/worker/log"
 	"github.com/ziutek/mymysql/godrv"
 )
 

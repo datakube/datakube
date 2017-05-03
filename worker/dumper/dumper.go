@@ -1,8 +1,8 @@
 package dumper
 
 import (
-	"github.com/santode/datahamster/worker/configuration"
-	"github.com/santode/datahamster/worker/types"
+	"github.com/SantoDE/datahamster/worker/configuration"
+	"github.com/SantoDE/datahamster/worker/types"
 )
 
 // BaseDumper struct which holds basic configuration for all dumpers
