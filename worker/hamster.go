@@ -1,10 +1,10 @@
 package main
 
 import (
-	"github.com/santode/datahamster/worker/configuration"
-	"github.com/santode/datahamster/worker/dumper"
-	"github.com/santode/datahamster/worker/dumper/sql"
-	"github.com/santode/datahamster/worker/log"
+	"github.com/SantoDE/datahamster/worker/configuration"
+	"github.com/SantoDE/datahamster/worker/dumper"
+	"github.com/SantoDE/datahamster/worker/dumper/sql"
+	"github.com/SantoDE/datahamster/worker/log"
 	"os"
 )
 
@@ -17,7 +17,7 @@ type Hamster struct {
 // NewHamster Create New Hamster with the given DB Config
 func NewHamster(configuration configuration.DatabaseConfiguration) *Hamster {
 	hamster := new(Hamster)
-	hamster.Dumper = sql.NewSqlDumper(configuration, os.TempDir())
+	hamster.Dumper = sql.NewSQLDumper(configuration, os.TempDir())
 	return hamster
 }
 

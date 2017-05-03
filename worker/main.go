@@ -1,9 +1,9 @@
 package main
 
 import (
+	"github.com/SantoDE/datahamster/worker/configuration"
+	"github.com/SantoDE/datahamster/worker/log"
 	"github.com/Sirupsen/logrus"
-	"github.com/santode/datahamster/worker/configuration"
-	"github.com/santode/datahamster/worker/log"
 	"github.com/urfave/cli"
 	"os"
 	"strings"

@@ -1,7 +1,7 @@
 package sql
 
 import (
-	"github.com/santode/datahamster/worker/configuration"
+	"github.com/SantoDE/datahamster/worker/configuration"
 	"reflect"
 	"testing"
 )

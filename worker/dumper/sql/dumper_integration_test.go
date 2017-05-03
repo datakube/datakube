@@ -3,9 +3,9 @@ package sql
 import (
 	"database/sql"
 	"fmt"
+	"github.com/SantoDE/datahamster/worker/configuration"
+	"github.com/SantoDE/datahamster/worker/types"
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/santode/datahamster/worker/configuration"
-	"github.com/santode/datahamster/worker/types"
 	"gopkg.in/ory-am/dockertest.v3"
 	"reflect"
 	"testing"
