@@ -46,7 +46,7 @@ func (d *Dumper) register(config configuration.DatabaseConfiguration) error {
 // Dump Method to really ceate the Database Dump
 func (d *Dumper) Dump() (*types.DumpResult, error) {
 
-	err := d.dumper.Dump()
+	dumpPath, err := d.dumper.Dump()
 
 	if err != nil {
 		log.Errorf("Error Dumping MySql Dump: %s", err)
@@ -55,6 +55,7 @@ func (d *Dumper) Dump() (*types.DumpResult, error) {
 
 	result := types.DumpResult{
 		Success: true,
+		Path:    dumpPath,
 	}
 
 	return &result, nil

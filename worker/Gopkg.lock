@@ -7,10 +7,10 @@ memo = "eb7439e9f518a657c29c831b40b03200986d85bf80a61cbef858fbf896045216"
   revision = "fa152c58bc15761d0200cb75fe958b89a9d4888e"
 
 [[projects]]
-  branch = "master"
   name = "github.com/JamesStewy/go-mysqldump"
   packages = ["."]
-  revision = "a49ae482e645a28ee6c80e4fde1cd824203afa46"
+  revision = "5a2120b2d8d477bdfb6611b995b137bb33206488"
+  version = "v0.2.0"
 
 [[projects]]
   name = "github.com/Microsoft/go-winio"
@@ -94,7 +94,7 @@ memo = "eb7439e9f518a657c29c831b40b03200986d85bf80a61cbef858fbf896045216"
   branch = "master"
   name = "golang.org/x/net"
   packages = ["context","context/ctxhttp"]
-  revision = "0819898fb4973868bba6de59b6aaad75beea9a6a"
+  revision = "feeb485667d1fdabe727840fe00adc22431bc86e"
 
 [[projects]]
   branch = "master"
