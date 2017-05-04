@@ -4,9 +4,9 @@ import (
 	"database/sql"
 	"fmt"
 	"github.com/SantoDE/datahamster/worker/configuration"
-	"github.com/SantoDE/datahamster/worker/types"
 	_ "github.com/go-sql-driver/mysql"
 	"gopkg.in/ory-am/dockertest.v3"
+	"os"
 	"reflect"
 	"testing"
 )
@@ -69,13 +69,35 @@ func TestSqlDumpOk(t *testing.T) {
 		t.Fatalf("Error while dumping: %s", err)
 	}
 
-	expectedResult := &types.DumpResult{
-		Success: true,
+	if reflect.TypeOf(result).String() == "DumpResult" {
+		pool.Purge(resource)
+		t.Fatalf("Error Dumping: Did not receive a DumpResult, instead received %+v", result)
 	}
 
-	if !reflect.DeepEqual(expectedResult, result) {
+	if reflect.ValueOf(result.Success).Bool() != true {
 		pool.Purge(resource)
-		t.Fatalf("Error dumping: expected %+v, got %+v", expectedResult, result)
+		t.Fatalf("Error Dumping: expected result %+v, got %+v", true, reflect.ValueOf(result.Success).Bool())
+	}
+
+	path := reflect.ValueOf(result.Path).String()
+
+	if path == "" {
+		pool.Purge(resource)
+		t.Fatalf("Error Dumping: Got an empty filename - probably no dump created")
+	}
+
+	file, err := os.Open(path)
+
+	if err != nil {
+		err = pool.Purge(resource)
+		t.Fatalf("Error while opening the file: %s", err)
+	}
+
+	info, _ := file.Stat()
+
+	if info.Size() <= 0 {
+		pool.Purge(resource)
+		t.Fatalf("Error Dumping: Got an empty file - no data dumped")
 	}
 
 	err = pool.Purge(resource)
