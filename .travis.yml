@@ -21,7 +21,7 @@ env:
 install:
   - docker version
   - go get github.com/golang/lint/golint
-  - cd worker && make integration-test-image
+  - make integration-test-image
 
 script:
   - make validate

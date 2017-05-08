@@ -4,4 +4,5 @@ package types
 type DumpResult struct {
 	Success bool
 	Path    string
+	Name    string
 }

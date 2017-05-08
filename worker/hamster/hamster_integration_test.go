@@ -1,4 +1,4 @@
-package sql
+package hamster
 
 import (
 	"database/sql"
@@ -13,7 +13,7 @@ import (
 
 var db *sql.DB
 
-func TestSqlDumpOk(t *testing.T) {
+func TestHamsterRunOk(t *testing.T) {
 	if testing.Short() {
 		t.Skip("Skipping test in short mode.")
 	}
@@ -46,7 +46,7 @@ func TestSqlDumpOk(t *testing.T) {
 
 	dir := "/tmp"
 
-	config := configuration.DatabaseConfiguration{
+	dBConfig := configuration.DatabaseConfiguration{
 		DatabasePassword: "test",
 		DatabaseUserName: "test",
 		DatabaseName:     "testdb",
@@ -57,47 +57,42 @@ func TestSqlDumpOk(t *testing.T) {
 		},
 	}
 
-	adapter := NewSQLDumper(config)
-
-	err = adapter.register()
-
-	if err != nil {
-		err = pool.Purge(resource)
-		t.Fatalf("Error while registering: %s", err)
+	storageConfig := configuration.StorageConfiguration{
+		Type: "file",
+		File: configuration.FileStorageConfiguration{
+			Dir: dir,
+		},
 	}
 
-	result, err := adapter.Dump()
+	hamster := NewHamster(dBConfig, storageConfig)
+
+	file, err := hamster.run()
 
 	if err != nil {
 		err = pool.Purge(resource)
 		t.Fatalf("Error while dumping: %s", err)
 	}
 
-	if reflect.TypeOf(result).String() == "DumpResult" {
+	if reflect.TypeOf(file).String() == "File" {
 		pool.Purge(resource)
-		t.Fatalf("Error Dumping: Did not receive a DumpResult, instead received %+v", result)
+		t.Fatalf("Error Hamster Run: Did not receive a file, instead received %+v", file)
 	}
 
-	if reflect.ValueOf(result.Success).Bool() != true {
-		pool.Purge(resource)
-		t.Fatalf("Error Dumping: expected result %+v, got %+v", true, reflect.ValueOf(result.Success).Bool())
-	}
-
-	path := reflect.ValueOf(result.Path).String()
+	path := file.Path
 
 	if path == "" {
 		pool.Purge(resource)
-		t.Fatalf("Error Dumping: Got an empty filename - probably no dump created")
+		t.Fatalf("Error Hamster Run: Got an empty filename - probably no dump created")
 	}
 
-	file, err := os.Open(path)
+	savedFile, err := os.Open(path)
 
 	if err != nil {
 		err = pool.Purge(resource)
 		t.Fatalf("Error while opening the file: %s", err)
 	}
 
-	info, _ := file.Stat()
+	info, _ := savedFile.Stat()
 
 	if info.Size() <= 0 {
 		pool.Purge(resource)
