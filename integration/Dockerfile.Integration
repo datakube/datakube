@@ -1,7 +1,7 @@
 FROM mariadb:latest
 MAINTAINER Manuel Laufenberg <hello@manuel-laufenberg.de>
 
-ADD fixtures/dump_test_table.sql /docker-entrypoint-initdb.d/dump_test_table.sql
+ADD integration/fixtures/dump_test_table.sql /docker-entrypoint-initdb.d/dump_test_table.sql
 
 ENTRYPOINT ["docker-entrypoint.sh"]
 

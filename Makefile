@@ -1,30 +1,34 @@
-WORKER_IMAGE := $(if $(REPONAME),$(REPONAME),"santode/datahamster-worker")
 SRCS = $(shell git ls-files '*.go' | grep -v '^vendor/')
+WORKER_MOUNT := -v "$(CURDIR)/$(BIND_DIR):/go/src/github.com/SantoDE/datahamster/$(BIND_DIR)"
+BIND_DIR := "dist"
+
+GIT_BRANCH := $(subst heads/,,$(shell git rev-parse --abbrev-ref HEAD 2>/dev/null))
 
 default: binary
 
-worker:
-	./worker/script/make.sh binary
+binary:
+	./script/make.sh generate binary
 
-crossbinary:
-	./script/make.sh crossbinary
+crossbinary: build
+	./script/make.sh generate crossbinary
 
 image:
 	docker build -t $(WORKER_IMAGE) .
 
 lint:
-	find . -type d -not -path "./vendor/*" | xargs -L 1 golint
+	./script/make.sh validate-golint
 
 fmt:
 	gofmt -s -l -w $(SRCS)
 
-test: test-unit test-integration
+validate:  ## validate gofmt, golint and go vet
+	./script/make.sh validate-gofmt validate-golint
 
 test-unit:
-	go test -test.short ./dumper/sql
+	./script/make.sh test-unit
 
-test-integration: integration-test-image
-	go test ./dumper/sql/
+test-integration:
+	 ./script/make.sh test-integration
 
 integration-test-image:
-	docker build -f Dockerfile.Integration -t santode/datahamster-worker-integration-test-db .
+	docker build -f integration/Dockerfile.Integration -t santode/datahamster-worker-integration-test-db .

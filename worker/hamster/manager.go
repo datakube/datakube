@@ -1,4 +1,4 @@
-package main
+package hamster
 
 import (
 	"fmt"
@@ -18,14 +18,15 @@ func NewManager(globalConfiguration configuration.GlobalConfiguration) *Manager 
 	return manager
 }
 
-func (manager *Manager) run(exit chan struct{}) error {
+// Run Main function to create a scheduler and a hamster and wire it together
+func (manager *Manager) Run(exit chan struct{}) error {
 
 	schedule := make(chan int, 1)
 
 	scheduler := NewScheduler(manager.globalConfiguration.Schedule)
 	scheduler.run(schedule)
 
-	hamster := NewHamster(manager.globalConfiguration.Database)
+	hamster := NewHamster(manager.globalConfiguration.Database, manager.globalConfiguration.Storage)
 
 	for {
 		select {
