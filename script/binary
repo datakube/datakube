@@ -17,4 +17,4 @@ if [ -z "$DATE" ]; then
 fi
 
 # Build binaries
-CGO_ENABLED=0 GOGC=off go build $FLAGS -ldflags "-s -w -X github.com/SantoDE/datahamster/worker/version.Version=$VERSION -X github.com/SantoDE/datahamster/worker/version.BuildDate=$DATE" -a -installsuffix nocgo -o dist/datahamster-worker .
+CGO_ENABLED=0 GOGC=off go build $FLAGS -ldflags "-X github.com/SantoDE/datahamster/cmd/worker/version.Version=$VERSION -X github.com/SantoDE/datahamster/cmd/worker/version.BuildDate=$DATE" -o dist/worker ./cmd/worker/

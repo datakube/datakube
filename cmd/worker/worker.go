@@ -108,7 +108,6 @@ func initConfig(c *cli.Context) configuration.GlobalConfiguration {
 	var databasePort = c.String("database.port")
 	var databasePassword = c.String("database.password")
 	var scheduleDuration = c.String("schedule-duration")
-	//var fileStorage	= c.Bool("storage.file")
 	var startNow = c.Bool("start-now")
 	var logLevel = c.String("log-level")
 
