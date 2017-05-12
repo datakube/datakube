@@ -18,6 +18,6 @@ OS_ARCH_ARG=(386 amd64)
 for OS in ${OS_PLATFORM_ARG[@]}; do
   for ARCH in ${OS_ARCH_ARG[@]}; do
     echo "Building binary for $OS/$ARCH..."
-    GOARCH=$ARCH GOOS=$OS CGO_ENABLED=0 go build -ldflags "-s -w -X github.com/SantoDE/datahamster/worker/version.Version=$VERSION -X github.com/SantoDE/datahamster/worker/version.BuildDate=$DATE" -o "dist/datahamster-worker_$OS-$ARCH" .
+    GOARCH=$ARCH GOOS=$OS CGO_ENABLED=0 go build -ldflags "-s -w -X github.com/SantoDE/datahamster/cmd/worker/version.Version=$VERSION -X github.com/SantoDE/datahamster/cmd/worker/version.BuildDate=$DATE" -o "dist/datahamster-worker_$OS-$ARCH" .
   done
 done

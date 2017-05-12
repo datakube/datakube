@@ -7,10 +7,10 @@ GIT_BRANCH := $(subst heads/,,$(shell git rev-parse --abbrev-ref HEAD 2>/dev/nul
 default: binary
 
 binary:
-	./script/make.sh generate binary
+	./script/make.sh binary
 
-crossbinary: build
-	./script/make.sh generate crossbinary
+crossbinary:
+	./script/make.sh crossbinary
 
 image:
 	docker build -t $(WORKER_IMAGE) .
