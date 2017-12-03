@@ -1,10 +1,12 @@
 package configuration
 
+import "github.com/SantoDE/datahamster/storage"
+
 // GlobalConfiguration struct to hold Application config
 type GlobalConfiguration struct {
 	Schedule ScheduleConfiguration
 	Database DatabaseConfiguration
-	Storage  StorageConfiguration
+	Storage  storage.StorageConfiguration
 	LogLevel string
 }
 
@@ -28,15 +30,4 @@ type SQLDatabaseConfiguration struct {
 type ScheduleConfiguration struct {
 	Interval string `description:"Interval to run at i.e. 8h or 5m"`
 	StartNow bool   `description:"Interval to run at i.e. 8h or 5m"`
-}
-
-// StorageConfiguration struct to hold Storage Configuration
-type StorageConfiguration struct {
-	Type string `description:"Persistent File Storage"`
-	File FileStorageConfiguration
-}
-
-// FileStorageConfiguration struct to hold File Storage specific Configuration
-type FileStorageConfiguration struct {
-	Dir string `description:"Persistent File Storage"`
 }

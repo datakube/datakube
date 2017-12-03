@@ -5,6 +5,7 @@ import (
 	"github.com/SantoDE/datahamster/storage"
 	"os"
 	"path"
+	"io/ioutil"
 )
 
 var _ storage.Storage = (*Storage)(nil)
@@ -41,6 +42,10 @@ func (storage *Storage) SaveFile(f storage.File) error {
 
 // ReadFile function to read a specific file
 func (*Storage) ReadFile() {
+
+}
+
+func (storage *Storage) ListFiles() {
 
 }
 

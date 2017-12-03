@@ -3,11 +3,12 @@ package hamster
 import (
 	"github.com/SantoDE/datahamster/log"
 	"github.com/SantoDE/datahamster/storage"
-	"github.com/SantoDE/datahamster/storage/file"
 	"github.com/SantoDE/datahamster/worker/configuration"
 	"github.com/SantoDE/datahamster/worker/dumper"
 	"github.com/SantoDE/datahamster/worker/dumper/sql"
-	"os"
+	pb "github.com/SantoDE/datahamster/services/fileUpload"
+	"google.golang.org/grpc"
+	"golang.org/x/net/context"
 )
 
 // Hamster Structs which knows the DB Configuration and the dumper needed for that Config
@@ -17,33 +18,46 @@ type Hamster struct {
 }
 
 // NewHamster Create New Hamster with the given DB Config
-func NewHamster(dbConfiguration configuration.DatabaseConfiguration, storage configuration.StorageConfiguration) *Hamster {
+func NewHamster(dbConfiguration configuration.DatabaseConfiguration, storage storage.StorageConfiguration) *Hamster {
 	hamster := new(Hamster)
 	hamster.Dumper = sql.NewSQLDumper(dbConfiguration)
-	hamster.Storage = file.NewFileStorage(storage.File.Dir)
 	return hamster
 }
 
-func (hamster *Hamster) run() (*storage.File, error) {
+func (hamster *Hamster) run() (error) {
 	result, err := hamster.Dumper.Dump()
 
 	if err != nil {
 		log.Errorf("Error connecting to MySql Database %s", err)
-		return nil, err
+		return err
 	}
 
 	log.Debugf("Dump Succesfull - going to save it")
 
-	fileInfo, _ := os.Stat(result.Path)
+	conn, err := grpc.Dial("127.0.0.1:8010", grpc.WithInsecure(), grpc.WithBlock())
+	if err != nil {
+		log.Debugf("Error Dialing RPC %s", err.Error())
+	}
 
-	name := fileInfo.Name()
+	log.Debugf("Dailed successfull")
+	defer conn.Close()
 
-	f := new(storage.File)
-	f.Path = result.Path
-	f.Name = name
+	c := pb.NewFileUploadClient(conn)
 
-	hamster.Storage.SaveFile(*f)
+	request := new(pb.FileUploadRequest)
+	request.Id = 123
+	request.Success = result.Success
 
-	log.Debugf("Saved File with new Name %s", f.Name)
-	return f, nil
+	log.Debugf("Uploading....")
+	resp, err := c.UploadFile(context.Background(), request)
+
+	if err != nil {
+		log.Debugf("Error Uploading File%s", err.Error())
+	}
+
+	log.Debugf("Uploaded...%s", resp.Keyword)
+
+
+
+	return nil
 }
