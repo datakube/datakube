@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package fileUpload;
+
+// The Customer service definition.
+service FileUpload {
+    // Get all Customers with filter - A server-to-client streaming RPC.
+    rpc UploadFile(FileUploadRequest) returns (FileUploadResponse) {}
+}
+
+message FileUploadRequest {
+    int32 id = 1;
+    bool success = 2;
+}
+message FileUploadResponse {
+    string keyword = 1;
+}

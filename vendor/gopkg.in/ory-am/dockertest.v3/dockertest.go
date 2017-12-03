@@ -92,11 +92,15 @@ func NewPool(endpoint string) (*Pool, error) {
 
 // RunOptions is used to pass in optional parameters when running a container.
 type RunOptions struct {
-	Repository string
-	Tag        string
-	Env        []string
-	Cmd        []string
-	Mounts     []string
+	Repository   string
+	Tag          string
+	Env          []string
+	Entrypoint   []string
+	Cmd          []string
+	Mounts       []string
+	Links        []string
+	ExposedPorts []string
+	Auth         dc.AuthConfiguration
 }
 
 // RunWithOptions starts a docker container.
@@ -107,6 +111,15 @@ func (d *Pool) RunWithOptions(opts *RunOptions) (*Resource, error) {
 	tag := opts.Tag
 	env := opts.Env
 	cmd := opts.Cmd
+	ep := opts.Entrypoint
+	var exp map[dc.Port]struct{}
+
+	if len(opts.ExposedPorts) > 0 {
+		exp = map[dc.Port]struct{}{}
+		for _, p := range opts.ExposedPorts {
+			exp[dc.Port(p)] = struct{}{}
+		}
+	}
 
 	mounts := []dc.Mount{}
 
@@ -132,21 +145,24 @@ func (d *Pool) RunWithOptions(opts *RunOptions) (*Resource, error) {
 		if err := d.Client.PullImage(dc.PullImageOptions{
 			Repository: repository,
 			Tag:        tag,
-		}, dc.AuthConfiguration{}); err != nil {
+		}, opts.Auth); err != nil {
 			return nil, errors.Wrap(err, "")
 		}
 	}
 
 	c, err := d.Client.CreateContainer(dc.CreateContainerOptions{
 		Config: &dc.Config{
-			Image:  fmt.Sprintf("%s:%s", repository, tag),
-			Env:    env,
-			Cmd:    cmd,
-			Mounts: mounts,
+			Image:        fmt.Sprintf("%s:%s", repository, tag),
+			Env:          env,
+			Entrypoint:   ep,
+			Cmd:          cmd,
+			Mounts:       mounts,
+			ExposedPorts: exp,
 		},
 		HostConfig: &dc.HostConfig{
 			PublishAllPorts: true,
 			Binds:           opts.Mounts,
+			Links:           opts.Links,
 		},
 	})
 	if err != nil {

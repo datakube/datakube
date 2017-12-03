@@ -9,6 +9,7 @@ import (
 	"github.com/urfave/cli"
 	"os"
 	"strings"
+	"github.com/SantoDE/datahamster/storage"
 )
 
 func main() {
@@ -111,13 +112,13 @@ func initConfig(c *cli.Context) configuration.GlobalConfiguration {
 	var startNow = c.Bool("start-now")
 	var logLevel = c.String("log-level")
 
-	storageConfig := new(configuration.StorageConfiguration)
+	storageConfig := new(storage.StorageConfiguration)
 
 	switch storageType := c.String("storage.type"); storageType {
 
 	case "file":
 		var storageDir = c.String("storage.file.dir")
-		storageConfig.File = configuration.FileStorageConfiguration{
+		storageConfig.File = storage.FileStorageConfiguration{
 			Dir: storageDir,
 		}
 
