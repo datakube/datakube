@@ -3,13 +3,14 @@ package main
 
 import (
 	"github.com/SantoDE/datahamster/log"
-	"github.com/SantoDE/datahamster/server/configuration"
+	"github.com/SantoDE/datahamster/configuration"
 	"github.com/Sirupsen/logrus"
 	"github.com/urfave/cli"
 	"os"
 	"strings"
 	"github.com/SantoDE/datahamster/storage"
 	"github.com/SantoDE/datahamster/server"
+	"fmt"
 )
 
 func main() {
@@ -52,10 +53,8 @@ func main() {
 
 		cfg := globalConfiguration.Server
 
-		server := new(server.HamsterServer)
-		server.Configuration = cfg
-
-		server.Start()
+		fmt.Printf("Server Adress %s", cfg.Address)
+		server.StartRpc()
 
 		return nil
 	}

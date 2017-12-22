@@ -2,8 +2,24 @@ package configuration
 
 import "github.com/SantoDE/datahamster/storage"
 
-// GlobalConfiguration struct to hold Application config
 type GlobalConfiguration struct {
+	Server	 ServerConfiguration
+	LogLevel string
+	Dumps	 []DumpConfiguration
+}
+
+type ServerConfiguration struct {
+	Address	string
+}
+
+type DumpConfiguration struct {
+	Identifier 	string
+	StorageType	string
+	Storage		storage.StorageConfiguration
+}
+
+// GlobalConfiguration struct to hold Application config
+type AgentConfiguration struct {
 	Schedule ScheduleConfiguration
 	Database DatabaseConfiguration
 	Storage  storage.StorageConfiguration

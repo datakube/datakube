@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 	"github.com/SantoDE/datahamster/log"
-	"github.com/SantoDE/datahamster/worker/configuration"
-	"github.com/SantoDE/datahamster/worker/hamster"
+	"github.com/SantoDE/datahamster/configuration"
+	"github.com/SantoDE/datahamster/worker"
 	"github.com/Sirupsen/logrus"
 	"github.com/urfave/cli"
 	"os"
@@ -78,18 +78,16 @@ func main() {
 	}
 
 	app.Action = func(c *cli.Context) error {
-		globalConfiguration := initConfig(c)
-		level, err := logrus.ParseLevel(strings.ToLower(globalConfiguration.LogLevel))
+		agentConfiguration := initConfig(c)
+		level, err := logrus.ParseLevel(strings.ToLower(agentConfiguration.LogLevel))
 		if err != nil {
 			log.Error("Error getting level", err)
 		}
 		log.SetLevel(level)
 
-		exit := make(chan struct{}, 1)
+		//exit := make(chan struct{}, 1)
 
-		manager := hamster.NewManager(globalConfiguration)
-
-		manager.Run(exit)
+		worker.StartWorker()
 
 		return nil
 	}
@@ -100,7 +98,7 @@ func main() {
 	app.Run(os.Args)
 }
 
-func initConfig(c *cli.Context) configuration.GlobalConfiguration {
+func initConfig(c *cli.Context) configuration.AgentConfiguration {
 
 	var dataBaseName = c.String("database.name")
 	var databaseHost = c.String("database.host")
@@ -108,8 +106,6 @@ func initConfig(c *cli.Context) configuration.GlobalConfiguration {
 	var databaseType = c.String("database.type")
 	var databasePort = c.String("database.port")
 	var databasePassword = c.String("database.password")
-	var scheduleDuration = c.String("schedule-duration")
-	var startNow = c.Bool("start-now")
 	var logLevel = c.String("log-level")
 
 	storageConfig := new(storage.StorageConfiguration)
@@ -148,11 +144,7 @@ func initConfig(c *cli.Context) configuration.GlobalConfiguration {
 		fmt.Printf("Default")
 	}
 
-	config := configuration.GlobalConfiguration{
-		Schedule: configuration.ScheduleConfiguration{
-			Interval: scheduleDuration,
-			StartNow: startNow,
-		},
+	config := configuration.AgentConfiguration{
 		Database: dbConfig,
 		Storage:  *storageConfig,
 		LogLevel: logLevel,

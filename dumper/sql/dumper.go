@@ -5,7 +5,7 @@ import (
 	"github.com/JamesStewy/go-mysqldump"
 	"github.com/SantoDE/datahamster/log"
 	"github.com/SantoDE/datahamster/worker/configuration"
-	"github.com/SantoDE/datahamster/worker/dumper"
+	"github.com/SantoDE/datahamster/dumper"
 	"github.com/SantoDE/datahamster/worker/types"
 	"time"
 )

@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package connect;
+
+// The Customer service definition.
+service AgentConnect {
+    rpc ConnectAgent(ConnectRequest) returns (ConnectResponse) {}
+}
+
+message ConnectRequest {
+    string type = 1;
+}
+message ConnectResponse {
+    bool success = 2;
+}
