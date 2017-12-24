@@ -13,7 +13,7 @@ func StartWorker() {
 	defer conn.Close()
 
 	request := new(connect.ConnectRequest)
-	request.Type = "sql"
+	request.Token = "12345"
 	conClient := connect.NewAgentConnectClient(conn)
 	resp, err := conClient.ConnectAgent(context.Background(), request)
 
