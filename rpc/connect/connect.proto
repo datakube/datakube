@@ -8,7 +8,7 @@ service AgentConnect {
 }
 
 message ConnectRequest {
-    string type = 1;
+    string token = 1;
 }
 message ConnectResponse {
     bool success = 2;

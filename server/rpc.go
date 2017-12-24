@@ -7,7 +7,19 @@ import (
 	"google.golang.org/grpc"
 )
 
-func StartRpc() {
+type RpcServer struct {
+	application *Application
+}
+
+func NewRpcServer(app *Application) *RpcServer {
+
+	server := new(RpcServer)
+	server.application = app
+
+	return server
+}
+
+func (r *RpcServer) Start() {
 	lis, err := net.Listen("tcp", ":8010")
 
 	if err != nil {
@@ -16,7 +28,8 @@ func StartRpc() {
 
 	server := grpc.NewServer()
 	log.Debugf("Registering FileUpload RPC")
-	connect.RegisterAgentConnectServer(server, &connect.AgentService{})
+	as := connect.NewAgentService(&r.application.AgentService)
+	connect.RegisterAgentConnectServer(server, as)
 	log.Debugf("Start Serve FileUpload RPC")
 	err = server.Serve(lis)
 	if err != nil {

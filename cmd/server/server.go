@@ -11,6 +11,8 @@ import (
 	"github.com/SantoDE/datahamster/storage"
 	"github.com/SantoDE/datahamster/server"
 	"fmt"
+	"github.com/SantoDE/datahamster/bolt"
+	"golang.org/x/sync/errgroup"
 )
 
 func main() {
@@ -51,12 +53,30 @@ func main() {
 		}
 		log.SetLevel(level)
 
+		store := initStore("test.db")
+
 		cfg := globalConfiguration.Server
+		application := initApplication(store)
 
 		fmt.Printf("Server Adress %s", cfg.Address)
-		server.StartRpc()
+		rpcServer := server.NewRpcServer(application)
 
-		return nil
+		httpServer := server.NewHttpServer(application)
+
+		var g errgroup.Group
+
+		g.Go(func() error {
+			rpcServer.Start()
+			return nil
+		})
+
+		g.Go(func() error {
+			httpServer.Start()
+			return nil
+		})
+
+
+		return g.Wait()
 	}
 
 	app.Name = "Datahamster - Worker"
@@ -101,4 +121,22 @@ func initConfig(c *cli.Context) configuration.GlobalConfiguration {
 	}
 
 	return config
+}
+
+func initStore(dataStorePath string) *bolt.Datastore {
+	store, err := bolt.NewStore(dataStorePath)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = store.Open()
+
+	return store
+}
+
+func initApplication(store *bolt.Datastore) *server.Application {
+	app := new(server.Application)
+	bas := bolt.NewAgentService(store)
+	app.AgentService = bas
+	return app
 }
