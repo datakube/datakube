@@ -9,10 +9,12 @@ import (
 	"os"
 	"strings"
 	"github.com/SantoDE/datahamster/storage"
-	"github.com/SantoDE/datahamster/server"
 	"fmt"
 	"github.com/SantoDE/datahamster/bolt"
 	"golang.org/x/sync/errgroup"
+	"github.com/SantoDE/datahamster/rpc"
+	"github.com/SantoDE/datahamster/http"
+	"github.com/SantoDE/datahamster"
 )
 
 func main() {
@@ -56,21 +58,20 @@ func main() {
 		store := initStore("test.db")
 
 		cfg := globalConfiguration.Server
-		application := initApplication(store)
+		services := initServices(store)
 
 		fmt.Printf("Server Adress %s", cfg.Address)
-		rpcServer := server.NewRpcServer(application)
-
-		httpServer := server.NewHttpServer(application)
 
 		var g errgroup.Group
 
 		g.Go(func() error {
+			rpcServer := rpc.NewRpcServer(services)
 			rpcServer.Start()
 			return nil
 		})
 
 		g.Go(func() error {
+			httpServer := http.NewHttpServer(services)
 			httpServer.Start()
 			return nil
 		})
@@ -134,9 +135,9 @@ func initStore(dataStorePath string) *bolt.Datastore {
 	return store
 }
 
-func initApplication(store *bolt.Datastore) *server.Application {
-	app := new(server.Application)
+func initServices(store *bolt.Datastore) *datahamster.Services {
+	services := new(datahamster.Services)
 	bas := bolt.NewAgentService(store)
-	app.AgentService = bas
-	return app
+	services.AgentService = &bas
+	return services
 }
