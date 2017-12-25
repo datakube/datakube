@@ -7,6 +7,7 @@ import (
 	"github.com/SantoDE/datahamster/rpc/connect"
 )
 
+//StartWorker function to start the Worker
 func StartWorker() {
 
 	conn := Connect()

@@ -64,14 +64,14 @@ func main() {
 		var g errgroup.Group
 
 		g.Go(func() error {
-			rpcServer := rpc.NewRpcServer(services)
-			rpcServer.Start()
+			Server := rpc.NewServer(services)
+			Server.Start()
 			return nil
 		})
 
 		g.Go(func() error {
-			httpServer := http.NewHttpServer(services)
-			httpServer.Start()
+			Server := http.NewServer(services)
+			Server.Start()
 			return nil
 		})
 
@@ -92,13 +92,13 @@ func initConfig(c *cli.Context) configuration.GlobalConfiguration {
 
 	dumpConfig := new(configuration.DumpConfiguration)
 	dumpConfig.Identifier = dumpIdentifier
-	storageConfig := new(storage.StorageConfiguration)
+	storageConfig := new(storage.Configuration)
 
 	switch storageType := c.String("dump.storage.type"); storageType {
 
 	case "file":
 		var storageDir = c.String("dump.storage.file.dir")
-		storageConfig.File = storage.FileStorageConfiguration{
+		storageConfig.File = storage.FileConfiguration{
 			Dir: storageDir,
 		}
 

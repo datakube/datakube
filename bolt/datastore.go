@@ -7,11 +7,13 @@ import (
 	"time"
 )
 
+//Datastore struct to hold Datastore Information
 type Datastore struct {
 	Path string
 	db   *storm.DB
 }
 
+//NewStore creates a new Datastore
 func NewStore(path string) (*Datastore, error) {
 	s := &Datastore{
 		Path: path,
@@ -20,6 +22,8 @@ func NewStore(path string) (*Datastore, error) {
 	return s, nil
 }
 
+
+//Open opens a database connection
 func (d *Datastore) Open() error {
 	db, err := storm.Open(d.Path, storm.BoltOptions(0600, &bolt.Options{Timeout: 1 * time.Second}))
 

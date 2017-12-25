@@ -6,18 +6,21 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type HttpServer struct {
+//Server struct to hold HTTP Server Information
+type Server struct {
 	Handler *Handlers
 }
 
+//Handlers struct to hold different Handlers
 type Handlers struct {
 	PingHandler  *handlers.PingHandler
 	AgentHandler *handlers.AgentHandler
 }
 
-func NewHttpServer(services *datahamster.Services) *HttpServer {
+//NewServer to create a new HTTP Server and wire handlers
+func NewServer(services *datahamster.Services) *Server {
 
-	server := new(HttpServer)
+	server := new(Server)
 	server.Handler = new(Handlers)
 
 	pingHandler := handlers.NewPingHandler(services.AgentService)
@@ -29,7 +32,8 @@ func NewHttpServer(services *datahamster.Services) *HttpServer {
 	return server
 }
 
-func (h *HttpServer) Start() {
+//Start HTTP Server
+func (h *Server) Start() {
 	r := gin.Default()
 	r.GET("/ping", h.Handler.PingHandler.GET)
 	r.POST("/agent", h.Handler.AgentHandler.POST)

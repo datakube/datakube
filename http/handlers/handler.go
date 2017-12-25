@@ -4,9 +4,11 @@ import (
 	"github.com/SantoDE/datahamster/bolt"
 )
 
+//Handler Interface
 type Handler interface {
 }
 
+//BaseHandler Interface
 type BaseHandler struct {
 	agentService *bolt.AgentService
 }

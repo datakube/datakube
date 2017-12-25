@@ -108,13 +108,13 @@ func initConfig(c *cli.Context) configuration.AgentConfiguration {
 	var databasePassword = c.String("database.password")
 	var logLevel = c.String("log-level")
 
-	storageConfig := new(storage.StorageConfiguration)
+	storageConfig := new(storage.Configuration)
 
 	switch storageType := c.String("storage.type"); storageType {
 
 	case "file":
 		var storageDir = c.String("storage.file.dir")
-		storageConfig.File = storage.FileStorageConfiguration{
+		storageConfig.File = storage.FileConfiguration{
 			Dir: storageDir,
 		}
 

@@ -1,13 +1,13 @@
 package storage
 
-// StorageConfiguration struct to hold Storage Configuration
-type StorageConfiguration struct {
+// Configuration struct to hold Storage Configuration
+type Configuration struct {
 	Type string `description:"Persistent File Storage"`
-	File FileStorageConfiguration
+	File FileConfiguration
 }
 
-// FileStorageConfiguration struct to hold File Storage specific Configuration
-type FileStorageConfiguration struct {
+// FileConfiguration struct to hold File Storage specific Configuration
+type FileConfiguration struct {
 	Dir string `description:"Persistent File Storage"`
 }
 

@@ -7,19 +7,21 @@ import (
 	"net/http"
 )
 
+//AgentHandler struct to hold AgentHandler specific information
 type AgentHandler struct {
 	BaseHandler
 }
 
 var _ Handler = (*AgentHandler)(nil)
 
+//NewAgentHandler function to create a new handler agent
 func NewAgentHandler(as *bolt.AgentService) *AgentHandler {
 	ah := new(AgentHandler)
-	ah.setupHandler(as)
 
 	return ah
 }
 
+//POST function to create a new handler
 func (h *AgentHandler) POST(c *gin.Context) {
 	var newAgent types.Agent
 	// This will infer what binder to use depending on the content-type header.

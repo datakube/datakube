@@ -5,6 +5,7 @@ import (
 	"google.golang.org/grpc"
 )
 
+//Connect function to connect to the GRPC Server
 func Connect() *grpc.ClientConn {
 	conn, err := grpc.Dial("127.0.0.1:8010", grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {

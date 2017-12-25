@@ -5,10 +5,12 @@ import (
 	"golang.org/x/net/context"
 )
 
+//AgentService struct to hold RPC AgentService definition
 type AgentService struct {
 	boltAgentService *bolt.AgentService
 }
 
+//NewAgentService to create a new RPC Agent Service
 func NewAgentService(bas *bolt.AgentService) *AgentService {
 	as := new(AgentService)
 	as.boltAgentService = bas
@@ -16,7 +18,7 @@ func NewAgentService(bas *bolt.AgentService) *AgentService {
 	return as
 }
 
-// SayHello implements helloworld.GreeterServer
+//ConnectAgent function which gets called when an agent connected
 func (f *AgentService) ConnectAgent(ctx context.Context, in *ConnectRequest) (*ConnectResponse, error) {
 	res, err := f.boltAgentService.Validate(in.Token)
 

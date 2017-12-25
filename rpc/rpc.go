@@ -8,22 +8,26 @@ import (
 	"net"
 )
 
-type RpcServer struct {
-	services *RpcServices
+//Server struct to hold RPC Server Information
+type Server struct {
+	services *Services
 }
 
-type RpcServices struct {
+//Services struct to hold RPC Services Information
+type Services struct {
 	AgentService *connect.AgentService
 }
 
-func NewRpcServer(services *datahamster.Services) *RpcServer {
-	server := new(RpcServer)
-	server.services = new(RpcServices)
+//NewServer function to create a new RPC Server
+func NewServer(services *datahamster.Services) *Server {
+	server := new(Server)
+	server.services = new(Services)
 	server.services.AgentService = connect.NewAgentService(services.AgentService)
 	return server
 }
 
-func (r *RpcServer) Start() {
+//Start function to create a new RPC Server
+func (r *Server) Start() {
 	lis, err := net.Listen("tcp", ":8010")
 
 	if err != nil {
