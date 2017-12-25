@@ -1,18 +1,18 @@
 package bolt
 
 import (
-	"github.com/asdine/storm"
-	"time"
 	"github.com/SantoDE/datahamster/types"
+	"github.com/asdine/storm"
 	"github.com/coreos/bbolt"
+	"time"
 )
 
 type Datastore struct {
 	Path string
-	db *storm.DB
+	db   *storm.DB
 }
 
-func NewStore(path string) (*Datastore, error){
+func NewStore(path string) (*Datastore, error) {
 	s := &Datastore{
 		Path: path,
 	}

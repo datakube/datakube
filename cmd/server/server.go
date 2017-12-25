@@ -1,20 +1,19 @@
-
 package main
 
 import (
-	"github.com/SantoDE/datahamster/log"
+	"fmt"
+	"github.com/SantoDE/datahamster"
+	"github.com/SantoDE/datahamster/bolt"
 	"github.com/SantoDE/datahamster/configuration"
+	"github.com/SantoDE/datahamster/http"
+	"github.com/SantoDE/datahamster/log"
+	"github.com/SantoDE/datahamster/rpc"
+	"github.com/SantoDE/datahamster/storage"
 	"github.com/Sirupsen/logrus"
 	"github.com/urfave/cli"
+	"golang.org/x/sync/errgroup"
 	"os"
 	"strings"
-	"github.com/SantoDE/datahamster/storage"
-	"fmt"
-	"github.com/SantoDE/datahamster/bolt"
-	"golang.org/x/sync/errgroup"
-	"github.com/SantoDE/datahamster/rpc"
-	"github.com/SantoDE/datahamster/http"
-	"github.com/SantoDE/datahamster"
 )
 
 func main() {
@@ -76,7 +75,6 @@ func main() {
 			return nil
 		})
 
-
 		return g.Wait()
 	}
 
@@ -91,7 +89,6 @@ func initConfig(c *cli.Context) configuration.GlobalConfiguration {
 	var serverAddress = c.String("server.address")
 	var logLevel = c.String("log.level")
 	var dumpIdentifier = c.String("dump.identifier")
-
 
 	dumpConfig := new(configuration.DumpConfiguration)
 	dumpConfig.Identifier = dumpIdentifier
@@ -117,7 +114,7 @@ func initConfig(c *cli.Context) configuration.GlobalConfiguration {
 		Server: configuration.ServerConfiguration{
 			Address: serverAddress,
 		},
-		Dumps:  dumps,
+		Dumps:    dumps,
 		LogLevel: logLevel,
 	}
 

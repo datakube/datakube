@@ -3,9 +3,9 @@ package file
 import (
 	"github.com/SantoDE/datahamster/log"
 	"github.com/SantoDE/datahamster/storage"
+	"io/ioutil"
 	"os"
 	"path"
-	"io/ioutil"
 )
 
 var _ storage.Storage = (*Storage)(nil)

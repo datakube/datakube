@@ -1,10 +1,10 @@
 package worker
 
 import (
-	"github.com/SantoDE/datahamster/rpc/connect"
 	"context"
-	"github.com/SantoDE/datahamster/log"
 	"fmt"
+	"github.com/SantoDE/datahamster/log"
+	"github.com/SantoDE/datahamster/rpc/connect"
 )
 
 func StartWorker() {

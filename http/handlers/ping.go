@@ -1,10 +1,9 @@
 package handlers
 
 import (
-	"github.com/gin-gonic/gin"
 	"github.com/SantoDE/datahamster/bolt"
+	"github.com/gin-gonic/gin"
 )
-
 
 type PingHandler struct {
 	BaseHandler
@@ -18,7 +17,6 @@ func NewPingHandler(as *bolt.AgentService) *PingHandler {
 
 	return h
 }
-
 
 func (h *PingHandler) GET(c *gin.Context) {
 	c.JSON(200, gin.H{

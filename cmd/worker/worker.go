@@ -2,14 +2,14 @@ package main
 
 import (
 	"fmt"
-	"github.com/SantoDE/datahamster/log"
 	"github.com/SantoDE/datahamster/configuration"
+	"github.com/SantoDE/datahamster/log"
+	"github.com/SantoDE/datahamster/storage"
 	"github.com/SantoDE/datahamster/worker"
 	"github.com/Sirupsen/logrus"
 	"github.com/urfave/cli"
 	"os"
 	"strings"
-	"github.com/SantoDE/datahamster/storage"
 )
 
 func main() {

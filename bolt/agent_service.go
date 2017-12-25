@@ -1,9 +1,9 @@
 package bolt
 
 import (
+	"crypto/rand"
 	"fmt"
 	"github.com/SantoDE/datahamster/types"
-	"crypto/rand"
 )
 
 // DialService represents a service for managing dials.
@@ -11,7 +11,7 @@ type AgentService struct {
 	datastore *Datastore
 }
 
-func NewAgentService(d *Datastore) AgentService{
+func NewAgentService(d *Datastore) AgentService {
 	s := AgentService{
 		datastore: d,
 	}
@@ -19,7 +19,7 @@ func NewAgentService(d *Datastore) AgentService{
 	return s
 }
 
-func (a *AgentService) Validate(token string) (bool, error){
+func (a *AgentService) Validate(token string) (bool, error) {
 	fmt.Printf("In Validate baby!")
 	var agent types.Agent
 	err := a.datastore.db.One("Token", token, &agent)
@@ -53,4 +53,3 @@ func randToken() string {
 	rand.Read(b)
 	return fmt.Sprintf("%x", b)
 }
-

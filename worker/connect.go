@@ -1,8 +1,8 @@
 package worker
 
 import (
-	"google.golang.org/grpc"
 	"github.com/SantoDE/datahamster/log"
+	"google.golang.org/grpc"
 )
 
 func Connect() *grpc.ClientConn {

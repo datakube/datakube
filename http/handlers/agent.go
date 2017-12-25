@@ -1,10 +1,10 @@
 package handlers
 
 import (
-	"github.com/gin-gonic/gin"
-	"github.com/SantoDE/datahamster/types"
-	"net/http"
 	"github.com/SantoDE/datahamster/bolt"
+	"github.com/SantoDE/datahamster/types"
+	"github.com/gin-gonic/gin"
+	"net/http"
 )
 
 type AgentHandler struct {

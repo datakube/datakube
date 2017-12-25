@@ -1,8 +1,8 @@
 package connect
 
 import (
-	"golang.org/x/net/context"
 	"github.com/SantoDE/datahamster/bolt"
+	"golang.org/x/net/context"
 )
 
 type AgentService struct {

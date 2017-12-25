@@ -1,17 +1,17 @@
 package http
 
 import (
-	"github.com/gin-gonic/gin"
-	"github.com/SantoDE/datahamster/http/handlers"
 	"github.com/SantoDE/datahamster"
+	"github.com/SantoDE/datahamster/http/handlers"
+	"github.com/gin-gonic/gin"
 )
 
 type HttpServer struct {
-	Handler	*Handlers
+	Handler *Handlers
 }
 
 type Handlers struct {
-	PingHandler *handlers.PingHandler
+	PingHandler  *handlers.PingHandler
 	AgentHandler *handlers.AgentHandler
 }
 

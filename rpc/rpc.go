@@ -1,11 +1,11 @@
 package rpc
 
 import (
-	"net"
+	"github.com/SantoDE/datahamster"
 	"github.com/SantoDE/datahamster/log"
 	"github.com/SantoDE/datahamster/rpc/connect"
 	"google.golang.org/grpc"
-	"github.com/SantoDE/datahamster"
+	"net"
 )
 
 type RpcServer struct {
