@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"github.com/SantoDE/datahamster"
-	"github.com/SantoDE/datahamster/bolt"
 	"github.com/SantoDE/datahamster/configuration"
 	"github.com/SantoDE/datahamster/http"
 	"github.com/SantoDE/datahamster/log"
@@ -14,6 +13,8 @@ import (
 	"golang.org/x/sync/errgroup"
 	"os"
 	"strings"
+	"github.com/SantoDE/datahamster/services"
+	"github.com/SantoDE/datahamster/store"
 )
 
 func main() {
@@ -121,8 +122,8 @@ func initConfig(c *cli.Context) configuration.GlobalConfiguration {
 	return config
 }
 
-func initStore(dataStorePath string) *bolt.Datastore {
-	store, err := bolt.NewStore(dataStorePath)
+func initStore(dataStorePath string) *store.Datastore {
+	store, err := store.NewStore(dataStorePath)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -132,9 +133,9 @@ func initStore(dataStorePath string) *bolt.Datastore {
 	return store
 }
 
-func initServices(store *bolt.Datastore) *datahamster.Services {
-	services := new(datahamster.Services)
-	bas := bolt.NewAgentService(store)
-	services.AgentService = &bas
-	return services
+func initServices(store *store.Datastore) *datahamster.Services {
+	applicationServices := new(datahamster.Services)
+	bas := services.NewAgentService(store)
+	applicationServices.AgentService = &bas
+	return applicationServices
 }

@@ -23,7 +23,7 @@ func NewServer(services *datahamster.Services) *Server {
 	server := new(Server)
 	server.Handler = new(Handlers)
 
-	pingHandler := handlers.NewPingHandler(services.AgentService)
+	pingHandler := handlers.NewPingHandler()
 	agentHander := handlers.NewAgentHandler(services.AgentService)
 
 	server.Handler.PingHandler = pingHandler

@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"github.com/SantoDE/datahamster/bolt"
 	"github.com/gin-gonic/gin"
 )
 
@@ -13,9 +12,8 @@ type PingHandler struct {
 var _ Handler = (*PingHandler)(nil)
 
 //NewPingHandler to create a new Pinghandler
-func NewPingHandler(as *bolt.AgentService) *PingHandler {
+func NewPingHandler() *PingHandler {
 	h := new(PingHandler)
-	h.setupHandler(as)
 
 	return h
 }

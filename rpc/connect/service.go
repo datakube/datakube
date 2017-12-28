@@ -1,17 +1,17 @@
 package connect
 
 import (
-	"github.com/SantoDE/datahamster/bolt"
 	"golang.org/x/net/context"
+	"github.com/SantoDE/datahamster/services"
 )
 
 //AgentService struct to hold RPC AgentService definition
 type AgentService struct {
-	boltAgentService *bolt.AgentService
+	boltAgentService services.AgentService
 }
 
 //NewAgentService to create a new RPC Agent Service
-func NewAgentService(bas *bolt.AgentService) *AgentService {
+func NewAgentService(bas services.AgentService) *AgentService {
 	as := new(AgentService)
 	as.boltAgentService = bas
 
