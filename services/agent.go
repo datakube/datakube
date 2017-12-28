@@ -9,11 +9,14 @@ import (
 
 var _ AgentService = (*Service)(nil)
 
+
+//AgentService Interface to expose the public API
 type AgentService interface {
 	Validate(string) (bool, error)
 	Create(string) (*types.Agent, error)
 }
 
+//Service struct to hold Agent Service Information
 type Service struct {
 	datastore *store.Datastore
 }
