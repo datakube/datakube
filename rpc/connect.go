@@ -1,9 +1,9 @@
 package rpc
 
 import (
-	"golang.org/x/net/context"
-	"github.com/SantoDE/datahamster/services"
 	pb "github.com/SantoDE/datahamster/rpc/internal/connect"
+	"github.com/SantoDE/datahamster/services"
+	"golang.org/x/net/context"
 )
 
 //AgentService struct to hold RPC AgentService definition

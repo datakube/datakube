@@ -7,14 +7,14 @@ import (
 	"github.com/SantoDE/datahamster/http"
 	"github.com/SantoDE/datahamster/log"
 	"github.com/SantoDE/datahamster/rpc"
+	"github.com/SantoDE/datahamster/services"
 	"github.com/SantoDE/datahamster/storage"
+	"github.com/SantoDE/datahamster/store"
 	"github.com/Sirupsen/logrus"
 	"github.com/urfave/cli"
 	"golang.org/x/sync/errgroup"
 	"os"
 	"strings"
-	"github.com/SantoDE/datahamster/services"
-	"github.com/SantoDE/datahamster/store"
 )
 
 func main() {

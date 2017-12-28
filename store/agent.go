@@ -12,7 +12,7 @@ type AgentStore interface {
 	Save(types.Agent) (types.Agent, error)
 }
 
-func (ds *Datastore) One(token string) (types.Agent, error){
+func (ds *Datastore) One(token string) (types.Agent, error) {
 	var agent types.Agent
 	err := ds.db.One("Token", token, &agent)
 
@@ -24,7 +24,7 @@ func (ds *Datastore) One(token string) (types.Agent, error){
 	return agent, nil
 }
 
-func (ds *Datastore) Save(agent types.Agent) (types.Agent, error){
+func (ds *Datastore) Save(agent types.Agent) (types.Agent, error) {
 	err := ds.db.Save(&agent)
 
 	if err != nil {

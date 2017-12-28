@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/SantoDE/datahamster/configuration"
+	"github.com/SantoDE/datahamster/dumper"
 	"github.com/SantoDE/datahamster/log"
 	"github.com/SantoDE/datahamster/storage"
 	"github.com/SantoDE/datahamster/worker"
@@ -10,7 +11,6 @@ import (
 	"github.com/urfave/cli"
 	"os"
 	"strings"
-	"github.com/SantoDE/datahamster/dumper"
 )
 
 func main() {

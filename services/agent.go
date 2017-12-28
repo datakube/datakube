@@ -3,13 +3,11 @@ package services
 import (
 	"crypto/rand"
 	"fmt"
-	"github.com/SantoDE/datahamster/types"
 	"github.com/SantoDE/datahamster/store"
+	"github.com/SantoDE/datahamster/types"
 )
 
-
 var _ AgentService = (*Service)(nil)
-
 
 type AgentService interface {
 	Validate(string) (bool, error)
@@ -40,7 +38,6 @@ func (s *Service) Validate(token string) (bool, error) {
 
 	return true, err
 }
-
 
 //Create creates a new agent with a random token
 func (s *Service) Create(name string) (*types.Agent, error) {

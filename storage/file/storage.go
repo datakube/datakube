@@ -44,6 +44,7 @@ func (storage *Storage) SaveFile(f storage.File) error {
 func (*Storage) ReadFile() {
 
 }
+
 // ListFiles function to list all files
 func (storage *Storage) ListFiles() {
 
