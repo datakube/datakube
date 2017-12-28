@@ -10,6 +10,7 @@ import (
 	"github.com/urfave/cli"
 	"os"
 	"strings"
+	"github.com/SantoDE/datahamster/dumper"
 )
 
 func main() {
@@ -87,7 +88,7 @@ func main() {
 
 		//exit := make(chan struct{}, 1)
 
-		worker.StartWorker()
+		dumper.StartWorker()
 
 		return nil
 	}

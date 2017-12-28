@@ -10,11 +10,11 @@ import (
 	"time"
 )
 
-var _ dumper.Dumper = (*Dumper)(nil)
+var _ __rename_me.Dumper = (*Dumper)(nil)
 
 // Dumper struct for the SQL Dumper
 type Dumper struct {
-	dumper.BaseDumper
+	__rename_me.BaseDumper
 	dumper   *mysqldump.Dumper
 	Database sql.DB
 }

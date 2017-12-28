@@ -1,8 +1,9 @@
-package connect
+package rpc
 
 import (
 	"golang.org/x/net/context"
 	"github.com/SantoDE/datahamster/services"
+	pb "github.com/SantoDE/datahamster/rpc/internal/connect"
 )
 
 //AgentService struct to hold RPC AgentService definition
@@ -19,12 +20,12 @@ func NewAgentService(bas services.AgentService) *AgentService {
 }
 
 //ConnectAgent function which gets called when an agent connected
-func (f *AgentService) ConnectAgent(ctx context.Context, in *ConnectRequest) (*ConnectResponse, error) {
+func (f *AgentService) ConnectAgent(ctx context.Context, in *pb.ConnectRequest) (*pb.ConnectResponse, error) {
 	res, err := f.boltAgentService.Validate(in.Token)
 
 	if err != nil {
-		return &ConnectResponse{Success: false}, err
+		return &pb.ConnectResponse{Success: false}, err
 	}
 
-	return &ConnectResponse{Success: res}, nil
+	return &pb.ConnectResponse{Success: res}, nil
 }

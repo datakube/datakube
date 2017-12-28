@@ -1,4 +1,4 @@
-package worker
+package dumper
 
 import (
 	"github.com/SantoDE/datahamster/log"

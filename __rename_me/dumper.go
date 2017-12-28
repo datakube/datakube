@@ -1,4 +1,4 @@
-package dumper
+package __rename_me
 
 import (
 	"github.com/SantoDE/datahamster/worker/configuration"
