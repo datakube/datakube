@@ -1,10 +1,10 @@
 package store_test
 
 import (
-	"testing"
 	"github.com/SantoDE/datahamster/store"
 	"github.com/SantoDE/datahamster/types"
 	"github.com/stretchr/testify/assert"
+	"testing"
 )
 
 func TestSaveOK(t *testing.T) {
@@ -18,13 +18,13 @@ func TestSaveOK(t *testing.T) {
 	var targets []types.DumpTarget
 
 	targets = append(targets, types.DumpTarget{
-		Name: "testtarget",
+		Name:     "testtarget",
 		Schedule: "weekly",
 	})
 
 	dumper := types.Dumper{
-		Token: "1234",
-		Name: "Testdumper",
+		Token:   "1234",
+		Name:    "Testdumper",
 		Targets: targets,
 	}
 

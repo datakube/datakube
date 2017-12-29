@@ -1,25 +1,25 @@
 package services_test
 
 import (
-	"testing"
 	"github.com/SantoDE/datahamster/services"
-	"github.com/SantoDE/datahamster/types"
 	"github.com/SantoDE/datahamster/store"
+	"github.com/SantoDE/datahamster/types"
 	"github.com/stretchr/testify/assert"
+	"testing"
 )
 
 var _ store.DumperStore = (*TestDataStore)(nil)
 
-type TestDataStore struct {}
+type TestDataStore struct{}
 
 func (t *TestDataStore) One(token string) (types.Dumper, error) {
 	var targets []types.DumpTarget
 
-	targets = append(targets, types.DumpTarget{Name:"existing Target", Schedule:"weekly"})
+	targets = append(targets, types.DumpTarget{Name: "existing Target", Schedule: "weekly"})
 
 	return types.Dumper{
-		Token: token,
-		Name: "Testdumper",
+		Token:   token,
+		Name:    "Testdumper",
 		Targets: targets,
 	}, nil
 }

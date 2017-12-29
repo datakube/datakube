@@ -13,7 +13,7 @@ type Server struct {
 
 //Handlers struct to hold different Handlers
 type Handlers struct {
-	PingHandler  *handlers.PingHandler
+	PingHandler   *handlers.PingHandler
 	DumperHandler *handlers.DumperHandler
 }
 

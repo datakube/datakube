@@ -42,9 +42,8 @@ func (s *Service) Validate(token string) (bool, error) {
 	return true, err
 }
 
-
 //Register function registers targets with the given dumper
-func (s *Service) RegisterTarget(token string, name string, schedule string) (*types.DumpTarget, error){
+func (s *Service) RegisterTarget(token string, name string, schedule string) (*types.DumpTarget, error) {
 	existing, err := s.datastore.One(token)
 
 	if err != nil {

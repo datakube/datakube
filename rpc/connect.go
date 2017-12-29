@@ -27,7 +27,6 @@ func (f *DumperService) RegisterDumper(ctx context.Context, in *pb.RegisterReque
 		return &pb.RegisterResponse{Success: false}, err
 	}
 
-
 	for _, target := range in.Targets {
 		f.DumperService.RegisterTarget(in.Token, target.Name, target.Schedule)
 	}
