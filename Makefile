@@ -24,11 +24,8 @@ fmt:
 validate:  ## validate gofmt, golint and go vet
 	./script/make.sh validate-gofmt validate-golint
 
-test-unit:
+test:
 	./script/make.sh test-unit
 
-test-integration:
-	 ./script/make.sh test-integration
-
-integration-test-image:
-	docker build -f integration/Dockerfile.Integration -t santode/datahamster-worker-integration-test-db .
+test-unit:
+	./script/make.sh test-unit

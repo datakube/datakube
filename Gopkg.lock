@@ -2,6 +2,12 @@
 
 
 [[projects]]
+  name = "github.com/JamesStewy/go-mysqldump"
+  packages = ["."]
+  revision = "417d97ba24a16270a6ba4171a30e9af937ea169a"
+  version = "v0.2.1"
+
+[[projects]]
   name = "github.com/Sirupsen/logrus"
   packages = ["."]
   revision = "f006c2ac4710855cf0f916dd6b77acf6b048dc6e"
@@ -12,6 +18,12 @@
   packages = [".","codec","codec/json","index","internal","q"]
   revision = "dbd37722730b6cb703b5bd825c3f142d87358525"
   version = "v2.0.0"
+
+[[projects]]
+  name = "github.com/cenk/backoff"
+  packages = ["."]
+  revision = "61153c768f31ee5f130071d08fc82b85208528de"
+  version = "v1.1.0"
 
 [[projects]]
   name = "github.com/coreos/bbolt"
@@ -26,6 +38,12 @@
   version = "v1.1.0"
 
 [[projects]]
+  name = "github.com/fsouza/go-dockerclient"
+  packages = [".","external/github.com/Sirupsen/logrus","external/github.com/docker/docker/opts","external/github.com/docker/docker/pkg/archive","external/github.com/docker/docker/pkg/fileutils","external/github.com/docker/docker/pkg/homedir","external/github.com/docker/docker/pkg/idtools","external/github.com/docker/docker/pkg/ioutils","external/github.com/docker/docker/pkg/longpath","external/github.com/docker/docker/pkg/pools","external/github.com/docker/docker/pkg/promise","external/github.com/docker/docker/pkg/stdcopy","external/github.com/docker/docker/pkg/system","external/github.com/docker/go-units","external/github.com/hashicorp/go-cleanhttp","external/github.com/opencontainers/runc/libcontainer/user","external/golang.org/x/net/context","external/golang.org/x/sys/unix"]
+  revision = "1d4f4ae73768d3ca16a6fb964694f58dc5eba601"
+  version = "docker-1.9/go-1.4"
+
+[[projects]]
   branch = "master"
   name = "github.com/gin-contrib/sse"
   packages = ["."]
@@ -36,6 +54,12 @@
   packages = [".","binding","render"]
   revision = "d459835d2b077e44f7c9b453505ee29881d5d12d"
   version = "v1.2"
+
+[[projects]]
+  name = "github.com/go-sql-driver/mysql"
+  packages = ["."]
+  revision = "a0583e0143b1624142adab07e0e97fe106d99561"
+  version = "v1.3"
 
 [[projects]]
   branch = "master"
@@ -50,10 +74,22 @@
   version = "v0.0.3"
 
 [[projects]]
+  name = "github.com/pkg/errors"
+  packages = ["."]
+  revision = "645ef00459ed84a119197bfb8d8205042c6df63d"
+  version = "v0.8.0"
+
+[[projects]]
   name = "github.com/pmezard/go-difflib"
   packages = ["difflib"]
   revision = "792786c7400a136282c1664665ae0a8db921c6c2"
   version = "v1.0.0"
+
+[[projects]]
+  name = "github.com/robfig/cron"
+  packages = ["."]
+  revision = "b024fc5ea0e34bc3f83d9941c8d60b0622bfaca4"
+  version = "v1"
 
 [[projects]]
   name = "github.com/stretchr/testify"
@@ -74,6 +110,12 @@
   version = "v1.20.0"
 
 [[projects]]
+  name = "github.com/ziutek/mymysql"
+  packages = ["godrv","mysql","native"]
+  revision = "e08c2f35356576b3c3690c252fe5dca728ae9292"
+  version = "v1.5.4"
+
+[[projects]]
   branch = "master"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
@@ -82,7 +124,7 @@
 [[projects]]
   branch = "master"
   name = "golang.org/x/net"
-  packages = ["context","http2","http2/hpack","idna","internal/timeseries","lex/httplex","trace"]
+  packages = ["context","context/ctxhttp","http2","http2/hpack","idna","internal/timeseries","lex/httplex","trace"]
   revision = "a8b9294777976932365dabb6640cf1468d95c70f"
 
 [[projects]]
@@ -122,6 +164,12 @@
   version = "v8.18.2"
 
 [[projects]]
+  name = "gopkg.in/ory-am/dockertest.v3"
+  packages = ["."]
+  revision = "6d57cd43b964e928111542771659af6a3a58521f"
+  version = "3.0.9"
+
+[[projects]]
   branch = "v2"
   name = "gopkg.in/yaml.v2"
   packages = ["."]
@@ -130,6 +178,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "5fb82346c5bf8c3101273b7a1f67782126a89e864b72ea9819c97d7615aa9e29"
+  inputs-digest = "9daf65f5c56d042d11487110b5e954137a59b8a81cbd62fa31e6e2271bdfbebf"
   solver-name = "gps-cdcl"
   solver-version = 1

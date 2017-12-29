@@ -1,12 +1,9 @@
 package configuration
 
-import "github.com/SantoDE/datahamster/storage"
-
 // GlobalConfiguration struct to hold Application config
 type GlobalConfiguration struct {
 	Server   ServerConfiguration
 	LogLevel string
-	Dumps    []DumpConfiguration
 }
 
 // ServerConfiguration struct to hold Server config
@@ -14,18 +11,16 @@ type ServerConfiguration struct {
 	Address string
 }
 
-// DumpConfiguration struct to hold Dump config
-type DumpConfiguration struct {
-	Identifier  string
-	StorageType string
-	Storage     storage.Configuration
+// Target struct to hold Target config
+type Target struct {
+	TargetType string
+	Schedule   ScheduleConfiguration
+	DBConfig   DatabaseConfiguration
 }
 
 // DumperConfiguration struct to hold Dumper config
 type DumperConfiguration struct {
-	Schedule ScheduleConfiguration
-	Database DatabaseConfiguration
-	Storage  storage.Configuration
+	Targets  []Target
 	LogLevel string
 }
 
@@ -47,6 +42,8 @@ type SQLDatabaseConfiguration struct {
 
 // ScheduleConfiguration struct to hold Schedule Configuration
 type ScheduleConfiguration struct {
-	Interval string `description:"Interval to run at i.e. 8h or 5m"`
+	Interval string `description:"Interval to run at i.e. weekly"`
+	Day      string `description:"Number of day in month i.e: Monday for week interval and Number (3) for Monthly Interval"`
+	At       string `description:"When to start the Dump, i.e. 03:00"`
 	StartNow bool   `description:"Interval to run at i.e. 8h or 5m"`
 }

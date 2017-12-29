@@ -1,6 +1,7 @@
 package services_test
 
 import (
+	"errors"
 	"github.com/SantoDE/datahamster/services"
 	"github.com/SantoDE/datahamster/store"
 	"github.com/SantoDE/datahamster/types"
@@ -9,6 +10,7 @@ import (
 )
 
 var _ store.DumperStore = (*TestDataStore)(nil)
+var noHit = false
 
 type TestDataStore struct{}
 
@@ -17,11 +19,15 @@ func (t *TestDataStore) One(token string) (types.Dumper, error) {
 
 	targets = append(targets, types.DumpTarget{Name: "existing Target", Schedule: "weekly"})
 
-	return types.Dumper{
-		Token:   token,
-		Name:    "Testdumper",
-		Targets: targets,
-	}, nil
+	if !noHit {
+		return types.Dumper{
+			Token:   token,
+			Name:    "Testdumper",
+			Targets: targets,
+		}, nil
+	}
+
+	return types.Dumper{}, errors.New("no dumper with token")
 }
 
 func (t *TestDataStore) Save(dumper types.Dumper) (types.Dumper, error) {
@@ -37,4 +43,16 @@ func TestRegisterTargetOK(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, res.Name, "testtarget")
 	assert.Equal(t, res.Schedule, "weekly")
+}
+
+func TestRegisterTargetNOK(t *testing.T) {
+	noHit = true
+	testStore := new(TestDataStore)
+	ds := services.NewDumperService(testStore)
+
+	res, err := ds.RegisterTarget("12345", "testtarget", "weekly")
+
+	assert.NotNil(t, err)
+	assert.Equal(t, res.ID, 0)
+	noHit = false
 }
