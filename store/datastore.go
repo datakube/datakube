@@ -36,7 +36,7 @@ func (d *Datastore) Open() error {
 }
 
 func (d *Datastore) setup() error {
-	err := d.db.Init(&types.Agent{})
+	err := d.db.Init(&types.Dumper{})
 
 	if err != nil {
 		return err

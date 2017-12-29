@@ -6,26 +6,31 @@ import (
 	"golang.org/x/net/context"
 )
 
-//AgentService struct to hold RPC AgentService definition
-type AgentService struct {
-	boltAgentService services.AgentService
+//DumperService struct to hold RPC DumperService definition
+type DumperService struct {
+	DumperService services.DumperService
 }
 
-//NewAgentService to create a new RPC Agent Service
-func NewAgentService(bas services.AgentService) *AgentService {
-	as := new(AgentService)
-	as.boltAgentService = bas
+//NewDumperService to create a new RPC Dumper Service
+func NewDumperService(bas services.DumperService) *DumperService {
+	as := new(DumperService)
+	as.DumperService = bas
 
 	return as
 }
 
-//ConnectAgent function which gets called when an agent connected
-func (f *AgentService) ConnectAgent(ctx context.Context, in *pb.ConnectRequest) (*pb.ConnectResponse, error) {
-	res, err := f.boltAgentService.Validate(in.Token)
+//ConnectDumper function which gets called when an Dumper connected
+func (f *DumperService) RegisterDumper(ctx context.Context, in *pb.RegisterRequest) (*pb.RegisterResponse, error) {
+	res, err := f.DumperService.Validate(in.Token)
 
 	if err != nil {
-		return &pb.ConnectResponse{Success: false}, err
+		return &pb.RegisterResponse{Success: false}, err
 	}
 
-	return &pb.ConnectResponse{Success: res}, nil
+
+	for _, target := range in.Targets {
+		f.DumperService.RegisterTarget(in.Token, target.Name, target.Schedule)
+	}
+
+	return &pb.RegisterResponse{Success: res}, nil
 }

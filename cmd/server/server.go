@@ -135,7 +135,7 @@ func initStore(dataStorePath string) *store.Datastore {
 
 func initServices(store *store.Datastore) *datahamster.Services {
 	applicationServices := new(datahamster.Services)
-	bas := services.NewAgentService(store)
-	applicationServices.AgentService = &bas
+	bas := services.NewDumperService(store)
+	applicationServices.DumperService = &bas
 	return applicationServices
 }

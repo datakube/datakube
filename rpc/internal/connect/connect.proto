@@ -3,13 +3,20 @@ syntax = "proto3";
 package connect;
 
 // The Customer service definition.
-service AgentConnect {
-    rpc ConnectAgent(ConnectRequest) returns (ConnectResponse) {}
+service DumperService {
+    rpc RegisterDumper(RegisterRequest) returns (RegisterResponse) {}
 }
 
-message ConnectRequest {
+message RegisterRequest {
     string token = 1;
+    repeated Target targets= 2;
 }
-message ConnectResponse {
-    bool success = 2;
+
+message Target {
+    string name = 1;
+    string schedule = 2;
+}
+
+message RegisterResponse {
+    bool success = 1;
 }

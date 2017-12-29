@@ -13,5 +13,5 @@ type DataStore interface {
 
 //Services Type to expose Services to RPC and HTTP
 type Services struct {
-	AgentService services.AgentService
+	DumperService services.DumperService
 }

@@ -3,7 +3,7 @@ package rpc
 import (
 	"github.com/SantoDE/datahamster"
 	"github.com/SantoDE/datahamster/log"
-	"github.com/SantoDE/datahamster/rpc/connect"
+	pb "github.com/SantoDE/datahamster/rpc/internal/connect"
 	"google.golang.org/grpc"
 	"net"
 )
@@ -15,14 +15,14 @@ type Server struct {
 
 //Services struct to hold RPC Services Information
 type Services struct {
-	AgentService *connect.AgentService
+	DumperService *DumperService
 }
 
 //NewServer function to create a new RPC Server
 func NewServer(services *datahamster.Services) *Server {
 	server := new(Server)
 	server.services = new(Services)
-	server.services.AgentService = connect.NewAgentService(services.AgentService)
+	server.services.DumperService = NewDumperService(services.DumperService)
 	return server
 }
 
@@ -36,7 +36,7 @@ func (r *Server) Start() {
 
 	server := grpc.NewServer()
 	log.Debugf("Registering FileUpload RPC")
-	connect.RegisterAgentConnectServer(server, r.services.AgentService)
+	pb.RegisterDumperServiceServer(server, r.services.DumperService)
 	log.Debugf("Start Serve FileUpload RPC")
 	err = server.Serve(lis)
 	if err != nil {
