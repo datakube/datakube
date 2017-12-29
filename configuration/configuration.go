@@ -21,8 +21,8 @@ type DumpConfiguration struct {
 	Storage     storage.Configuration
 }
 
-// AgentConfiguration struct to hold Agent config
-type AgentConfiguration struct {
+// DumperConfiguration struct to hold Dumper config
+type DumperConfiguration struct {
 	Schedule ScheduleConfiguration
 	Database DatabaseConfiguration
 	Storage  storage.Configuration

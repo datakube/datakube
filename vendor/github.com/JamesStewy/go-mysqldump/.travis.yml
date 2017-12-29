@@ -1,9 +1,0 @@
-language: go
-
-go:
-  - 1.6
-  - 1.7.x
-  - master
-
-script:
-- go test -cover -coverprofile=cover.out .

@@ -15,8 +15,8 @@ func StartWorker() {
 
 	request := new(connect.ConnectRequest)
 	request.Token = "12345"
-	conClient := connect.NewAgentConnectClient(conn)
-	resp, err := conClient.ConnectAgent(context.Background(), request)
+	conClient := connect.NewDumperConnectClient(conn)
+	resp, err := conClient.ConnectDumper(context.Background(), request)
 
 	if err != nil {
 		log.Debugf("Error Connecting s%s", err.Error())

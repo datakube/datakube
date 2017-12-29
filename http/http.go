@@ -14,7 +14,7 @@ type Server struct {
 //Handlers struct to hold different Handlers
 type Handlers struct {
 	PingHandler  *handlers.PingHandler
-	AgentHandler *handlers.AgentHandler
+	DumperHandler *handlers.DumperHandler
 }
 
 //NewServer to create a new HTTP Server and wire handlers
@@ -24,10 +24,10 @@ func NewServer(services *datahamster.Services) *Server {
 	server.Handler = new(Handlers)
 
 	pingHandler := handlers.NewPingHandler()
-	agentHander := handlers.NewAgentHandler(services.AgentService)
+	DumperHander := handlers.NewDumperHandler(services.DumperService)
 
 	server.Handler.PingHandler = pingHandler
-	server.Handler.AgentHandler = agentHander
+	server.Handler.DumperHandler = DumperHander
 
 	return server
 }
@@ -36,6 +36,6 @@ func NewServer(services *datahamster.Services) *Server {
 func (h *Server) Start() {
 	r := gin.Default()
 	r.GET("/ping", h.Handler.PingHandler.GET)
-	r.POST("/agent", h.Handler.AgentHandler.POST)
+	r.POST("/Dumper", h.Handler.DumperHandler.POST)
 	r.Run(":8080")
 }

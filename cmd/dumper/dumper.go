@@ -79,8 +79,8 @@ func main() {
 	}
 
 	app.Action = func(c *cli.Context) error {
-		agentConfiguration := initConfig(c)
-		level, err := logrus.ParseLevel(strings.ToLower(agentConfiguration.LogLevel))
+		DumperConfiguration := initConfig(c)
+		level, err := logrus.ParseLevel(strings.ToLower(DumperConfiguration.LogLevel))
 		if err != nil {
 			log.Error("Error getting level", err)
 		}
@@ -99,7 +99,7 @@ func main() {
 	app.Run(os.Args)
 }
 
-func initConfig(c *cli.Context) configuration.AgentConfiguration {
+func initConfig(c *cli.Context) configuration.DumperConfiguration {
 
 	var dataBaseName = c.String("database.name")
 	var databaseHost = c.String("database.host")
@@ -145,7 +145,7 @@ func initConfig(c *cli.Context) configuration.AgentConfiguration {
 		fmt.Printf("Default")
 	}
 
-	config := configuration.AgentConfiguration{
+	config := configuration.DumperConfiguration{
 		Database: dbConfig,
 		Storage:  *storageConfig,
 		LogLevel: logLevel,
