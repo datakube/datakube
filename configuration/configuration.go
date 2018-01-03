@@ -14,6 +14,7 @@ type ServerConfiguration struct {
 // Target struct to hold Target config
 type Target struct {
 	TargetType string
+	Name string
 	Schedule   ScheduleConfiguration
 	DBConfig   DatabaseConfiguration
 }

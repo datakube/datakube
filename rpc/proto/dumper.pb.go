@@ -6,11 +6,14 @@ Package dumper is a generated protocol buffer package.
 
 It is generated from these files:
 	dumper.proto
+	file.proto
 
 It has these top-level messages:
 	RegisterRequest
 	Target
 	RegisterResponse
+	SaveDumpFileRequest
+	SaveDumpFileResponse
 */
 package dumper
 

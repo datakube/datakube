@@ -89,10 +89,7 @@ func initConfig(c *cli.Context) configuration.GlobalConfiguration {
 
 	var serverAddress = c.String("server.address")
 	var logLevel = c.String("log.level")
-	var dumpIdentifier = c.String("dump.identifier")
 
-	dumpConfig := new(configuration.DumpConfiguration)
-	dumpConfig.Identifier = dumpIdentifier
 	storageConfig := new(storage.Configuration)
 
 	switch storageType := c.String("dump.storage.type"); storageType {
@@ -107,15 +104,10 @@ func initConfig(c *cli.Context) configuration.GlobalConfiguration {
 		storageConfig.Type = storageType
 	}
 
-	dumps := []configuration.DumpConfiguration{}
-
-	dumps = append(dumps, *dumpConfig)
-
 	config := configuration.GlobalConfiguration{
 		Server: configuration.ServerConfiguration{
 			Address: serverAddress,
 		},
-		Dumps:    dumps,
 		LogLevel: logLevel,
 	}
 

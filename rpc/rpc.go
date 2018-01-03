@@ -3,7 +3,7 @@ package rpc
 import (
 	"github.com/SantoDE/datahamster"
 	"github.com/SantoDE/datahamster/log"
-	pb "github.com/SantoDE/datahamster/rpc/internal/connect"
+	pb "github.com/SantoDE/datahamster/rpc/proto"
 	"google.golang.org/grpc"
 	"net"
 )
