@@ -5,8 +5,7 @@ branches:
     - master
 
 go:
-  - 1.8.x
-  - master
+  - 1.9
 
 services:
   - docker

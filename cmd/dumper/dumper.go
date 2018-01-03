@@ -6,7 +6,6 @@ import (
 	"github.com/SantoDE/datahamster/dumper"
 	"github.com/SantoDE/datahamster/log"
 	"github.com/SantoDE/datahamster/storage"
-	"github.com/SantoDE/datahamster/worker"
 	"github.com/Sirupsen/logrus"
 	"github.com/urfave/cli"
 	"os"
@@ -88,7 +87,7 @@ func main() {
 
 		//exit := make(chan struct{}, 1)
 
-		dumper.StartWorker()
+		dumper.StartWorker(&DumperConfiguration)
 
 		return nil
 	}
@@ -146,9 +145,8 @@ func initConfig(c *cli.Context) configuration.DumperConfiguration {
 	}
 
 	config := configuration.DumperConfiguration{
-		Database: dbConfig,
-		Storage:  *storageConfig,
 		LogLevel: logLevel,
+		Targets:  make([]configuration.Target, 1),
 	}
 
 	return config

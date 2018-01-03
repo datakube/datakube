@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package dumper;
+
+// The DumperService service definition.
+service DumperService {
+    rpc RegisterDumper(RegisterRequest) returns (RegisterResponse) {}
+}
+
+message RegisterRequest {
+    string token = 1;
+    repeated Target targets= 2;
+}
+
+message Target {
+    string name = 1;
+    string schedule = 2;
+}
+
+message RegisterResponse {
+    bool success = 1;
+}

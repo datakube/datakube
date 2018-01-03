@@ -13,3 +13,9 @@ type DumpTarget struct {
 	Name     string `json:"name"`
 	Schedule string `json:"schedule"`
 }
+
+// DumpResult struct to hold a general result for a dump
+type DumpResult struct {
+	Success bool
+	TemporaryFile string
+}
