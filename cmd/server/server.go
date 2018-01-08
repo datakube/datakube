@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"github.com/SantoDE/datahamster"
 	"github.com/SantoDE/datahamster/configuration"
 	"github.com/SantoDE/datahamster/http"
 	"github.com/SantoDE/datahamster/log"
@@ -114,7 +113,7 @@ func initConfig(c *cli.Context) configuration.GlobalConfiguration {
 	return config
 }
 
-func initStore(dataStorePath string) *store.Datastore {
+func initStore(dataStorePath string) *store.Store {
 	store, err := store.NewStore(dataStorePath)
 	if err != nil {
 		log.Fatal(err)
@@ -125,8 +124,8 @@ func initStore(dataStorePath string) *store.Datastore {
 	return store
 }
 
-func initServices(store *store.Datastore) *datahamster.Services {
-	applicationServices := new(datahamster.Services)
+func initServices(store *store.Store) *services.Services {
+	applicationServices := new(services.Services)
 	bas := services.NewDumperService(store)
 	applicationServices.DumperService = &bas
 	return applicationServices

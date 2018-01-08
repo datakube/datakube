@@ -5,7 +5,7 @@ import (
 	"github.com/SantoDE/datahamster/types"
 )
 
-var _ DumperStore = (*Datastore)(nil)
+var _ DumperStore = (*Store)(nil)
 
 //DumperStore Interface to expose Dumper Stores API
 type DumperStore interface {
@@ -14,9 +14,9 @@ type DumperStore interface {
 }
 
 //One function to retrieve one Dumper by the given token
-func (ds *Datastore) One(token string) (types.Dumper, error) {
+func (s *Store) One(token string) (types.Dumper, error) {
 	var Dumper types.Dumper
-	err := ds.db.One("Token", token, &Dumper)
+	err := s.db.One("Token", token, &Dumper)
 
 	if err != nil {
 		fmt.Print("Error fetching %s", err)
@@ -27,8 +27,8 @@ func (ds *Datastore) One(token string) (types.Dumper, error) {
 }
 
 //Save function to save the given Dumper
-func (ds *Datastore) Save(Dumper types.Dumper) (types.Dumper, error) {
-	err := ds.db.Save(&Dumper)
+func (s *Store) Save(Dumper types.Dumper) (types.Dumper, error) {
+	err := s.db.Save(&Dumper)
 
 	if err != nil {
 		return *new(types.Dumper), err

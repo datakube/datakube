@@ -1,11 +1,11 @@
 package rpc
 
 import (
-	"github.com/SantoDE/datahamster"
 	"github.com/SantoDE/datahamster/log"
 	pb "github.com/SantoDE/datahamster/rpc/proto"
 	"google.golang.org/grpc"
 	"net"
+	"github.com/SantoDE/datahamster/services"
 )
 
 //Server struct to hold RPC Server Information
@@ -19,7 +19,7 @@ type Services struct {
 }
 
 //NewServer function to create a new RPC Server
-func NewServer(services *datahamster.Services) *Server {
+func NewServer(services *services.Services) *Server {
 	server := new(Server)
 	server.services = new(Services)
 	server.services.DumperService = NewDumperService(services.DumperService)
