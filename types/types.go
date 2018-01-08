@@ -18,4 +18,5 @@ type DumpTarget struct {
 type DumpResult struct {
 	Success bool
 	TemporaryFile string
+	TargetName string
 }

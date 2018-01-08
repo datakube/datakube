@@ -18,16 +18,16 @@ type Dumper struct {
 }
 
 // NewSQLDumper function to create new dumper
-func NewSQLDumper(config configuration.DatabaseConfiguration) *Dumper {
+func NewSQLDumper(target configuration.Target) *Dumper {
 	d := new(Dumper)
-	d.Config = config
-	d.Dir = config.SQL.TempDir
+	d.Target = target
+	d.Dir = target.DBConfig.SQL.TempDir
 	return d
 }
 
 func (d *Dumper) register() error {
 
-	d.connect(d.Config)
+	d.connect(d.Target.DBConfig)
 
 	dumper, err := mysqldump.Register(&d.Database, d.Dir, time.RFC3339)
 
@@ -61,6 +61,7 @@ func (d *Dumper) Dump() (*types.DumpResult, error) {
 	result := types.DumpResult{
 		Success: true,
 		TemporaryFile: dumpPath,
+		TargetName: d.Target.Name,
 	}
 
 	return &result, nil

@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package dumper;
+
+// The DumperService service definition.
+service FileService {
+    rpc SaveDumpFile(SaveDumpFileRequest) returns (SaveDumpFileResponse) {}
+}
+
+message SaveDumpFileRequest {
+    string Targetname = 1;
+    bytes data = 2;
+
+}
+
+message SaveDumpFileResponse {
+    bool success = 1;
+}

@@ -10,7 +10,7 @@ func TestNewSqlDumperOk(t *testing.T) {
 
 	dir := "/tmp/test"
 
-	config := configuration.DatabaseConfiguration{
+	dbConfig := configuration.DatabaseConfiguration{
 		DatabasePassword: "test",
 		DatabaseUserName: "test",
 		DatabaseName:     "test",
@@ -21,10 +21,17 @@ func TestNewSqlDumperOk(t *testing.T) {
 		},
 	}
 
+	config := configuration.Target{
+		TargetType: "mysql",
+		Name: "testtarget",
+		Schedule: *new(configuration.ScheduleConfiguration),
+		DBConfig: dbConfig,
+	}
+
 	adapter := NewSQLDumper(config)
 
-	if !reflect.DeepEqual(config, adapter.Config) {
-		t.Fatalf("Error reading database config: expected %+v, got %+v", config, adapter.Config)
+	if !reflect.DeepEqual(config.DBConfig, adapter.Target.DBConfig) {
+		t.Fatalf("Error reading database config: expected %+v, got %+v", config, adapter.Target.DBConfig)
 	}
 
 	if !reflect.DeepEqual(dir, adapter.Dir) {

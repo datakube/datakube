@@ -5,6 +5,8 @@ import (
 	"github.com/SantoDE/datahamster/configuration"
 )
 
+const TYPE_MSQL string = "mysql"
+
 // Dumper Interface for all dumpers
 type DumpRunner interface {
 	Dump() (*types.DumpResult, error)
@@ -12,6 +14,6 @@ type DumpRunner interface {
 
 // BaseDumper struct which holds basic configuration for all dumpers
 type BaseDumper struct {
-	Config configuration.DatabaseConfiguration
+	Target configuration.Target
 	Dir    string
 }
