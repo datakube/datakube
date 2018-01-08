@@ -1,5 +1,7 @@
 package storage
 
+import "github.com/SantoDE/datahamster/types"
+
 // Configuration struct to hold Storage Configuration
 type Configuration struct {
 	Type string `description:"Persistent File Storage"`
@@ -15,15 +17,9 @@ type FileConfiguration struct {
 type BaseStorage struct {
 }
 
-// File struct which holds the file to save
-type File struct {
-	Name string
-	Path string
-}
-
 // Storage Interface for all dumpers
 type Storage interface {
-	SaveFile(file File) error
+	SaveFile(file types.File) (types.File, error)
 	ListFiles()
 	DeleteFile()
 }
