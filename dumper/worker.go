@@ -2,7 +2,6 @@ package dumper
 
 import (
 	"context"
-	"fmt"
 	"github.com/SantoDE/datahamster/configuration"
 	"github.com/SantoDE/datahamster/dumper/jobs"
 	"github.com/SantoDE/datahamster/log"
@@ -21,11 +20,16 @@ func StartWorker(c *configuration.DumperConfiguration) {
 
 	ctx := context.Background()
 	request := new(dumper.RegisterRequest)
-	request.Token = "12345"
+	request.Token = c.Token
 	resp, err := conClient.RegisterDumper(ctx, request)
 
 	if err != nil {
 		log.Debugf("Error Connecting s%s", err.Error())
+		os.Exit(500)
+	}
+
+	if resp.Success != true {
+		log.Debugf("Register was not correct - wrong token maybe?")
 		os.Exit(500)
 	}
 
@@ -34,8 +38,6 @@ func StartWorker(c *configuration.DumperConfiguration) {
 	dumps := make(chan types.DumpResult)
 
 	for _, target := range c.Targets {
-
-
 		j := jobs.NewDumpJob(&target, dumps)
 		scheduler.Schedule(&target.Schedule, j)
 	}
@@ -47,7 +49,7 @@ func StartWorker(c *configuration.DumperConfiguration) {
 			data, err := ioutil.ReadFile(dump.TemporaryFile)
 
 			if err != nil {
-
+				log.Debugf("Error reading temporary file to send %s", err.Error())
 			}
 
 			req := dumper.SaveDumpFileRequest{
@@ -58,14 +60,11 @@ func StartWorker(c *configuration.DumperConfiguration) {
 			res, err := fileClient.SaveDumpFile(ctx, &req)
 
 			if err != nil {
-
+				log.Debugf("Error sending file to server %s", err.Error())
 			}
 
-			fmt.Printf("Save grpc %s", res.Success)
-		default:
-			fmt.Println("no message sent")
+			log.Debugf("Save grpc %s", res.Success)
 	}
 
-	fmt.Printf("response %s", resp.Success)
 	defer conn.Close()
 }

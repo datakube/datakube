@@ -7,15 +7,20 @@ import (
 	"time"
 )
 
+// DataStore defines the interface to manage the data.
+type DataStore interface {
+	Open() error
+}
+
 //Datastore struct to hold Datastore Information
-type Datastore struct {
+type Store struct {
 	Path string
 	db   *storm.DB
 }
 
 //NewStore creates a new Datastore
-func NewStore(path string) (*Datastore, error) {
-	s := &Datastore{
+func NewStore(path string) (*Store, error) {
+	s := &Store{
 		Path: path,
 	}
 
@@ -23,20 +28,20 @@ func NewStore(path string) (*Datastore, error) {
 }
 
 //Open opens a database connection
-func (d *Datastore) Open() error {
-	db, err := storm.Open(d.Path, storm.BoltOptions(0600, &bolt.Options{Timeout: 1 * time.Second}))
+func (s *Store) Open() error {
+	db, err := storm.Open(s.Path, storm.BoltOptions(0600, &bolt.Options{Timeout: 1 * time.Second}))
 
 	if err != nil {
 		return err
 	}
-	d.db = db
+	s.db = db
 
-	d.setup()
+	s.setup()
 	return nil
 }
 
-func (d *Datastore) setup() error {
-	err := d.db.Init(&types.Dumper{})
+func (s *Store) setup() error {
+	err := s.db.Init(&types.Dumper{})
 
 	if err != nil {
 		return err

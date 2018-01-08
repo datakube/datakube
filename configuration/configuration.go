@@ -11,40 +11,42 @@ type ServerConfiguration struct {
 	Address string
 }
 
-// Target struct to hold Target config
-type Target struct {
-	TargetType string
-	Name string
-	Schedule   ScheduleConfiguration
-	DBConfig   DatabaseConfiguration
-}
 
 // DumperConfiguration struct to hold Dumper config
 type DumperConfiguration struct {
-	Targets  []Target
-	LogLevel string
+	LogLevel string `mapstructure:"logLevel"`
+	Token 	 string `mapstructure:"token"`
+	Targets  []Target `mapstructure:"target"`
+}
+
+// Target struct to hold Target config
+type Target struct {
+	TargetType string `mapstructure:"type"`
+	Name string `mapstructure:"name"`
+	DBConfig   DatabaseConfiguration `mapstructure:"db"`
+	Schedule    ScheduleConfiguration `mapstructure:"schedule"`
 }
 
 // DatabaseConfiguration struct to hold Database Configuration
 type DatabaseConfiguration struct {
-	DatabaseName     string `description:"Database Name"`
-	DatabaseUserName string `description:"Database User Name"`
-	DatabasePassword string `description:"Database Password"`
-	DatabaseHost     string `description:"Database Host"`
-	DatabasePort     string `description:"Database Port"`
-	DatabaseType     string `description:"Database Type"`
-	SQL              SQLDatabaseConfiguration
+	DatabaseHost     string `description:"Database Host" mapstructure:"host"`
+	DatabaseName     string `description:"Database Name" mapstructure:"name"`
+	DatabaseUserName string `description:"Database User Name" mapstructure:"user"`
+	DatabasePassword string `description:"Database Password" mapstructure:"password"`
+	DatabasePort     string `description:"Database Port" mapstructure:"port"`
+	DatabaseType     string `description:"Database Type" mapstructure:"type"`
+	SQL 		 SQLDatabaseConfiguration `description:"Database Type" mapstructure:"sql"`
 }
 
 // SQLDatabaseConfiguration struct to hold SQL Database specific Configuration
 type SQLDatabaseConfiguration struct {
-	TempDir string
+	TempDir string `description:"TempDir" mapstructure:"tempdir"`
 }
 
 // ScheduleConfiguration struct to hold Schedule Configuration
 type ScheduleConfiguration struct {
-	Interval string `description:"Interval to run at i.e. weekly"`
-	Day      string `description:"Number of day in month i.e: Monday for week interval and Number (3) for Monthly Interval"`
-	At       string `description:"When to start the Dump, i.e. 03:00"`
-	StartNow bool   `description:"Interval to run at i.e. 8h or 5m"`
+	Interval string `description:"Interval to run at i.e. weekly" mapstructure:"interval" `
+	Day      string `description:"Number of day in month i.e: Monday for week interval and Number (3) for Monthly Interval" mapstructure:"day" `
+	At       string `description:"When to start the Dump, i.e. 03:00" mapstructure:"at"`
+	StartNow bool   `description:"Interval to run at i.e. 8h or 5m" mapstructure:"db_name"`
 }

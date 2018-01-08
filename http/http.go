@@ -1,9 +1,9 @@
 package http
 
 import (
-	"github.com/SantoDE/datahamster"
 	"github.com/SantoDE/datahamster/http/handlers"
 	"github.com/gin-gonic/gin"
+	"github.com/SantoDE/datahamster/services"
 )
 
 //Server struct to hold HTTP Server Information
@@ -18,7 +18,7 @@ type Handlers struct {
 }
 
 //NewServer to create a new HTTP Server and wire handlers
-func NewServer(services *datahamster.Services) *Server {
+func NewServer(services *services.Services) *Server {
 
 	server := new(Server)
 	server.Handler = new(Handlers)
@@ -36,6 +36,6 @@ func NewServer(services *datahamster.Services) *Server {
 func (h *Server) Start() {
 	r := gin.Default()
 	r.GET("/ping", h.Handler.PingHandler.GET)
-	r.POST("/Dumper", h.Handler.DumperHandler.POST)
+	r.POST("/dumper", h.Handler.DumperHandler.POST)
 	r.Run(":8080")
 }
