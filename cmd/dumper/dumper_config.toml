@@ -1,0 +1,37 @@
+logLevel = "debug"
+token    = "d67ed8fa127a3b34"
+
+[[target]]
+    type = "db"
+    name = "application_database"
+    [target.db]
+        host = "localhost"
+        name = "frooggies"
+        user = "root"
+        password = "root"
+        port = "3306"
+        type = "sql"
+        [target.db.sql]
+        tempdir = "/tmp/dumps"
+        [target.schedule]
+            inverval = "weekly"
+            day = 1
+            at = "03:00"
+
+[[target]]
+    type = "db"
+    name = "application_database"
+    [target.db]
+        host = "localhost"
+        name = "frooggies"
+        user = "root"
+        password = "root"
+        port = "3306"
+        type = "sql"
+        [target.db.sql]
+        tempdir = "/tmp/dumps"
+        [target.schedule]
+            inverval = "weekly"
+            day = 1
+            at = "03:00"
+

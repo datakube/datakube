@@ -8,8 +8,10 @@ service FileService {
 }
 
 message SaveDumpFileRequest {
-    string Targetname = 1;
-    bytes data = 2;
+    string token = 1;
+    string targetname = 2;
+    string filename = 3;
+    bytes data = 4;
 
 }
 

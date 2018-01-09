@@ -56,3 +56,16 @@ func TestRegisterTargetNOK(t *testing.T) {
 	assert.Equal(t, res.ID, 0)
 	noHit = false
 }
+
+func TestSaveTargetFileOK(t *testing.T) {
+	testStore := new(TestDataStore)
+	ds := services.NewDumperService(testStore)
+
+	res, err := ds.SaveTargetFile("12345", "existing Target", "testfile", "/tmp/test123.txt")
+
+	assert.Nil(t, err)
+	assert.Equal(t, res.ID, 0)
+	assert.Equal(t, res.File.Path, "/tmp/test123.txt")
+	assert.Equal(t, res.File.Name, "testfile")
+}
+
