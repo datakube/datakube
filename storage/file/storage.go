@@ -3,7 +3,6 @@ package file
 import (
 	"github.com/SantoDE/datahamster/log"
 	"github.com/SantoDE/datahamster/storage"
-	"os"
 	"path"
 	"github.com/SantoDE/datahamster/types"
 	"io/ioutil"

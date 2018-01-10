@@ -9,6 +9,7 @@ import (
 
 func TestSaveOK(t *testing.T) {
 	store, err := store.NewStore("/tmp/test.db")
+	defer store.Close()
 
 	assert.Nil(t, err)
 
@@ -25,13 +26,10 @@ func TestSaveOK(t *testing.T) {
 	dumper := types.Dumper{
 		Token:   "1234",
 		Name:    "Testdumper",
-		Targets: targets,
 	}
 
 	savedDumper, err := store.Save(dumper)
 	assert.Nil(t, err)
 	assert.NotNil(t, savedDumper.ID)
-	assert.NotNil(t, savedDumper.Targets)
 	assert.Equal(t, savedDumper.Name, "Testdumper")
-	assert.Equal(t, savedDumper.Targets[0].Name, "testtarget")
 }
