@@ -23,6 +23,7 @@ type DumperConfiguration struct {
 type Target struct {
 	TargetType string `mapstructure:"type"`
 	Name string `mapstructure:"name"`
+	StartImmediately bool `mapstructure:"start_immediately"`
 	DBConfig   DatabaseConfiguration `mapstructure:"db"`
 	Schedule    ScheduleConfiguration `mapstructure:"schedule"`
 }
@@ -35,7 +36,7 @@ type DatabaseConfiguration struct {
 	DatabasePassword string `description:"Database Password" mapstructure:"password"`
 	DatabasePort     string `description:"Database Port" mapstructure:"port"`
 	DatabaseType     string `description:"Database Type" mapstructure:"type"`
-	SQL 		 SQLDatabaseConfiguration `description:"Database Type" mapstructure:"sql"`
+	SQL SQLDatabaseConfiguration `description:"Database Type" mapstructure:"sql"`
 }
 
 // SQLDatabaseConfiguration struct to hold SQL Database specific Configuration

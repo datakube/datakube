@@ -21,16 +21,28 @@ func StartWorker(c *configuration.DumperConfiguration) {
 	ctx := context.Background()
 	request := new(dumper.RegisterRequest)
 	request.Token = c.Token
+
+	var targets []*dumper.Target
+
+	for _, target := range c.Targets {
+		requestTarget := dumper.Target{
+			Name: target.Name,
+		}
+
+		targets = append(targets, &requestTarget)
+	}
+
+	request.Targets = targets
 	resp, err := conClient.RegisterDumper(ctx, request)
 
 	if err != nil {
-		log.Debugf("Error Connecting s%s", err.Error())
-		os.Exit(500)
+		log.Debugf("Error Connecting %s", err.Error())
+		os.Exit(15)
 	}
 
 	if resp.Success != true {
 		log.Debugf("Register was not correct - wrong token maybe?")
-		os.Exit(500)
+		os.Exit(15)
 	}
 
 	scheduler := NewScheduler()
@@ -39,12 +51,20 @@ func StartWorker(c *configuration.DumperConfiguration) {
 
 	for _, target := range c.Targets {
 		j := jobs.NewDumpJob(&target, dumps)
+
+		if target.StartImmediately {
+			go j.Run()
+		}
+
 		scheduler.Schedule(&target.Schedule, j)
 	}
 
+	scheduler.Cron.Start()
+
 	fileClient := dumper.NewFileServiceClient(conn)
 
-	select {
+	for {
+		select {
 		case dump := <- dumps:
 			data, err := ioutil.ReadFile(dump.TemporaryFile)
 
@@ -63,7 +83,11 @@ func StartWorker(c *configuration.DumperConfiguration) {
 				log.Debugf("Error sending file to server %s", err.Error())
 			}
 
-			log.Debugf("Save grpc %s", res.Success)
+			if res.Success != true {
+				log.Debugf("Transfered dump to Server not successful")
+			}
+			log.Debugf("Transfered dump to Server successfuly")
+		}
 	}
 
 	defer conn.Close()

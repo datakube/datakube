@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/SantoDE/datahamster/types"
 	"time"
+	"github.com/SantoDE/datahamster/log"
 )
 
 //Service struct to hold Dumper Service Information
@@ -45,7 +46,7 @@ func (s *TargetService) SaveTargetFile(targetname string, filename string, stora
 	target, err := s.datastore.OneByName(targetname)
 
 	if err != nil {
-		fmt.Print("Error Saving Target File - Target with name %s not found", targetname)
+		log.Error("Error Saving Target File - Target with name %s not found", targetname)
 		return *new(types.DumpFile), err
 	}
 
@@ -66,7 +67,7 @@ func (s *TargetService) SaveTargetFile(targetname string, filename string, stora
 }
 
 
-func (s *TargetService) GetTargetById(targetId string) (types.DumpTarget, error) {
+func (s *TargetService) GetTargetById(targetId int) (types.DumpTarget, error) {
 	target, err := s.datastore.OneById(targetId)
 
 	if err != nil {

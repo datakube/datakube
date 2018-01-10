@@ -3,8 +3,7 @@ package handlers
 import (
 	"github.com/SantoDE/datahamster/services"
 	"github.com/gin-gonic/gin"
-	"fmt"
-	"io"
+	"strconv"
 )
 
 //DumperHandler struct to hold DumperHandler specific information
@@ -24,10 +23,11 @@ func NewFileHandler(ts services.TargetService) *FileHandler {
 
 //POST function to create a new handler
 func (h *FileHandler) GET(c *gin.Context) {
-	targetId := c.Param("targetId")
+	targetId, err := strconv.Atoi(c.Param("targetId"))
 
 	target, err := h.TargetService.GetTargetById(targetId)
 
+	//@TODO MAKE BETTER ERROR HANDLING
 	if err != nil {
 
 	}

@@ -1,20 +1,23 @@
 package rpc
 
 import (
-	dumper "github.com/SantoDE/datahamster/rpc/proto"
+	"github.com/SantoDE/datahamster/rpc/proto"
 	"github.com/SantoDE/datahamster/services"
 	"golang.org/x/net/context"
+	"github.com/SantoDE/datahamster/log"
 )
 
 //DumperService struct to hold RPC DumperService definition
 type DumperService struct {
 	DumperService services.DumperService
+	TargetService services.TargetService
 }
 
 //NewDumperService to create a new RPC Dumper Service
-func NewDumperService(bas services.DumperService) *DumperService {
+func NewDumperService(bas services.DumperService, tas services.TargetService) *DumperService {
 	as := new(DumperService)
 	as.DumperService = bas
+	as.TargetService = tas
 
 	return as
 }
@@ -28,7 +31,11 @@ func (f *DumperService) RegisterDumper(ctx context.Context, in *dumper.RegisterR
 	}
 
 	for _, target := range in.Targets {
-		f.DumperService.RegisterTarget(in.Token, target.Name, target.Schedule)
+		_, err := f.TargetService.RegisterTarget(target.Name, target.Schedule)
+
+		if err != nil {
+			log.Debug("Error registering target ", err.Error())
+		}
 	}
 
 	return &dumper.RegisterResponse{Success: res}, nil

@@ -58,5 +58,7 @@ func (s *Store) setup() error {
 		return err
 	}
 
+	err = s.db.Init(&types.DumpTarget{})
+
 	return nil
 }
