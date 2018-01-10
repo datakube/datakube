@@ -15,6 +15,7 @@ type Server struct {
 type Handlers struct {
 	PingHandler   *handlers.PingHandler
 	DumperHandler *handlers.DumperHandler
+	FileHandler   *handlers.FileHandler
 }
 
 //NewServer to create a new HTTP Server and wire handlers
@@ -25,6 +26,7 @@ func NewServer(services *services.Services) *Server {
 
 	pingHandler := handlers.NewPingHandler()
 	DumperHander := handlers.NewDumperHandler(services.DumperService)
+	FileHandler := handlers.NewFileHandler(services.TargetService)
 
 	server.Handler.PingHandler = pingHandler
 	server.Handler.DumperHandler = DumperHander
@@ -37,5 +39,6 @@ func (h *Server) Start() {
 	r := gin.Default()
 	r.GET("/ping", h.Handler.PingHandler.GET)
 	r.POST("/dumper", h.Handler.DumperHandler.POST)
+	r.GET("/files/download/:targetId/", h.Handler.FileHandler.GET)
 	r.Run(":8080")
 }

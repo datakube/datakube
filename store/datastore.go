@@ -40,6 +40,17 @@ func (s *Store) Open() error {
 	return nil
 }
 
+//Close closes a database connection
+func (s *Store) Close() error {
+	err := s.db.Close()
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (s *Store) setup() error {
 	err := s.db.Init(&types.Dumper{})
 
