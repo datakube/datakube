@@ -4,11 +4,14 @@ import (
 	"github.com/SantoDE/datahamster/http/handlers"
 	"github.com/gin-gonic/gin"
 	"github.com/SantoDE/datahamster/services"
+	"github.com/SantoDE/datahamster/http/rpc"
+	"github.com/SantoDE/datahamster/proto"
 )
 
 //Server struct to hold HTTP Server Information
 type Server struct {
 	Handler *Handlers
+	services *rpc.Services
 }
 
 //Handlers struct to hold different Handlers
@@ -32,6 +35,10 @@ func NewServer(services *services.Services) *Server {
 	server.Handler.DumperHandler = dumperHander
 	server.Handler.FileHandler = fileHandler
 
+	server.services = new(rpc.Services)
+	server.services.DumperService = rpc.NewDumperService(services.DumperService, services.TargetService)
+	server.services.FileHandleService = rpc.NewFileHandleService(services.TargetService)
+
 	return server
 }
 
@@ -41,5 +48,12 @@ func (h *Server) Start() {
 	r.GET("/ping", h.Handler.PingHandler.GET)
 	r.POST("/dumper", h.Handler.DumperHandler.POST)
 	r.GET("/files/download/:targetId/", h.Handler.FileHandler.GET)
+
+	dumperHandler := dumper.NewDumperServiceServer(h.services.DumperService, nil)
+	fileHandler := dumper.NewFileServiceServer(h.services.FileHandleService, nil)
+
+	r.POST(dumper.DumperServicePathPrefix+"*action", gin.WrapH(dumperHandler))
+	r.POST(dumper.FileServicePathPrefix+"*action", gin.WrapH(fileHandler))
+
 	r.Run(":8080")
 }
