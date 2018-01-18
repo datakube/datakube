@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/SantoDE/datahamster/store"
 	"github.com/SantoDE/datahamster/types"
+	"github.com/SantoDE/datahamster/log"
 )
 
 //Service struct to hold Dumper Service Information
@@ -26,7 +27,7 @@ func (s *DumperService) Validate(token string) (bool, error) {
 	_, err := s.datastore.One(token)
 
 	if err != nil {
-		fmt.Print("Error fetching %s", err)
+		log.Errorf("Error Validating the token %s => %s", token, err.Error())
 		return false, err
 	}
 
@@ -44,7 +45,7 @@ func (s *DumperService) Create(name string) (types.Dumper, error) {
 	newDumper, err := s.datastore.Save(*Dumper)
 
 	if err != nil {
-		fmt.Print("Error Creating Dumper %s", err)
+		fmt.Print("Error Creating Dumper %s", err.Error())
 		return *new(types.Dumper), err
 	}
 

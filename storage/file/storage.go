@@ -26,7 +26,6 @@ func NewFileStorage(dir string) *Storage {
 // SaveFile function to save a new file
 func (storage *Storage) SaveFile(f types.File) (types.File, error) {
 
-
 	s := []string{storage.dir, f.Name}
 	path := strings.Join(s, "/", )
 

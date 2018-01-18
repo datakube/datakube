@@ -76,3 +76,7 @@
 [[constraint]]
   branch = "master"
   name = "github.com/jasonlvhit/gocron"
+
+[[constraint]]
+  name = "github.com/twitchtv/twirp"
+  version = "5.0.0"

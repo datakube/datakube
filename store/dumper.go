@@ -1,8 +1,8 @@
 package store
 
 import (
-	"fmt"
 	"github.com/SantoDE/datahamster/types"
+	"github.com/SantoDE/datahamster/log"
 )
 
 var _ DumperStore = (*Store)(nil)
@@ -19,7 +19,7 @@ func (s *Store) One(token string) (types.Dumper, error) {
 	err := s.db.One("Token", token, &Dumper)
 
 	if err != nil {
-		fmt.Print("Error fetching %s", err)
+		log.Errorf("Error fetching the dumper by token %s => %s", token, err.Error())
 		return *new(types.Dumper), err
 	}
 

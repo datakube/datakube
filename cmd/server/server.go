@@ -5,7 +5,6 @@ import (
 	"github.com/SantoDE/datahamster/configuration"
 	"github.com/SantoDE/datahamster/http"
 	"github.com/SantoDE/datahamster/log"
-	"github.com/SantoDE/datahamster/rpc"
 	"github.com/SantoDE/datahamster/services"
 	"github.com/SantoDE/datahamster/storage"
 	"github.com/SantoDE/datahamster/store"
@@ -62,12 +61,6 @@ func main() {
 		fmt.Printf("Server Adress %s", cfg.Address)
 
 		var g errgroup.Group
-
-		g.Go(func() error {
-			Server := rpc.NewServer(services)
-			Server.Start()
-			return nil
-		})
 
 		g.Go(func() error {
 			Server := http.NewServer(services)

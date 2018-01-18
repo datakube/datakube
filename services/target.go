@@ -71,7 +71,7 @@ func (s *TargetService) GetTargetById(targetId int) (types.DumpTarget, error) {
 	target, err := s.datastore.OneById(targetId)
 
 	if err != nil {
-		fmt.Print("Error fetching %s", err)
+		fmt.Print("Error fetching a Target with the id %s. Error %s", targetId, err)
 		return target, err
 	}
 

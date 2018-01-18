@@ -5,18 +5,18 @@ import (
 	"github.com/SantoDE/datahamster/configuration"
 	"github.com/SantoDE/datahamster/dumper/jobs"
 	"github.com/SantoDE/datahamster/log"
-	"github.com/SantoDE/datahamster/rpc/proto"
+	"github.com/SantoDE/datahamster/proto"
 	"github.com/SantoDE/datahamster/types"
 	"io/ioutil"
 	"os"
+	"net/http"
 )
 
 //StartWorker function to start the Worker
 func StartWorker(c *configuration.DumperConfiguration) {
 
-	conn := Connect()
-
-	conClient := dumper.NewDumperServiceClient(conn)
+	conClient := dumper.NewDumperServiceProtobufClient("http://127.0.0.1:8080", &http.Client{})
+	fileClient := dumper.NewFileServiceProtobufClient("http://127.0.0.1:8080", &http.Client{})
 
 	ctx := context.Background()
 	request := new(dumper.RegisterRequest)
@@ -33,6 +33,7 @@ func StartWorker(c *configuration.DumperConfiguration) {
 	}
 
 	request.Targets = targets
+
 	resp, err := conClient.RegisterDumper(ctx, request)
 
 	if err != nil {
@@ -61,8 +62,6 @@ func StartWorker(c *configuration.DumperConfiguration) {
 
 	scheduler.Cron.Start()
 
-	fileClient := dumper.NewFileServiceClient(conn)
-
 	for {
 		select {
 		case dump := <- dumps:
@@ -89,6 +88,4 @@ func StartWorker(c *configuration.DumperConfiguration) {
 			log.Debugf("Transfered dump to Server successfuly")
 		}
 	}
-
-	defer conn.Close()
 }
