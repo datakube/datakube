@@ -2,10 +2,11 @@ package rpc
 
 import (
 	"github.com/SantoDE/datahamster/log"
-	pb "github.com/SantoDE/datahamster/rpc/proto"
+	"github.com/SantoDE/datahamster/rpc/proto"
 	"google.golang.org/grpc"
 	"net"
 	"github.com/SantoDE/datahamster/services"
+	"fmt"
 )
 
 //Server struct to hold RPC Server Information
@@ -16,13 +17,15 @@ type Server struct {
 //Services struct to hold RPC Services Information
 type Services struct {
 	DumperService *DumperService
+	FileHandleService *FileHandleService
 }
 
 //NewServer function to create a new RPC Server
 func NewServer(services *services.Services) *Server {
 	server := new(Server)
 	server.services = new(Services)
-	server.services.DumperService = NewDumperService(services.DumperService)
+	server.services.DumperService = NewDumperService(services.DumperService, services.TargetService)
+	server.services.FileHandleService = NewFileHandleService(services.TargetService)
 	return server
 }
 
@@ -35,9 +38,20 @@ func (r *Server) Start() {
 	}
 
 	server := grpc.NewServer()
-	log.Debugf("Registering FileUpload RPC")
-	pb.RegisterDumperServiceServer(server, r.services.DumperService)
-	log.Debugf("Start Serve FileUpload RPC")
+	grpc.MaxCallRecvMsgSize(17179869184)
+	log.Debugf("Registering Dumper RPC")
+
+	dumper.RegisterDumperServiceServer(server, r.services.DumperService)
+	log.Debugf("Registering FileService RPC")
+	dumper.RegisterFileServiceServer(server, r.services.FileHandleService)
+	log.Debugf("Start RPC socket")
+
+	tmp := server.GetServiceInfo()
+
+	for _, info := range tmp {
+		fmt.Printf("Data %s", info.Metadata)
+	}
+
 	err = server.Serve(lis)
 	if err != nil {
 		log.Debugf("Error Starting GRPC %s", err.Error())

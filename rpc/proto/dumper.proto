@@ -7,6 +7,12 @@ service DumperService {
     rpc RegisterDumper(RegisterRequest) returns (RegisterResponse) {}
 }
 
+// The FileService service definition.
+service FileService {
+    rpc SaveDumpFile(SaveDumpFileRequest) returns (SaveDumpFileResponse) {}
+}
+
+
 message RegisterRequest {
     string token = 1;
     repeated Target targets= 2;
@@ -18,5 +24,16 @@ message Target {
 }
 
 message RegisterResponse {
+    bool success = 1;
+}
+
+message SaveDumpFileRequest {
+    string token = 1;
+    string targetname = 2;
+    string filename = 3;
+    bytes data = 4;
+}
+
+message SaveDumpFileResponse {
     bool success = 1;
 }

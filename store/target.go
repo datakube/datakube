@@ -9,7 +9,7 @@ var _ TargetStore = (*Store)(nil)
 //DumperStore Interface to expose Dumper Stores API
 type TargetStore interface {
 	SaveTarget(target types.DumpTarget) (types.DumpTarget, error)
-	OneById(string) (types.DumpTarget, error)
+	OneById(int) (types.DumpTarget, error)
 	OneByName(string) (types.DumpTarget, error)
 }
 
@@ -25,10 +25,10 @@ func (s *Store) SaveTarget(target types.DumpTarget) (types.DumpTarget, error) {
 }
 
 //TargetById fetches a target by id
-func (s *Store) OneById(id string) (types.DumpTarget, error) {
+func (s *Store) OneById(id int) (types.DumpTarget, error) {
 	var target types.DumpTarget
 
-	err :=  s.db.One("Id", id, &target)
+	err :=  s.db.One("ID", id, &target)
 
 	if err != nil {
 		return *new(types.DumpTarget), err

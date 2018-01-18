@@ -127,6 +127,8 @@ func initStore(dataStorePath string) *store.Store {
 func initServices(store *store.Store) *services.Services {
 	applicationServices := new(services.Services)
 	bas := services.NewDumperService(store)
-	applicationServices.DumperService = &bas
+	tas := services.NewTargetService(store)
+	applicationServices.DumperService = bas
+	applicationServices.TargetService = tas
 	return applicationServices
 }

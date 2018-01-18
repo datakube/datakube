@@ -25,11 +25,12 @@ func NewServer(services *services.Services) *Server {
 	server.Handler = new(Handlers)
 
 	pingHandler := handlers.NewPingHandler()
-	DumperHander := handlers.NewDumperHandler(services.DumperService)
-	FileHandler := handlers.NewFileHandler(services.TargetService)
+	dumperHander := handlers.NewDumperHandler(services.DumperService)
+	fileHandler := handlers.NewFileHandler(services.TargetService)
 
 	server.Handler.PingHandler = pingHandler
-	server.Handler.DumperHandler = DumperHander
+	server.Handler.DumperHandler = dumperHander
+	server.Handler.FileHandler = fileHandler
 
 	return server
 }

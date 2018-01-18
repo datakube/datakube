@@ -13,7 +13,7 @@ var _ store.TargetStore = (*TestTargetDataStore)(nil)
 
 type TestTargetDataStore struct{}
 
-func (t *TestTargetDataStore) OneById(tokiden string) (types.DumpTarget, error) {
+func (t *TestTargetDataStore) OneById(tokenId int) (types.DumpTarget, error) {
 	var target types.DumpTarget
 
 	target = types.DumpTarget{Name: "existing Target", Schedule: "weekly"}

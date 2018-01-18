@@ -2,7 +2,6 @@ package jobs
 
 import (
 	"github.com/robfig/cron"
-	"fmt"
 	"github.com/SantoDE/datahamster/runner"
 	"github.com/SantoDE/datahamster/configuration"
 	"github.com/SantoDE/datahamster/runner/sql"
@@ -35,9 +34,9 @@ func NewDumpJob(target *configuration.Target, dumpResults chan <- types.DumpResu
 }
 
 func (p *DumpJob) Run() {
-	fmt.Printf("I'm running babe")
+	log.Debug("Running Dump")
 	res, err := p.Runner.Dump()
-
+	log.Debug("Dump done")
 	if err != nil {
 		log.Debug("Error during Dump %s", err.Error())
 	}
