@@ -27,5 +27,3 @@ validate:  ## validate gofmt, golint and go vet
 test:
 	./script/make.sh test-unit
 
-test-unit:
-	./script/make.sh test-unit

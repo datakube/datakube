@@ -11,6 +11,7 @@ import (
 //Server struct to hold HTTP Server Information
 type Server struct {
 	Handler *Handlers
+	addr string
 	services *rpc.Services
 }
 
@@ -22,10 +23,12 @@ type Handlers struct {
 }
 
 //NewServer to create a new HTTP Server and wire handlers
-func NewServer(services *services.Services) *Server {
+func NewServer(addr string, dir string, services *services.Services) *Server {
 
 	server := new(Server)
 	server.Handler = new(Handlers)
+
+	server.addr = addr
 
 	pingHandler := handlers.NewPingHandler()
 	dumperHander := handlers.NewDumperHandler(services.DumperService)
@@ -37,7 +40,7 @@ func NewServer(services *services.Services) *Server {
 
 	server.services = new(rpc.Services)
 	server.services.DumperService = rpc.NewDumperService(services.DumperService, services.TargetService)
-	server.services.FileHandleService = rpc.NewFileHandleService(services.TargetService)
+	server.services.FileHandleService = rpc.NewFileHandleService(services.TargetService, dir)
 
 	return server
 }
@@ -55,5 +58,5 @@ func (h *Server) Start() {
 	r.POST(dumper.DumperServicePathPrefix+"*action", gin.WrapH(dumperHandler))
 	r.POST(dumper.FileServicePathPrefix+"*action", gin.WrapH(fileHandler))
 
-	r.Run(":8080")
+	r.Run(h.addr)
 }
