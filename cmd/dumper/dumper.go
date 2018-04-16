@@ -35,7 +35,7 @@ to quickly create a Cobra application.`,
 			fmt.Printf("unable to decode into struct, %v", err)
 		}
 
-		level, err := logrus.ParseLevel(strings.ToLower("debug"))
+		level, err := logrus.ParseLevel(strings.ToLower(config.LogLevel))
 		if err != nil {
 			log.Error("Error getting level", err)
 		}

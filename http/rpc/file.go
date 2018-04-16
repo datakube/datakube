@@ -17,11 +17,11 @@ type FileHandleService struct {
 }
 
 //NewDumperService to create a new RPC Dumper Service
-func NewFileHandleService(tas services.TargetService) *FileHandleService {
+func NewFileHandleService(tas services.TargetService, dir string) *FileHandleService {
 	fh := new(FileHandleService)
 	fh.TargetService = tas
 	//@TODO make storage location configurable
-	fh.FileStorage = file.NewFileStorage("/tmp/dumps")
+	fh.FileStorage = file.NewFileStorage(dir)
 
 	return fh
 }

@@ -1,109 +1,110 @@
 package main
 
 import (
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	"fmt"
-	"github.com/SantoDE/datahamster/configuration"
-	"github.com/SantoDE/datahamster/http"
-	"github.com/SantoDE/datahamster/log"
-	"github.com/SantoDE/datahamster/services"
-	"github.com/SantoDE/datahamster/storage"
-	"github.com/SantoDE/datahamster/store"
-	"github.com/Sirupsen/logrus"
-	"github.com/urfave/cli"
-	"golang.org/x/sync/errgroup"
 	"os"
+	"github.com/mitchellh/go-homedir"
+	"github.com/SantoDE/datahamster/configuration"
+	"github.com/Sirupsen/logrus"
 	"strings"
+	"github.com/SantoDE/datahamster/log"
+	"github.com/SantoDE/datahamster/http"
+	"github.com/SantoDE/datahamster/services"
+	"github.com/SantoDE/datahamster/store"
 )
 
-func main() {
-	app := cli.NewApp()
-	app.Flags = []cli.Flag{
-		cli.StringFlag{
-			Name:   "server.address",
-			Usage:  "The Database Name to Backup",
-			EnvVar: "DATABASE_NAME",
-		},
-		cli.StringFlag{
-			Name:   "dump.identifier",
-			Usage:  "The Database Type to connect to (currently SQL is supported only)",
-			EnvVar: "SCHEDULE_DURATION",
-		},
-		cli.StringFlag{
-			Name:   "dump.storage.type",
-			Usage:  "The Database Type to connect to (currently SQL is supported only)",
-			EnvVar: "SCHEDULE_DURATION",
-		},
-		cli.StringFlag{
-			Name:   "dump.storage.file.dir",
-			Usage:  "The Database Type to connect to (currently SQL is supported only)",
-			EnvVar: "SCHEDULE_DURATION",
-		},
-		cli.StringFlag{
-			Name:   "log.level",
-			Usage:  "The Database Type to connect to (currently SQL is supported only)",
-			EnvVar: "SCHEDULE_DURATION",
-		},
-	}
+var cfgFile string
+var logLevel string
+var config configuration.ServerConfiguration
 
-	app.Action = func(c *cli.Context) error {
-		globalConfiguration := initConfig(c)
-		level, err := logrus.ParseLevel(strings.ToLower(globalConfiguration.LogLevel))
+// RootCmd represents the base command when called without any subcommands
+var serverCommand = &cobra.Command{
+	Use:   "datahamster",
+	Short: "A brief description of your application",
+	Long: `A longer description that spans multiple lines and likely contains
+examples and usage of using your application. For example:
+Cobra is a CLI library for Go that empowers applications.
+This application is a tool to generate the needed files
+to quickly create a Cobra application.`,
+	// Uncomment the following line if your bare application
+	// has an action associated with it:
+	Run: func(cmd *cobra.Command, args []string) {
+		err := viper.Unmarshal(&config)
+
+		if err != nil {
+			fmt.Printf("unable to decode into struct, %v", err)
+		}
+
+		level, err := logrus.ParseLevel(strings.ToLower(config.LogLevel))
 		if err != nil {
 			log.Error("Error getting level", err)
 		}
 		log.SetLevel(level)
 
-		store := initStore("test.db")
+		store := initStore(config.Datastore.Path)
 
-		cfg := globalConfiguration.Server
 		services := initServices(store)
 
-		fmt.Printf("Server Adress %s", cfg.Address)
+		Server := http.NewServer(config.Address, config.Storage.File.Path, services)
+		Server.Start()
 
-		var g errgroup.Group
-
-		g.Go(func() error {
-			Server := http.NewServer(services)
-			Server.Start()
-			return nil
-		})
-
-		return g.Wait()
-	}
-
-	app.Name = "Datahamster - Worker"
-	app.Usage = "Worker to automatically get databse dumps and forward them to the server"
-
-	app.Run(os.Args)
+	},
 }
 
-func initConfig(c *cli.Context) configuration.GlobalConfiguration {
+// Execute adds all child commands to the root command and sets flags appropriately.
+// This is called by main.main(). It only needs to happen once to the rootCmd.
+func Execute() {
+	if err := serverCommand.Execute(); err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+}
 
-	var serverAddress = c.String("server.address")
-	var logLevel = c.String("log.level")
+func init() {
+	cobra.OnInitialize(initServerConfig)
+	// Here you will define your flags and configuration settings.
+	// Cobra supports persistent flags, which, if defined here,
+	// will be global for your application.
+	serverCommand.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.config.toml)")
+	serverCommand.PersistentFlags().StringVar(&logLevel, "logLevel", "error", "Dumper Application Log Level")
 
-	storageConfig := new(storage.Configuration)
+	viper.BindPFlag("config", serverCommand.PersistentFlags().Lookup("config"))
+	viper.BindPFlag("logLevel", serverCommand.PersistentFlags().Lookup("logLevel"))
 
-	switch storageType := c.String("dump.storage.type"); storageType {
+	// Cobra also supports local flags, which will only run
+	// when this action is called directly.
+	serverCommand.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+}
 
-	case "file":
-		var storageDir = c.String("dump.storage.file.dir")
-		storageConfig.File = storage.FileConfiguration{
-			Dir: storageDir,
+// initConfig reads in config file and ENV variables if set.
+func initServerConfig() {
+	if cfgFile != "" {
+		// Use config file from the flag.
+		viper.SetConfigFile(cfgFile)
+	} else {
+		// Find home directory.
+		home, err := homedir.Dir()
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
 		}
 
-	default:
-		storageConfig.Type = storageType
+		// Search config in home directory with name ".dodo" (without extension).
+		viper.AddConfigPath(home)
+		viper.SetConfigName(".config")
 	}
 
-	config := configuration.GlobalConfiguration{
-		Server: configuration.ServerConfiguration{
-			Address: serverAddress,
-		},
-		LogLevel: logLevel,
+	viper.AutomaticEnv() // read in environment variables that match
+
+	err := viper.ReadInConfig()
+
+	if err != nil {
+		fmt.Printf("Error reading config file %s", err.Error())
 	}
 
-	return config
+	fmt.Println("Using config file:", viper.ConfigFileUsed())
 }
 
 func initStore(dataStorePath string) *store.Store {
