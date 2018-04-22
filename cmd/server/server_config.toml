@@ -2,8 +2,8 @@ logLevel = "debug"
 address = ":8080"
 
 [datastore]
-    path = "/data/storge"
+    path = "/tmp/datastore"
 
 [storage]
     [storage.file]
-        path = "/data/storage"
+        path = "/tmp/filestorage"

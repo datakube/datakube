@@ -10,9 +10,9 @@ import (
 	"github.com/Sirupsen/logrus"
 	"strings"
 	"github.com/SantoDE/datahamster/log"
-	"github.com/SantoDE/datahamster/http"
 	"github.com/SantoDE/datahamster/services"
 	"github.com/SantoDE/datahamster/store"
+	"github.com/SantoDE/datahamster/server"
 )
 
 var cfgFile string
@@ -47,9 +47,8 @@ to quickly create a Cobra application.`,
 
 		services := initServices(store)
 
-		Server := http.NewServer(config.Address, config.Storage.File.Path, services)
+		Server := server.NewServer(config.Address, config.Storage.File.Path, services)
 		Server.Start()
-
 	},
 }
 
