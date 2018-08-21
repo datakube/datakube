@@ -10,6 +10,7 @@ import (
 	"io/ioutil"
 	"os"
 	"net/http"
+	"github.com/twitchtv/twirp"
 )
 
 //StartWorker function to start the Worker
@@ -18,9 +19,17 @@ func StartWorker(c *configuration.DumperConfiguration) {
 	conClient := dumper.NewDumperServiceProtobufClient("http://127.0.0.1:8080", &http.Client{})
 	fileClient := dumper.NewFileServiceProtobufClient("http://127.0.0.1:8080", &http.Client{})
 
+	// Given some headers ...
+	header := make(http.Header)
+	header.Set("Datakube-Dumper-Token", "uDRlDxQYbFVXarBvmTncBoWKcZKqrZTY")
+
+	// Attach the headers to a context
 	ctx := context.Background()
+	ctx, err := twirp.WithHTTPRequestHeaders(ctx, header)
+
 	request := new(dumper.RegisterRequest)
-	request.Token = c.Token
+	request.Auth = new(dumper.Authorization)
+	request.Auth.Token = c.Token
 
 	var targets []*dumper.Target
 
@@ -33,7 +42,6 @@ func StartWorker(c *configuration.DumperConfiguration) {
 	}
 
 	request.Targets = targets
-
 	resp, err := conClient.RegisterDumper(ctx, request)
 
 	if err != nil {

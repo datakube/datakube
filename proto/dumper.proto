@@ -12,9 +12,12 @@ service FileService {
     rpc SaveDumpFile(SaveDumpFileRequest) returns (SaveDumpFileResponse) {}
 }
 
+message Authorization {
+    string token = 1;
+}
 
 message RegisterRequest {
-    string token = 1;
+    Authorization auth = 1;
     repeated Target targets= 2;
 }
 
@@ -28,7 +31,7 @@ message RegisterResponse {
 }
 
 message SaveDumpFileRequest {
-    string token = 1;
+    Authorization auth = 1;
     string targetname = 2;
     string filename = 3;
     bytes data = 4;
