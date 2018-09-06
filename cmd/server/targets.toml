@@ -1,0 +1,47 @@
+[[target]]
+    name = "asdasdasdasdaas"
+    [target.db]
+        type = "mysql"
+        host = "localhost"
+        name = "aaa"
+        user = "root"
+        password = "root"
+        port = "3306"
+        [target.db.sql]
+        tempdir = "/tmp"
+    [target.schedule]
+        interval = "weedhjiasbdias"
+        day = "2"
+        at = "03:00"
+
+[[target]]
+    name = "sam_dev"
+    [target.db]
+        type = "mysql"
+        host = "localhost"
+        name = "aaaaaaaa"
+        user = "root"
+        password = "root"
+        port = "3306"
+        [target.db.sql]
+        tempdir = "/tmp"
+    [target.schedule]
+        interval = "llllll"
+        day = "1"
+        at = "03:00"
+
+[[target]]
+    name = "sam_dev"
+    [target.db]
+        type = "mysql"
+        host = "localhost"
+        name = "sam"
+        user = "root"
+        password = "root"
+        port = "3306"
+        [target.db.sql]
+        tempdir = "/tmp"
+    [target.schedule]
+        interval = "weekly"
+        day = "1"
+        at = "03:00"
