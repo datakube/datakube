@@ -22,7 +22,7 @@ func ValidateJobNeededByTarget(target types.Target, store jobStore) bool {
 		return true
 	}
 
-	if job.State == types.STATUS_QUEUED {
+	if job.Status == types.STATUS_QUEUED {
 		//dont create a new job if one is queued already
 		return false
 	}

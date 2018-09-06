@@ -5,6 +5,7 @@ import (
 	"github.com/SantoDE/datahamster/job"
 	"github.com/SantoDE/datahamster/provider"
 	"github.com/SantoDE/datahamster/server/http"
+	"github.com/SantoDE/datahamster/storage/file"
 	"github.com/SantoDE/datahamster/store"
 	"github.com/SantoDE/datahamster/store/target"
 	"github.com/SantoDE/datahamster/types"
@@ -12,10 +13,11 @@ import (
 )
 
 type Server struct {
-	http *http.Server
-	cfg  *configuration.ServerConfiguration
-	targets *types.ConfigTargets
+	http      *http.Server
+	cfg       *configuration.ServerConfiguration
+	targets   *types.ConfigTargets
 	datastore *store.DataStore
+	storage   *file.Storage
 }
 
 func NewServer(c configuration.ServerConfiguration, dataStore *store.DataStore) *Server {
@@ -23,6 +25,7 @@ func NewServer(c configuration.ServerConfiguration, dataStore *store.DataStore) 
 	s.http = http.NewServer(c.Address)
 	s.cfg = &c
 	s.datastore = dataStore
+	s.storage = file.NewFileStorage(s.cfg.Storage.File.Path)
 
 	return s
 }
@@ -44,7 +47,7 @@ func (s *Server) Start() {
 		}
 	}()
 
-	s.http.Init(s.cfg.Storage.File.Path, s.datastore, targetStore)
+	s.http.Init(s.storage, s.datastore, targetStore)
 
 	go s.http.Start()
 
@@ -53,8 +56,8 @@ func (s *Server) Start() {
 		for _, target := range targetStore.ListTargets() {
 			if job.ValidateJobNeededByTarget(target, s.datastore) {
 				s.datastore.SaveJob(types.Job{
-					RunAt: time.Now(),
-					State: types.STATUS_QUEUED,
+					RunAt:  time.Now(),
+					Status:  types.STATUS_QUEUED,
 					Target: target.Name,
 				})
 			}

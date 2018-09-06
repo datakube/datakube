@@ -20,21 +20,21 @@ func NewFileHandler() *FileHandler {
 //POST function to create a new handler
 func (h *FileHandler) GET(c *gin.Context) {
 	/*
-	targetId, err := strconv.Atoi(c.Param("targetId"))
+		targetId, err := strconv.Atoi(c.Param("targetId"))
 
-	provider, err := h.TargetService.GetTargetById(targetId)
+		provider, err := h.TargetService.GetTargetById(targetId)
 
-	@TODO MAKE BETTER ERROR HANDLING
-	if err != nil {
+		@TODO MAKE BETTER ERROR HANDLING
+		if err != nil {
 
-	}
+		}
 
-	filename := provider.Files[0].File.Path
+		filename := provider.Files[0].File.Path
 
-	c.Header("Content-Description", "File Transfer")
-	c.Header("Content-Transfer-Encoding", "binary")
-	c.Header("Content-Disposition", "attachment; filename="+filename )
-	c.Header("Content-Type", "application/octet-stream")
-	c.File(filename)
+		c.Header("Content-Description", "File Transfer")
+		c.Header("Content-Transfer-Encoding", "binary")
+		c.Header("Content-Disposition", "attachment; filename="+filename )
+		c.Header("Content-Type", "application/octet-stream")
+		c.File(filename)
 	*/
 }

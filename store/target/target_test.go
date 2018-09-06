@@ -1,10 +1,10 @@
 package target_test
 
 import (
-	"testing"
-	"github.com/stretchr/testify/assert"
-	"github.com/SantoDE/datahamster/types"
 	"github.com/SantoDE/datahamster/internal/store"
+	"github.com/SantoDE/datahamster/types"
+	"github.com/stretchr/testify/assert"
+	"testing"
 )
 
 func TestSaveTargetOK(t *testing.T) {
@@ -58,5 +58,3 @@ func TestTargetOneById(t *testing.T) {
 	assert.Equal(t, savedTarget.Name, "testtarget")
 	assert.Equal(t, savedTarget.Schedule, "weekly")
 }
-
-

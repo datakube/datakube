@@ -3,88 +3,52 @@ package dumper
 import (
 	"context"
 	"github.com/SantoDE/datahamster/configuration"
-	"github.com/SantoDE/datahamster/dumper/jobs"
+	"github.com/SantoDE/datahamster/dumper/dump"
 	"github.com/SantoDE/datahamster/log"
-	"github.com/SantoDE/datahamster/proto"
+	"github.com/SantoDE/datahamster/rpc"
 	"github.com/SantoDE/datahamster/types"
 	"io/ioutil"
-	"os"
 	"net/http"
-	"github.com/twitchtv/twirp"
+	"os"
 )
 
 //StartWorker function to start the Worker
 func StartWorker(c *configuration.DumperConfiguration) {
 
-	conClient := dumper.NewDumperServiceProtobufClient("http://127.0.0.1:8080", &http.Client{})
-	fileClient := dumper.NewFileServiceProtobufClient("http://127.0.0.1:8080", &http.Client{})
-
-	// Given some headers ...
-	header := make(http.Header)
-	header.Set("Datakube-Dumper-Token", "uDRlDxQYbFVXarBvmTncBoWKcZKqrZTY")
+	client := datakube.NewDatakubeProtobufClient("http://localhost:8080", &http.Client{})
 
 	// Attach the headers to a context
 	ctx := context.Background()
-	ctx, err := twirp.WithHTTPRequestHeaders(ctx, header)
-
-	request := new(dumper.RegisterRequest)
-	request.Auth = new(dumper.Authorization)
-	request.Auth.Token = c.Token
-
-	var targets []*dumper.Target
-
-	for _, target := range c.Targets {
-		requestTarget := dumper.Target{
-			Name: target.Name,
-		}
-
-		targets = append(targets, &requestTarget)
-	}
-
-	request.Targets = targets
-	resp, err := conClient.RegisterDumper(ctx, request)
-
-	if err != nil {
-		log.Debugf("Error Connecting %s", err.Error())
-		os.Exit(15)
-	}
-
-	if resp.Success != true {
-		log.Debugf("Register was not correct - wrong token maybe?")
-		os.Exit(15)
-	}
-
-	scheduler := NewScheduler()
 
 	dumps := make(chan types.DumpResult)
 
-	for _, target := range c.Targets {
-		j := jobs.NewDumpJob(&target, dumps)
+	jobs, err := client.ListJobs(ctx, &datakube.ListJobsRequest{Status: types.STATUS_QUEUED})
 
-		if target.StartImmediately {
-			go j.Run()
-		}
-
-		scheduler.Schedule(&target.Schedule, j)
+	if err != nil {
+		log.Error("Errror getting jobs ", err.Error())
+		os.Exit(15)
 	}
 
-	scheduler.Cron.Start()
+	for _, job := range jobs.Jobs {
+		j := dump.NewDumpJob(job.Target, dumps)
+		go j.Run()
+	}
 
 	for {
 		select {
-		case dump := <- dumps:
+		case dump := <-dumps:
 			data, err := ioutil.ReadFile(dump.TemporaryFile)
 
 			if err != nil {
 				log.Debugf("Error reading temporary file to send %s", err.Error())
 			}
 
-			req := dumper.SaveDumpFileRequest{
+			req := datakube.SaveDumpFileRequest{
 				Targetname: dump.TargetName,
-				Data: data,
+				Data:       data,
 			}
 
-			res, err := fileClient.SaveDumpFile(ctx, &req)
+			res, err := client.SaveDumpFile(ctx, &req)
 
 			if err != nil {
 				log.Debugf("Error sending file to server %s", err.Error())

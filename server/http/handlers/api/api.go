@@ -25,7 +25,3 @@ func NewApiHandler(targetStore targetStore, jobStore jobStore) *ApiHandler {
 	a.jobStore = jobStore
 	return a
 }
-
-
-
-
