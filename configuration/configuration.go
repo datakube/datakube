@@ -2,10 +2,10 @@ package configuration
 
 // ServerConfiguration struct to hold Server config
 type ServerConfiguration struct {
-	Address string `mapstructure:"address"`
-	LogLevel string `mapstructure:"logLevel"`
-	Datastore DatastoreConfiguration `mapstructure:"datastore"`
-	Storage   StorageConfiguration `mapstructure:"storage"`
+	Address     string                  `mapstructure:"address"`
+	LogLevel    string                  `mapstructure:"logLevel"`
+	Datastore   DatastoreConfiguration  `mapstructure:"datastore"`
+	Storage     StorageConfiguration    `mapstructure:"storage"`
 	FileTargets FileTargetsConfguration `mapstructure:"file"`
 }
 
@@ -24,10 +24,10 @@ type FileStorageConfiguration struct {
 // DumperConfiguration struct to hold Dumper config
 type DumperConfiguration struct {
 	LogLevel string `mapstructure:"logLevel"`
-	Token 	 string `mapstructure:"token"`
+	Token    string `mapstructure:"token"`
 }
 
 type FileTargetsConfguration struct {
-	Dir string `mapstructure:"dir"`
-	File 	 string `mapstructure:"file"`
+	Dir  string `mapstructure:"dir"`
+	File string `mapstructure:"file"`
 }

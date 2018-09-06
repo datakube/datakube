@@ -1,16 +1,16 @@
 package main
 
 import (
+	"fmt"
+	"github.com/SantoDE/datahamster/configuration"
+	"github.com/SantoDE/datahamster/dumper"
+	"github.com/SantoDE/datahamster/log"
+	"github.com/Sirupsen/logrus"
+	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"fmt"
 	"os"
-	"github.com/mitchellh/go-homedir"
-	"github.com/SantoDE/datahamster/configuration"
-	"github.com/Sirupsen/logrus"
 	"strings"
-	"github.com/SantoDE/datahamster/log"
-	"github.com/SantoDE/datahamster/dumper"
 )
 
 var cfgFile string

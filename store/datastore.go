@@ -1,6 +1,5 @@
 package store
 
-
 import (
 	"github.com/SantoDE/datahamster/types"
 	"github.com/asdine/storm"

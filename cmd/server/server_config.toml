@@ -7,3 +7,7 @@ address = ":8080"
 [storage]
     [storage.file]
         path = "/tmp/filestorage"
+
+[file]
+dir = "/Users/manuelzapf/go/src/github.com/SantoDE/datahamster/cmd/server"
+file = "/Users/manuelzapf/go/src/github.com/SantoDE/datahamster/cmd/server/targets.toml"

@@ -2,19 +2,24 @@ package handlers
 
 import (
 	"context"
-	"github.com/SantoDE/datahamster/types"
-	"github.com/SantoDE/datahamster/rpc"
 	"github.com/SantoDE/datahamster/log"
+	"github.com/SantoDE/datahamster/rpc"
 	"github.com/SantoDE/datahamster/storage"
+	"github.com/SantoDE/datahamster/types"
 	"time"
 )
 
 type jobStore interface {
-	ListAllQueuedJobs() ([]types.Job, error)
+	ListJobsByStatus(status string) ([]types.Job, error)
+	DeleteJob(types.Job) error
 }
 
 type dumpfileStore interface {
 	SaveDumpFile(types.DumpFile) (types.DumpFile, error)
+}
+
+type targetStore interface {
+	GetOneTargetByName(targetName string) (types.Target)
 }
 
 //DumperHandler struct to hold DumperHandler specific information
@@ -22,22 +27,25 @@ type RpcHandler struct {
 	BaseHandler
 	jobStore
 	dumpfileStore
+	targetStore
 	storage.Storage
 }
 
-func NewRpcHandler(store jobStore, storage storage.Storage) RpcHandler {
+func NewRpcHandler(js jobStore, ts targetStore, df dumpfileStore, storage storage.Storage) RpcHandler {
 
 	h := new(RpcHandler)
-	h.jobStore = store
+	h.jobStore = js
 	h.Storage = storage
+	h.targetStore = ts
+	h.dumpfileStore = df
 
 	return *h
 }
 
 //ConnectDumper function which gets called when an Dumper connected
-func (h *RpcHandler) SaveDumpFile(ctx context.Context, in *rpc.SaveDumpFileRequest) (*rpc.SaveDumpFileResponse, error) {
+func (h *RpcHandler) SaveDumpFile(ctx context.Context, in *datakube.SaveDumpFileRequest) (*datakube.SaveDumpFileResponse, error) {
 
-	log.Debugf("Received RPC Request to save file with filename %s for token %s", in.Filename, in.Token)
+	log.Debugf("Received RPC Request to save file with filename %s", in.Filename)
 	file := types.File{
 		Name: in.Targetname,
 		Data: in.Data,
@@ -48,12 +56,15 @@ func (h *RpcHandler) SaveDumpFile(ctx context.Context, in *rpc.SaveDumpFileReque
 
 	if err != nil {
 		log.Errorf("Error while saving file %s", savedFile.Name)
+		return &datakube.SaveDumpFileResponse{
+			Success: false,
+		}, err
 	}
 
 	log.Debugf("Persist Saved Dump Record in Database")
 	_, err = h.dumpfileStore.SaveDumpFile(types.DumpFile{
 		CreatedAt: time.Now(),
-		Target: in.Targetname,
+		Target:    in.Targetname,
 		File: types.File{
 			Name: savedFile.Name,
 			Path: savedFile.Path,
@@ -61,36 +72,52 @@ func (h *RpcHandler) SaveDumpFile(ctx context.Context, in *rpc.SaveDumpFileReque
 	})
 
 	if err != nil {
-		return &rpc.SaveDumpFileResponse{
-			Success:false,
+		return &datakube.SaveDumpFileResponse{
+			Success: false,
 		}, err
 	}
 
-	return &rpc.SaveDumpFileResponse{
-		Success:true,
+	return &datakube.SaveDumpFileResponse{
+		Success: true,
 	}, nil
 }
 
-func (h *RpcHandler) ListQueuedJobs(ctx context.Context, in *rpc.ListJobsRequest) (*rpc.ListJobsResponse, error) {
+func (h *RpcHandler) ListJobs(ctx context.Context, in *datakube.ListJobsRequest) (*datakube.ListJobsResponse, error) {
 
-	jobs, err := h.ListAllQueuedJobs()
+	jobs, err := h.ListJobsByStatus(in.Status)
 
-	var rpcJobs []*rpc.Job
+	var rpcJobs []*datakube.Job
 
 	if err != nil {
 		log.Error("Error fetching all queued Jobs for RPC Call : %s", err)
 	}
 
 	for _, job := range jobs {
-		j := new(rpc.Job)
-		j.Target = &rpc.Target{
-			Name: job.Target,
-			State: job.State,
+
+		target := h.targetStore.GetOneTargetByName(job.Target)
+
+		if target == *new(types.Target){
+			h.jobStore.DeleteJob(job)
+			continue
 		}
+
+		j := new(datakube.Job)
+		j.Target = &datakube.Target{
+			Name:  job.Target,
+			Type: target.DBConfig.DatabaseType,
+			Credentials: &datakube.Credentials{
+				User: target.DBConfig.DatabaseUserName,
+				Host: target.DBConfig.DatabaseHost,
+				Database: target.DBConfig.DatabaseName,
+				Password: target.DBConfig.DatabasePassword,
+				Port: target.DBConfig.DatabasePort,
+			},
+		}
+
+		j.State = job.Status
 		rpcJobs = append(rpcJobs, j)
 	}
-	return &rpc.ListJobsResponse{
+	return &datakube.ListJobsResponse{
 		Jobs: rpcJobs,
 	}, err
 }
-

@@ -1,22 +1,21 @@
-package jobs_test
+package dump_test
 
 import (
-	"github.com/SantoDE/datahamster/dumper/jobs"
-	"testing"
-	"github.com/SantoDE/datahamster/types"
 	"github.com/SantoDE/datahamster/configuration"
+	"github.com/SantoDE/datahamster/dumper/jobs"
+	"github.com/SantoDE/datahamster/types"
 	"github.com/stretchr/testify/assert"
+	"testing"
 )
 
+type TestDumpRunner struct{}
 
-type TestDumpRunner struct {}
-
-func (tdr *TestDumpRunner) Dump() (*types.DumpResult, error){
+func (tdr *TestDumpRunner) Dump() (*types.DumpResult, error) {
 	result := new(types.DumpResult)
 
 	result.Success = true
 	result.TemporaryFile = "/tmp/testfile"
-	result.TargetName="TestTarget"
+	result.TargetName = "TestTarget"
 
 	return result, nil
 }
@@ -25,10 +24,9 @@ func TestDumpJobRunt(t *testing.T) {
 
 	cfg := configuration.Target{
 		TargetType: "mysql",
-		Name: "TestTarget",
-		Schedule: *new(configuration.ScheduleConfiguration),
-		DBConfig: *new(configuration.DatabaseConfiguration),
-
+		Name:       "TestTarget",
+		Schedule:   *new(configuration.ScheduleConfiguration),
+		DBConfig:   *new(configuration.DatabaseConfiguration),
 	}
 	events := make(chan types.DumpResult)
 	tdr := new(TestDumpRunner)
@@ -40,7 +38,7 @@ func TestDumpJobRunt(t *testing.T) {
 	var eventHit bool
 
 	select {
-	case dump := <- events:
+	case dump := <-events:
 		eventHit = true
 		assert.Equal(t, dump.Success, true)
 		assert.Equal(t, dump.TargetName, "TestTarget")

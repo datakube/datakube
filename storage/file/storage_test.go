@@ -1,10 +1,10 @@
 package file
 
 import (
-	"reflect"
-	"testing"
 	"github.com/SantoDE/datahamster/types"
 	"os"
+	"reflect"
+	"testing"
 )
 
 func TestNewFileStorageOkay(t *testing.T) {

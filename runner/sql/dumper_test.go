@@ -23,9 +23,9 @@ func TestNewSqlDumperOk(t *testing.T) {
 
 	config := configuration.Target{
 		TargetType: "mysql",
-		Name: "testtarget",
-		Schedule: *new(configuration.ScheduleConfiguration),
-		DBConfig: dbConfig,
+		Name:       "testtarget",
+		Schedule:   *new(configuration.ScheduleConfiguration),
+		DBConfig:   dbConfig,
 	}
 
 	adapter := NewSQLDumper(config)

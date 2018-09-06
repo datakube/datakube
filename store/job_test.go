@@ -1,11 +1,11 @@
 package store_test
 
 import (
-	"testing"
-	"github.com/stretchr/testify/assert"
-	"github.com/SantoDE/datahamster/types"
-	"time"
 	"github.com/SantoDE/datahamster/internal/store"
+	"github.com/SantoDE/datahamster/types"
+	"github.com/stretchr/testify/assert"
+	"testing"
+	"time"
 )
 
 func TestSaveJobOk(t *testing.T) {
@@ -16,7 +16,7 @@ func TestSaveJobOk(t *testing.T) {
 	job := types.Job{
 		State:  "test",
 		Target: "12345",
-		RunAt: now,
+		RunAt:  now,
 	}
 
 	savedJob, err := store.SaveJob(job)
@@ -65,14 +65,14 @@ func TestGetLatestbyTargetName(t *testing.T) {
 
 	job1 := types.Job{
 		Target: "12345",
-		RunAt: time.Now(),
-		State: "IShouldBeRetunred",
+		RunAt:  time.Now(),
+		State:  "IShouldBeRetunred",
 	}
 
 	job2 := types.Job{
 		Target: "12345",
-		RunAt: time.Now().AddDate(0, 0, -1),
-		State: "IShouldNotBeRetunred",
+		RunAt:  time.Now().AddDate(0, 0, -1),
+		State:  "IShouldNotBeRetunred",
 	}
 
 	store.SaveJob(job1)

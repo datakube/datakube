@@ -1,18 +1,17 @@
 package main
 
 import (
+	"fmt"
+	"github.com/SantoDE/datahamster/configuration"
+	"github.com/SantoDE/datahamster/log"
+	"github.com/SantoDE/datahamster/server"
+	"github.com/SantoDE/datahamster/store"
+	"github.com/Sirupsen/logrus"
+	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"fmt"
 	"os"
-	"github.com/mitchellh/go-homedir"
-	"github.com/SantoDE/datahamster/configuration"
-	"github.com/Sirupsen/logrus"
 	"strings"
-	"github.com/SantoDE/datahamster/log"
-	"github.com/SantoDE/datahamster/services"
-	"github.com/SantoDE/datahamster/store"
-	"github.com/SantoDE/datahamster/server"
 )
 
 var cfgFile string
@@ -45,9 +44,7 @@ to quickly create a Cobra application.`,
 
 		store := initStore(config.Datastore.Path)
 
-		services := initServices(store)
-
-		Server := server.NewServer(config.Address, config.Storage.File.Path, services)
+		Server := server.NewServer(config, store)
 		Server.Start()
 	},
 }
@@ -106,7 +103,7 @@ func initServerConfig() {
 	fmt.Println("Using config file:", viper.ConfigFileUsed())
 }
 
-func initStore(dataStorePath string) *store.Store {
+func initStore(dataStorePath string) *store.DataStore {
 	store, err := store.NewStore(dataStorePath)
 	if err != nil {
 		log.Fatal(err)
@@ -115,13 +112,4 @@ func initStore(dataStorePath string) *store.Store {
 	err = store.Open()
 
 	return store
-}
-
-func initServices(store *store.Store) *services.Services {
-	applicationServices := new(services.Services)
-	bas := services.NewDumperService(store)
-	tas := services.NewTargetService(store)
-	applicationServices.DumperService = bas
-	applicationServices.TargetService = tas
-	return applicationServices
 }

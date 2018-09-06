@@ -9,10 +9,10 @@ import (
 
 type FileTargets struct {
 	TargetFile string
-	Dir string
+	Dir        string
 }
 
-func (f *FileTargets) Provide(targetChan chan<- types.ConfigTargets){
+func (f *FileTargets) Provide(targetChan chan<- types.ConfigTargets) {
 
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {

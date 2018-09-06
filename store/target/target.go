@@ -5,7 +5,7 @@ import (
 )
 
 type Store struct {
-	targets []types.Target
+	targets    []types.Target
 	identifier string
 }
 

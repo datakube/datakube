@@ -4,32 +4,37 @@ import (
 	"database/sql"
 	"github.com/JamesStewy/go-mysqldump"
 	"github.com/SantoDE/datahamster/log"
+	"github.com/SantoDE/datahamster/rpc"
 	"github.com/SantoDE/datahamster/types"
+	"io/ioutil"
 	"time"
-	"github.com/SantoDE/datahamster/configuration"
-	"github.com/SantoDE/datahamster/runner"
 )
 
 // Dumper struct for the SQL Dumper
 type Dumper struct {
-	runner.BaseDumper
+	target   *datakube.Target
 	dumper   *mysqldump.Dumper
 	Database sql.DB
 }
 
 // NewSQLDumper function to create new dumper
-func NewSQLDumper(target configuration.Target) *Dumper {
+func NewSQLDumper(t *datakube.Target) *Dumper {
 	d := new(Dumper)
-	d.Target = target
-	d.Dir = target.DBConfig.SQL.TempDir
+	d.target = t
 	return d
 }
 
 func (d *Dumper) register() error {
 
-	d.connect(d.Target.DBConfig)
+	d.connect(*d.target.Credentials)
 
-	dumper, err := mysqldump.Register(&d.Database, d.Dir, time.RFC3339)
+	dir, err := ioutil.TempDir("", "dump")
+
+	if err != nil {
+
+	}
+
+	dumper, err := mysqldump.Register(&d.Database, dir, time.RFC3339)
 
 	if err != nil {
 		log.Errorf("Error Registering MySql Dump: %s", err)
@@ -59,9 +64,9 @@ func (d *Dumper) Dump() (*types.DumpResult, error) {
 	}
 
 	result := types.DumpResult{
-		Success: true,
+		Success:       true,
 		TemporaryFile: dumpPath,
-		TargetName: d.Target.Name,
+		TargetName:    d.target.Name,
 	}
 
 	return &result, nil
