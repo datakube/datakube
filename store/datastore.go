@@ -1,5 +1,6 @@
 package store
 
+
 import (
 	"github.com/SantoDE/datahamster/types"
 	"github.com/asdine/storm"
@@ -7,20 +8,15 @@ import (
 	"time"
 )
 
-// DataStore defines the interface to manage the data.
-type DataStore interface {
-	Open() error
-}
-
 //Datastore struct to hold Datastore Information
-type Store struct {
+type DataStore struct {
 	Path string
 	db   *storm.DB
 }
 
 //NewStore creates a new Datastore
-func NewStore(path string) (*Store, error) {
-	s := &Store{
+func NewStore(path string) (*DataStore, error) {
+	s := &DataStore{
 		Path: path,
 	}
 
@@ -28,7 +24,7 @@ func NewStore(path string) (*Store, error) {
 }
 
 //Open opens a database connection
-func (s *Store) Open() error {
+func (s *DataStore) Open() error {
 	db, err := storm.Open(s.Path, storm.BoltOptions(0600, &bolt.Options{Timeout: 1 * time.Second}))
 
 	if err != nil {
@@ -41,7 +37,7 @@ func (s *Store) Open() error {
 }
 
 //Close closes a database connection
-func (s *Store) Close() error {
+func (s *DataStore) Close() error {
 	err := s.db.Close()
 
 	if err != nil {
@@ -51,14 +47,10 @@ func (s *Store) Close() error {
 	return nil
 }
 
-func (s *Store) setup() error {
-	err := s.db.Init(&types.Dumper{})
+func (s *DataStore) setup() error {
 
-	if err != nil {
-		return err
-	}
-
-	err = s.db.Init(&types.DumpTarget{})
+	_ = s.db.Init(&types.Target{})
+	_ = s.db.Init(&types.Job{})
 
 	return nil
 }

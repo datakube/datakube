@@ -1,38 +1,3 @@
 logLevel = "debug"
 token    = "f70fe900b3393186"
 debug    = "true"
-
-[[target]]
-    name = "application_database"
-    type = "mysql"
-    [target.db]
-        host = "localhost"
-        name = "frooggies"
-        user = "root"
-        password = "root"
-        port = "3306"
-        [target.db.sql]
-        tempdir = "/tmp"
-        [target.schedule]
-            inverval = "weekly"
-            day = 1
-            at = "03:00"
-
-[[target]]
-    name = "application_database"
-    start_immediately = "true"
-    type = "mysql"
-    [target.db]
-        host = "localhost"
-        name = "sam_dev"
-        user = "root"
-        password = "root"
-        port = "3306"
-        type = "sql"
-        [target.db.sql]
-        tempdir = "/tmp"
-        [target.schedule]
-            inverval = "weekly"
-            day = 1
-            at = "03:00"
-

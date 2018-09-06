@@ -26,19 +26,19 @@ func (s *Scheduler) Schedule(targetSchedule *configuration.ScheduleConfiguration
 	minutes, _ := strconv.ParseUint(strings.Split(targetSchedule.At, ":")[0], 10, 64)
 	seconds, _ := strconv.ParseUint(strings.Split(targetSchedule.At, ":")[1], 10, 64)
 
-	switch targetSchedule.Interval {
-	case "monthly":
-		schedule.Dom = day
-		schedule.Minute = minutes
-		schedule.Second = seconds
-	case "weekly":
-		schedule.Dow = day
-		schedule.Minute = minutes
-		schedule.Second = seconds
-	case "daily":
-		schedule.Minute = minutes
-		schedule.Second = seconds
-	}
+		switch targetSchedule.Interval {
+		case "monthly":
+			schedule.Dom = day
+			schedule.Minute = minutes
+			schedule.Second = seconds
+		case "weekly":
+			schedule.Dow = day
+			schedule.Minute = minutes
+			schedule.Second = seconds
+		case "daily":
+			schedule.Minute = minutes
+			schedule.Second = seconds
+		}
 
 	s.Cron.Schedule(schedule, j)
 }
