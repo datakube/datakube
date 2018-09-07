@@ -67,7 +67,7 @@ type DumpResult struct {
 // Job struct to hold information about what to dump when and be the provider for the polling
 type Job struct {
 	ID     int       `storm:"id,increment"`
-	Status  string    `json:"state"`
+	Status string    `json:"state"`
 	Target string    `json:"provider"`
 	RunAt  time.Time `json:"runAt"`
 }

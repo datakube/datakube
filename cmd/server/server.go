@@ -44,8 +44,10 @@ to quickly create a Cobra application.`,
 
 		store := initStore(config.Datastore.Path)
 
+		var stopChan = make(chan bool)
+
 		Server := server.NewServer(config, store)
-		Server.Start()
+		Server.Start(stopChan)
 	},
 }
 

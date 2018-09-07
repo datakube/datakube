@@ -48,7 +48,7 @@ func (s *DataStore) Close() error {
 
 func (s *DataStore) setup() error {
 
-	_ = s.db.Init(&types.Target{})
+	_ = s.db.Init(&types.DumpFile{})
 	_ = s.db.Init(&types.Job{})
 
 	return nil

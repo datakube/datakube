@@ -27,14 +27,13 @@ func (d *DataStore) DeleteJob(job types.Job) error {
 	return nil
 }
 
-
 func (d *DataStore) AllJobsByTargetName(name string) ([]types.Job, error) {
 	var jobs []types.Job
 
 	err := d.db.Find("Target", name, &jobs)
 
 	if err != nil {
-		log.Error("Can't find all Jobs by Target Name", err)
+		log.Error("Can't find all Jobs by Target Name ", err)
 		return jobs, err
 	}
 
@@ -57,7 +56,7 @@ func (d *DataStore) ListJobsByStatus(status string) ([]types.Job, error) {
 	err := d.db.Find("Status", status, &jobs)
 
 	if err != nil {
-		log.Error("Can't list all Jobs by Status %s", status, err)
+		log.Error("Can't list all Jobs by Status ", status, err)
 		return jobs, err
 	}
 
@@ -70,8 +69,8 @@ func (d *DataStore) ListAllJobs() ([]types.Job, error) {
 	err := d.db.All(&jobs)
 
 	if err != nil {
-		log.Error("Can't list all Jobs", err)
-		return jobs, err
+		log.Error("Can't list all Jobs ", err)
+		return nil, err
 	}
 
 	return jobs, nil

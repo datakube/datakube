@@ -11,17 +11,3 @@ type targetStore interface {
 type jobStore interface {
 	ListAllJobs() ([]types.Job, error)
 }
-
-//PingHandler to hold Pinghandler information
-type ApiHandler struct {
-	targetStore
-	jobStore
-}
-
-//NewPingHandler to create a new Pinghandler
-func NewApiHandler(targetStore targetStore, jobStore jobStore) *ApiHandler {
-	a := new(ApiHandler)
-	a.targetStore = targetStore
-	a.jobStore = jobStore
-	return a
-}

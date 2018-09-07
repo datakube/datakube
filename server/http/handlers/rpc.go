@@ -19,12 +19,11 @@ type dumpfileStore interface {
 }
 
 type targetStore interface {
-	GetOneTargetByName(targetName string) (types.Target)
+	GetOneTargetByName(targetName string) types.Target
 }
 
 //DumperHandler struct to hold DumperHandler specific information
 type RpcHandler struct {
-	BaseHandler
 	jobStore
 	dumpfileStore
 	targetStore
@@ -80,44 +79,4 @@ func (h *RpcHandler) SaveDumpFile(ctx context.Context, in *datakube.SaveDumpFile
 	return &datakube.SaveDumpFileResponse{
 		Success: true,
 	}, nil
-}
-
-func (h *RpcHandler) ListJobs(ctx context.Context, in *datakube.ListJobsRequest) (*datakube.ListJobsResponse, error) {
-
-	jobs, err := h.ListJobsByStatus(in.Status)
-
-	var rpcJobs []*datakube.Job
-
-	if err != nil {
-		log.Error("Error fetching all queued Jobs for RPC Call : %s", err)
-	}
-
-	for _, job := range jobs {
-
-		target := h.targetStore.GetOneTargetByName(job.Target)
-
-		if target == *new(types.Target){
-			h.jobStore.DeleteJob(job)
-			continue
-		}
-
-		j := new(datakube.Job)
-		j.Target = &datakube.Target{
-			Name:  job.Target,
-			Type: target.DBConfig.DatabaseType,
-			Credentials: &datakube.Credentials{
-				User: target.DBConfig.DatabaseUserName,
-				Host: target.DBConfig.DatabaseHost,
-				Database: target.DBConfig.DatabaseName,
-				Password: target.DBConfig.DatabasePassword,
-				Port: target.DBConfig.DatabasePort,
-			},
-		}
-
-		j.State = job.Status
-		rpcJobs = append(rpcJobs, j)
-	}
-	return &datakube.ListJobsResponse{
-		Jobs: rpcJobs,
-	}, err
 }
