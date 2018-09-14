@@ -12,7 +12,7 @@ type FileTargets struct {
 	Dir        string
 }
 
-func (f *FileTargets) Provide(targetChan chan<- types.ConfigTargets) {
+func (f *FileTargets) Provide(targetChan chan<- types.ConfigTargets, stopChan <-chan bool) error {
 
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
@@ -20,40 +20,50 @@ func (f *FileTargets) Provide(targetChan chan<- types.ConfigTargets) {
 	}
 
 	var targets types.ConfigTargets
-	targets = f.loadTargets(f.TargetFile)
+	targets, _ = loadTargets(f.TargetFile)
 
 	targetChan <- targets
 
-	err = watcher.Add(f.Dir)
+	watcher.Add(f.Dir)
 	if err != nil {
 		log.Fatal(err)
+		return err
 	}
 
-	defer watcher.Close()
+	go func() {
+		defer watcher.Close()
+		for {
+			select {
+			case event, ok := <-watcher.Events:
+				log.Debug("Watcher event:", event)
+				if !ok {
+					return
+				}
 
-	for {
-		select {
-		case event, ok := <-watcher.Events:
-			if !ok {
+				fileName := event.Name
+				targets, err = loadTargets(fileName)
+
+				if err == nil {
+					targetChan <- targets
+				}
+			case err := <-watcher.Errors:
+				log.Errorf("Watcher event error: %s", err)
+			case <-stopChan:
 				return
 			}
-			fileName := event.Name
-
-			targets = f.loadTargets(fileName)
-			targetChan <- targets
-		case err := <-watcher.Errors:
-			log.Errorf("Watcher event error: %s", err)
 		}
-	}
+	}()
+	return nil
 }
 
-func (f *FileTargets) loadTargets(file string) types.ConfigTargets {
+func loadTargets(file string) (types.ConfigTargets, error) {
 	var targets types.ConfigTargets
 	_, err := toml.DecodeFile(file, &targets)
 
 	if err != nil {
 		log.Errorf("Error loading the provider file %s => %s", file, err.Error())
+		return targets, err
 	}
 
-	return targets
+	return targets, nil
 }

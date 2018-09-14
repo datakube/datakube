@@ -1,13 +1,14 @@
 package job
 
 import (
-	"fmt"
+	"github.com/SantoDE/datahamster/log"
 	"github.com/SantoDE/datahamster/types"
 	"time"
 )
 
 type jobStore interface {
 	GetLatestJobByTargetName(targetName string) (types.Job, error)
+	SaveJob(job types.Job) (types.Job, error)
 }
 
 func ValidateJobNeededByTarget(target types.Target, store jobStore) bool {
@@ -15,7 +16,7 @@ func ValidateJobNeededByTarget(target types.Target, store jobStore) bool {
 	job, err := store.GetLatestJobByTargetName(target.Name)
 
 	if err != nil {
-		fmt.Print("Error fetching jobs for provider %s. Error %s", target.Name, err)
+		log.Debug("Error fetching jobs for provider with Error", target.Name, err)
 	}
 
 	if &job == new(types.Job) {
@@ -43,4 +44,12 @@ func ValidateJobNeededByTarget(target types.Target, store jobStore) bool {
 	}
 
 	return true
+}
+
+func Queue(target string, store jobStore) (types.Job, error) {
+	return store.SaveJob(types.Job{
+		RunAt:  time.Now(),
+		Status: types.STATUS_QUEUED,
+		Target: target,
+	})
 }

@@ -1,17 +1,16 @@
-package dump_test
+package dumper
 
 import (
-	"github.com/SantoDE/datahamster/configuration"
-	"github.com/SantoDE/datahamster/dumper/jobs"
 	"github.com/SantoDE/datahamster/types"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
-type TestDumpRunner struct{}
+type TestDumpAdapter struct{}
 
-func (tdr *TestDumpRunner) Dump() (*types.DumpResult, error) {
-	result := new(types.DumpResult)
+func (t TestDumpAdapter) Dump(targetName string) (types.DumpResult, error) {
+
+	result := *new(types.DumpResult)
 
 	result.Success = true
 	result.TemporaryFile = "/tmp/testfile"
@@ -22,18 +21,10 @@ func (tdr *TestDumpRunner) Dump() (*types.DumpResult, error) {
 
 func TestDumpJobRunt(t *testing.T) {
 
-	cfg := configuration.Target{
-		TargetType: "mysql",
-		Name:       "TestTarget",
-		Schedule:   *new(configuration.ScheduleConfiguration),
-		DBConfig:   *new(configuration.DatabaseConfiguration),
-	}
 	events := make(chan types.DumpResult)
-	tdr := new(TestDumpRunner)
-	job := jobs.NewDumpJob(&cfg, events)
-	job.Runner = tdr
+	tda := new(TestDumpAdapter)
 
-	go job.Run()
+	go Run("TestTarget", tda, events)
 
 	var eventHit bool
 

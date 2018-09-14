@@ -2,8 +2,8 @@ package dumper
 
 import (
 	"context"
+	"github.com/SantoDE/datahamster/adapter"
 	"github.com/SantoDE/datahamster/configuration"
-	"github.com/SantoDE/datahamster/dumper/dump"
 	"github.com/SantoDE/datahamster/log"
 	"github.com/SantoDE/datahamster/rpc"
 	"github.com/SantoDE/datahamster/types"
@@ -30,8 +30,8 @@ func StartWorker(c *configuration.DumperConfiguration) {
 	}
 
 	for _, job := range jobs.Jobs {
-		j := dump.NewDumpJob(job.Target, dumps)
-		go j.Run()
+		adapter := adapter.CreateNewAdapter(job.Target.Credentials.Host, job.Target.Credentials.Port, job.Target.Credentials.Database, job.Target.Credentials.User, job.Target.Credentials.Password, job.Target.Type)
+		go Run(job.Target.Type, adapter, dumps)
 	}
 
 	for {

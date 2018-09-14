@@ -30,7 +30,7 @@ func NewServer(c configuration.ServerConfiguration, dataStore *store.DataStore) 
 	return s
 }
 
-func (s *Server) Start() {
+func (s *Server) Start(stopChan <-chan bool) {
 
 	var targetsChan = make(chan types.ConfigTargets)
 
@@ -43,7 +43,7 @@ func (s *Server) Start() {
 				s.cfg.FileTargets.File,
 				s.cfg.FileTargets.Dir,
 			}
-			ft.Provide(targetsChan)
+			ft.Provide(targetsChan, stopChan)
 		}
 	}()
 
@@ -55,11 +55,7 @@ func (s *Server) Start() {
 	for range ticker.C {
 		for _, target := range targetStore.ListTargets() {
 			if job.ValidateJobNeededByTarget(target, s.datastore) {
-				s.datastore.SaveJob(types.Job{
-					RunAt:  time.Now(),
-					Status:  types.STATUS_QUEUED,
-					Target: target.Name,
-				})
+				job.Queue(target.Name, s.datastore)
 			}
 		}
 	}

@@ -4,21 +4,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-//DumperHandler struct to hold DumperHandler specific information
-type FileHandler struct {
-	BaseHandler
-}
-
-var _ Handler = (*FileHandler)(nil)
-
-//NewDumperHandler function to create a new handler Dumper
-func NewFileHandler() *FileHandler {
-	fh := new(FileHandler)
-	return fh
-}
-
 //POST function to create a new handler
-func (h *FileHandler) GET(c *gin.Context) {
+func GetFile(c *gin.Context) {
 	/*
 		targetId, err := strconv.Atoi(c.Param("targetId"))
 

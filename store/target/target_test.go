@@ -1,60 +1,42 @@
 package target_test
 
 import (
-	"github.com/SantoDE/datahamster/internal/store"
+	"github.com/SantoDE/datahamster/store/target"
 	"github.com/SantoDE/datahamster/types"
 	"github.com/stretchr/testify/assert"
 	"testing"
+	"time"
 )
 
-func TestSaveTargetOK(t *testing.T) {
-	store := store.NewTestDataStore()
-	defer store.Close()
+func TestTargetStoreOk(t *testing.T) {
+	store := new(target.Store)
 
-	target := types.Target{
-		Name:     "testtarget",
-		Schedule: "weekly",
+	testChan := make(chan types.ConfigTargets)
+
+	var targets []types.Target
+
+	target1 := types.Target{
+		Name: "testtarget",
 	}
 
-	savedTarget, err := store.SaveTarget(target)
-	assert.Nil(t, err)
-	assert.NotNil(t, savedTarget.ID)
-	assert.Equal(t, savedTarget.Name, "testtarget")
-	assert.Equal(t, savedTarget.Schedule, "weekly")
-}
+	targets = append(targets, target1)
 
-func TestTargetOneByName(t *testing.T) {
-	store := NewTestDataStore()
-	defer store.Close()
+	go store.Subscribe(testChan)
 
-	target := types.Target{
-		Name:     "testtarget",
-		Schedule: "weekly",
+	assert.Nil(t, store.ListTargets())
+	assert.Equal(t, len(store.ListTargets()), 0)
+
+	target, _ := store.GetOneTargetByName("testtarget")
+	assert.Equal(t, target, *new(types.Target))
+
+	testChan <- types.ConfigTargets{
+		Targets: targets,
 	}
 
-	store.SaveTarget(target)
+	time.Sleep(200 * time.Millisecond)
 
-	savedTarget, err := store.OneTargetByName("testtarget")
-	assert.Nil(t, err)
-	assert.NotNil(t, savedTarget.ID)
-	assert.Equal(t, savedTarget.Name, "testtarget")
-	assert.Equal(t, savedTarget.Schedule, "weekly")
-}
-
-func TestTargetOneById(t *testing.T) {
-	store := NewTestDataStore()
-	defer store.Close()
-
-	target := types.Target{
-		Name:     "testtarget",
-		Schedule: "weekly",
-	}
-
-	saved, _ := store.SaveTarget(target)
-
-	savedTarget, err := store.OneTargetById(saved.ID)
-	assert.Nil(t, err)
-	assert.NotNil(t, savedTarget.ID)
-	assert.Equal(t, savedTarget.Name, "testtarget")
-	assert.Equal(t, savedTarget.Schedule, "weekly")
+	target, _ = store.GetOneTargetByName("testtarget")
+	assert.NotNil(t, store.ListTargets())
+	assert.Equal(t, len(store.ListTargets()), 1)
+	assert.Equal(t, target.Name, target1.Name)
 }
