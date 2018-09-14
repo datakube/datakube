@@ -14,6 +14,7 @@ import (
 
 type jobsResponse struct {
 	Jobs []types.Job `json:"jobs"`
+	Error string `json:"error"`
 }
 
 func TestGetJobs(t *testing.T) {
@@ -32,12 +33,14 @@ func TestGetJobs(t *testing.T) {
 	var response jobsResponse
 	json.Unmarshal([]byte(w.Body.String()), &response)
 	assert.Equal(t, 2, len(response.Jobs))
+	assert.Empty(t, response.Error)
 
 	jobStoreMock.Success = false
-	req, _ = http.NewRequest("GET", "/jobs", nil)
-	r.ServeHTTP(w, req)
+	errorRec := httptest.NewRecorder()
+	r.ServeHTTP(errorRec, req)
 
-	assert.Equal(t, 200, w.Code)
-	json.Unmarshal([]byte(w.Body.String()), &response)
-	assert.Equal(t, 2, len(response.Jobs))
+	assert.Equal(t, 500, errorRec.Code)
+	json.Unmarshal([]byte(errorRec.Body.String()), &response)
+	assert.Equal(t, 0, len(response.Jobs))
+	assert.NotNil(t, response.Error)
 }

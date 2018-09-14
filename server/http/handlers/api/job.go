@@ -1,17 +1,25 @@
 package api
 
-import "github.com/gin-gonic/gin"
+import (
+	"github.com/gin-gonic/gin"
+	"net/http"
+)
 
 func GetJobs(js jobStore) func(*gin.Context) {
 	return func(c *gin.Context) {
 		jobs, err := js.ListAllJobs()
 
-		if err != nil {
+		code := http.StatusOK
+		msg := ""
 
+		if err != nil {
+			code = http.StatusInternalServerError
+			msg = err.Error()
 		}
 
-		c.JSON(200, gin.H{
+		c.JSON(code, gin.H{
 			"jobs": jobs,
+			"error": msg,
 		})
 	}
 }
