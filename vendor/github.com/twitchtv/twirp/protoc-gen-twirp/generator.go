@@ -1,3 +1,16 @@
+// Copyright 2018 Twitch Interactive, Inc.  All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"). You may not
+// use this file except in compliance with the License. A copy of the License is
+// located at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// or in the "license" file accompanying this file. This file is distributed on
+// an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+// express or implied. See the License for the specific language governing
+// permissions and limitations under the License.
+
 package main
 
 import (
@@ -31,6 +44,9 @@ type twirp struct {
 	pkgs          map[string]string
 	pkgNamesInUse map[string]bool
 
+	importPrefix string            // String to prefix to imported package file names.
+	importMap    map[string]string // Mapping from .proto file name to import path.
+
 	// Package naming:
 	genPkgName          string // Name of the package that we're generating
 	fileToGoPackageName map[*descriptor.FileDescriptorProto]string
@@ -48,6 +64,7 @@ func newGenerator() *twirp {
 	t := &twirp{
 		pkgs:                make(map[string]string),
 		pkgNamesInUse:       make(map[string]bool),
+		importMap:           make(map[string]string),
 		fileToGoPackageName: make(map[*descriptor.FileDescriptorProto]string),
 		output:              bytes.NewBuffer(nil),
 	}
@@ -56,6 +73,13 @@ func newGenerator() *twirp {
 }
 
 func (t *twirp) Generate(in *plugin.CodeGeneratorRequest) *plugin.CodeGeneratorResponse {
+	params, err := parseCommandLineParams(in.GetParameter())
+	if err != nil {
+		gen.Fail("could not parse parameters passed to --twirp_out", err.Error())
+	}
+	t.importPrefix = params.importPrefix
+	t.importMap = params.importMap
+
 	t.genFiles = gen.FilesToGenerate(in)
 
 	// Collect information on types.
@@ -71,7 +95,6 @@ func (t *twirp) Generate(in *plugin.CodeGeneratorRequest) *plugin.CodeGeneratorR
 	t.registerPackageName("ioutil")
 	t.registerPackageName("json")
 	t.registerPackageName("jsonpb")
-	t.registerPackageName("log")
 	t.registerPackageName("proto")
 	t.registerPackageName("strconv")
 	t.registerPackageName("twirp")
@@ -98,8 +121,8 @@ func (t *twirp) Generate(in *plugin.CodeGeneratorRequest) *plugin.CodeGeneratorR
 				name = stringutils.BaseName(f.GetName())
 			}
 			name = stringutils.CleanIdentifier(name)
-			t.fileToGoPackageName[f] = name
-			t.registerPackageName(name)
+			alias := t.registerPackageName(name)
+			t.fileToGoPackageName[f] = alias
 		}
 	}
 
@@ -154,7 +177,7 @@ func deduceGenPkgName(genFiles []*descriptor.FileDescriptorProto) (string, error
 		name, _ := goPackageName(f)
 		name = stringutils.CleanIdentifier(name)
 		if genPkgName != "" && genPkgName != name {
-			return "", errors.Errorf("files have conflicting package names, must be the same or overriden with go_package: %q and %q", genPkgName, name)
+			return "", errors.Errorf("files have conflicting package names, must be the same or overridden with go_package: %q and %q", genPkgName, name)
 		}
 		genPkgName = name
 	}
@@ -230,10 +253,10 @@ func (t *twirp) generateImports(file *descriptor.FileDescriptorProto) {
 		return
 	}
 	t.P(`import `, t.pkgs["bytes"], ` "bytes"`)
+	t.P(`import `, t.pkgs["strings"], ` "strings"`)
 	t.P(`import `, t.pkgs["context"], ` "context"`)
 	t.P(`import `, t.pkgs["fmt"], ` "fmt"`)
 	t.P(`import `, t.pkgs["ioutil"], ` "io/ioutil"`)
-	t.P(`import `, t.pkgs["log"], ` "log"`)
 	t.P(`import `, t.pkgs["http"], ` "net/http"`)
 	t.P()
 	t.P(`import `, t.pkgs["jsonpb"], ` "github.com/golang/protobuf/jsonpb"`)
@@ -246,6 +269,7 @@ func (t *twirp) generateImports(file *descriptor.FileDescriptorProto) {
 	// method. Make sure to import the package of any such message. First, dedupe
 	// them.
 	deps := make(map[string]string) // Map of package name to quoted import path.
+	ourImportPath := path.Dir(goFileName(file))
 	for _, s := range file.Service {
 		for _, m := range s.Method {
 			defs := []*typemap.MessageDefinition{
@@ -253,11 +277,17 @@ func (t *twirp) generateImports(file *descriptor.FileDescriptorProto) {
 				t.reg.MethodOutputDefinition(m),
 			}
 			for _, def := range defs {
-				if def.File != file {
-					pkg := t.goPackageName(def.File)
-					importPath := path.Dir(goFileName(def.File))
-					deps[pkg] = strconv.Quote(importPath)
+				// By default, import path is the dirname of the Go filename.
+				importPath := path.Dir(goFileName(def.File))
+				if importPath == ourImportPath {
+					continue
 				}
+				if substitution, ok := t.importMap[def.File.GetName()]; ok {
+					importPath = substitution
+				}
+				importPath = t.importPrefix + importPath
+				pkg := t.goPackageName(def.File)
+				deps[pkg] = strconv.Quote(importPath)
 			}
 		}
 	}
@@ -281,6 +311,18 @@ func (t *twirp) generateUtilImports() {
 // These should be generated just once per package.
 func (t *twirp) generateUtils() {
 	t.sectionComment(`Utils`)
+	t.P(`// HTTPClient is the interface used by generated clients to send HTTP requests.`)
+	t.P(`// It is fulfilled by *(net/http).Client, which is sufficient for most users.`)
+	t.P(`// Users can provide their own implementation for special retry policies.`)
+	t.P(`// `)
+	t.P(`// HTTPClient implementations should not follow redirects. Redirects are`)
+	t.P(`// automatically disabled if *(net/http).Client is passed to client`)
+	t.P(`// constructors. See the withoutRedirects function in this file for more`)
+	t.P(`// details.`)
+	t.P(`type HTTPClient interface {`)
+	t.P(`	Do(req *`, t.pkgs["http"], `.Request) (*`, t.pkgs["http"], `.Response, error)`)
+	t.P(`}`)
+	t.P()
 	t.P(`// TwirpServer is the interface generated server structs will support: they're`)
 	t.P(`// HTTP handlers with additional methods for accessing metadata about the`)
 	t.P(`// service. Those accessors are a low-level API for building reflection tools.`)
@@ -289,7 +331,7 @@ func (t *twirp) generateUtils() {
 	t.P(`  `, t.pkgs["http"], `.Handler`)
 	t.P(`	// ServiceDescriptor returns gzipped bytes describing the .proto file that`)
 	t.P(`	// this service was generated from. Once unzipped, the bytes can be`)
-	t.P(`	// unmarshaled as a`)
+	t.P(`	// unmarshalled as a`)
 	t.P(`	// github.com/golang/protobuf/protoc-gen-go/descriptor.FileDescriptorProto.`)
 	t.P(` //`)
 	t.P(`	// The returned integer is the index of this particular service within that`)
@@ -299,17 +341,6 @@ func (t *twirp) generateUtils() {
 	t.P(`	// ProtocGenTwirpVersion is the semantic version string of the version of`)
 	t.P(`	// twirp used to generate this file.`)
 	t.P(`	ProtocGenTwirpVersion() string`)
-	t.P(`}`)
-	t.P()
-
-	t.P(`// done returns ctx.Err() if ctx.Done() indicates that the context done`)
-	t.P(`func done(ctx `, t.pkgs["context"], `.Context) error {`)
-	t.P(`  select {`)
-	t.P(`  case <-ctx.Done():`)
-	t.P(`    return ctx.Err()`)
-	t.P(`  default:`)
-	t.P(`    return nil`)
-	t.P(`  }`)
 	t.P(`}`)
 	t.P()
 
@@ -336,9 +367,23 @@ func (t *twirp) generateUtils() {
 	t.P(`  resp.WriteHeader(statusCode) // HTTP response status code`)
 	t.P(``)
 	t.P(`  respBody := marshalErrorToJSON(twerr)`)
-	t.P(`  _, err2 := resp.Write(respBody)`)
-	t.P(`  if err2 != nil {`)
-	t.P(`    `, t.pkgs["log"], `.Printf("unable to send error message %q: %s", twerr, err2)`)
+	t.P(`  _, writeErr := resp.Write(respBody)`)
+	t.P(`  if writeErr != nil {`)
+	t.P(`    // We have three options here. We could log the error, call the Error`)
+	t.P(`    // hook, or just silently ignore the error.`)
+	t.P(`    //`)
+	t.P(`    // Logging is unacceptable because we don't have a user-controlled `)
+	t.P(`    // logger; writing out to stderr without permission is too rude.`)
+	t.P(`    //`)
+	t.P(`    // Calling the Error hook would confuse users: it would mean the Error`)
+	t.P(`    // hook got called twice for one request, which is likely to lead to`)
+	t.P(`    // duplicated log messages and metrics, no matter how well we document`)
+	t.P(`    // the behavior.`)
+	t.P(`    //`)
+	t.P(`    // Silently ignoring the error is our least-bad option. It's highly`)
+	t.P(`    // likely that the connection is broken and the original 'err' says`)
+	t.P(`    // so anyway.`)
+	t.P(`    _ = writeErr`)
 	t.P(`  }`)
 	t.P(``)
 	t.P(`  callResponseSent(ctx, hooks)`)
@@ -382,16 +427,6 @@ func (t *twirp) generateUtils() {
 	t.P(`}`)
 	t.P()
 
-	t.P(`// closebody closes a response or request body and just logs `)
-	t.P(`// any error encountered while closing, since errors are `)
-	t.P(`// considered very unusual.`)
-	t.P(`func closebody(body io.Closer) {`)
-	t.P(`  if err := body.Close(); err != nil {`)
-	t.P(`    `, t.pkgs["log"], `.Printf("error closing body: %q", err)`)
-	t.P(`  }`)
-	t.P(`}`)
-	t.P()
-
 	t.P(`// newRequest makes an http.Request from a client, adding common headers.`)
 	t.P(`func newRequest(ctx `, t.pkgs["context"], `.Context, url string, reqBody io.Reader, contentType string) (*`, t.pkgs["http"], `.Request, error) {`)
 	t.P(`  req, err := `, t.pkgs["http"], `.NewRequest("POST", url, reqBody)`)
@@ -402,6 +437,7 @@ func (t *twirp) generateUtils() {
 	t.P(`  if customHeader := getCustomHTTPReqHeaders(ctx); customHeader != nil {`)
 	t.P(`    req.Header = customHeader`)
 	t.P(`  }`)
+	t.P(`  req.Header.Set("Accept", contentType)`)
 	t.P(`  req.Header.Set("Content-Type", contentType)`)
 	t.P(`  req.Header.Set("Twirp-Version", "`, gen.Version, `")`)
 	t.P(`  return req, nil`)
@@ -448,7 +484,7 @@ func (t *twirp) generateUtils() {
 	t.P(``)
 	t.P(`  if isHTTPRedirect(statusCode) {`)
 	t.P(`    // Unexpected redirect: it must be an error from an intermediary.`)
-	t.P(`    // Twirp clients dont't follow redirects automatically, Twirp only handles`)
+	t.P(`    // Twirp clients don't follow redirects automatically, Twirp only handles`)
 	t.P(`    // POST requests, redirects should only happen on GET and HEAD requests.`)
 	t.P(`    location := resp.Header.Get("Location")`)
 	t.P(`    msg := `, t.pkgs["fmt"], `.Sprintf("unexpected HTTP status code %d %q received, Location=%q", statusCode, statusText, location)`)
@@ -568,15 +604,14 @@ func (t *twirp) generateUtils() {
 	t.P(`}`)
 	t.P()
 
-	t.P(`// doProtoRequest is common code to make a request to the remote twirp service.`)
-	t.P(`func doProtoRequest(ctx `, t.pkgs["context"], `.Context, client *`, t.pkgs["http"], `.Client, url string, in, out `, t.pkgs["proto"], `.Message) error {`)
-	t.P(`  var err error`)
+	t.P(`// doProtobufRequest is common code to make a request to the remote twirp service.`)
+	t.P(`func doProtobufRequest(ctx `, t.pkgs["context"], `.Context, client HTTPClient, url string, in, out `, t.pkgs["proto"], `.Message) (err error) {`)
 	t.P(`  reqBodyBytes, err := `, t.pkgs["proto"], `.Marshal(in)`)
 	t.P(`  if err != nil {`)
 	t.P(`    return clientError("failed to marshal proto request", err)`)
 	t.P(`  }`)
 	t.P(`  reqBody := `, t.pkgs["bytes"], `.NewBuffer(reqBodyBytes)`)
-	t.P(`  if err = done(ctx); err != nil {`)
+	t.P(`  if err = ctx.Err(); err != nil {`)
 	t.P(`    return clientError("aborted because context was done", err)`)
 	t.P(`  }`)
 	t.P()
@@ -588,8 +623,15 @@ func (t *twirp) generateUtils() {
 	t.P(`  if err != nil {`)
 	t.P(`    return clientError("failed to do request", err)`)
 	t.P(`  }`)
-	t.P(`  defer closebody(resp.Body)`)
-	t.P(`  if err = done(ctx); err != nil {`)
+	t.P()
+	t.P(`  defer func() {`)
+	t.P(`    cerr := resp.Body.Close()`)
+	t.P(`    if err == nil && cerr != nil {`)
+	t.P(`      err = clientError("failed to close response body", cerr)`)
+	t.P(`    }`)
+	t.P(`  }()`)
+	t.P()
+	t.P(`  if err = ctx.Err(); err != nil {`)
 	t.P(`    return clientError("aborted because context was done", err)`)
 	t.P(`  }`)
 	t.P()
@@ -601,7 +643,7 @@ func (t *twirp) generateUtils() {
 	t.P(`  if err != nil {`)
 	t.P(`    return clientError("failed to read response body", err)`)
 	t.P(`  }`)
-	t.P(`  if err = done(ctx); err != nil {`)
+	t.P(`  if err = ctx.Err(); err != nil {`)
 	t.P(`    return clientError("aborted because context was done", err)`)
 	t.P(`  }`)
 	t.P()
@@ -613,14 +655,13 @@ func (t *twirp) generateUtils() {
 	t.P()
 
 	t.P(`// doJSONRequest is common code to make a request to the remote twirp service.`)
-	t.P(`func doJSONRequest(ctx `, t.pkgs["context"], `.Context, client *`, t.pkgs["http"], `.Client, url string, in, out `, t.pkgs["proto"], `.Message) error {`)
-	t.P(`  var err error`)
+	t.P(`func doJSONRequest(ctx `, t.pkgs["context"], `.Context, client HTTPClient, url string, in, out `, t.pkgs["proto"], `.Message) (err error) {`)
 	t.P(`  reqBody := `, t.pkgs["bytes"], `.NewBuffer(nil)`)
 	t.P(`  marshaler := &`, t.pkgs["jsonpb"], `.Marshaler{OrigName: true}`)
 	t.P(`  if err = marshaler.Marshal(reqBody, in); err != nil {`)
 	t.P(`    return clientError("failed to marshal json request", err)`)
 	t.P(`  }`)
-	t.P(`  if err = done(ctx); err != nil {`)
+	t.P(`  if err = ctx.Err(); err != nil {`)
 	t.P(`    return clientError("aborted because context was done", err)`)
 	t.P(`  }`)
 	t.P()
@@ -632,8 +673,15 @@ func (t *twirp) generateUtils() {
 	t.P(`  if err != nil {`)
 	t.P(`    return clientError("failed to do request", err)`)
 	t.P(`  }`)
-	t.P(`  defer closebody(resp.Body)`)
-	t.P(`  if err = done(ctx); err != nil {`)
+	t.P()
+	t.P(`  defer func() {`)
+	t.P(`    cerr := resp.Body.Close()`)
+	t.P(`    if err == nil && cerr != nil {`)
+	t.P(`      err = clientError("failed to close response body", cerr)`)
+	t.P(`    }`)
+	t.P(`  }()`)
+	t.P()
+	t.P(`  if err = ctx.Err(); err != nil {`)
 	t.P(`    return clientError("aborted because context was done", err)`)
 	t.P(`  }`)
 	t.P()
@@ -645,7 +693,7 @@ func (t *twirp) generateUtils() {
 	t.P(`  if err = unmarshaler.Unmarshal(resp.Body, out); err != nil {`)
 	t.P(`    return clientError("failed to unmarshal json response", err)`)
 	t.P(`  }`)
-	t.P(`  if err = done(ctx); err != nil {`)
+	t.P(`  if err = ctx.Err(); err != nil {`)
 	t.P(`    return clientError("aborted because context was done", err)`)
 	t.P(`  }`)
 	t.P(`  return nil`)
@@ -718,10 +766,10 @@ func (t *twirp) generateService(file *descriptor.FileDescriptorProto, service *d
 	t.generateTwirpInterface(file, service)
 
 	t.sectionComment(servName + ` Protobuf Client`)
-	t.generateProtobufClient(file, service)
+	t.generateClient("Protobuf", file, service)
 
 	t.sectionComment(servName + ` JSON Client`)
-	t.generateJSONClient(file, service)
+	t.generateClient("JSON", file, service)
 
 	// Server
 	t.sectionComment(servName + ` Server Handler`)
@@ -754,73 +802,57 @@ func (t *twirp) generateSignature(method *descriptor.MethodDescriptorProto) stri
 	return fmt.Sprintf(`	%s(%s.Context, *%s) (*%s, error)`, methName, t.pkgs["context"], inputType, outputType)
 }
 
-func (t *twirp) generateJSONClient(file *descriptor.FileDescriptorProto, service *descriptor.ServiceDescriptorProto) {
+// valid names: 'JSON', 'Protobuf'
+func (t *twirp) generateClient(name string, file *descriptor.FileDescriptorProto, service *descriptor.ServiceDescriptorProto) {
 	servName := serviceName(service)
 	pathPrefixConst := servName + "PathPrefix"
-	structName := unexported(servName) + "JSONClient"
-	newJSONClientFunc := "New" + servName + "JSONClient"
+	structName := unexported(servName) + name + "Client"
+	newClientFunc := "New" + servName + name + "Client"
 
+	methCnt := strconv.Itoa(len(service.Method))
 	t.P(`type `, structName, ` struct {`)
-	t.P(`  urlBase string`)
-	t.P(`  client *`, t.pkgs["http"], `.Client`)
+	t.P(`  client HTTPClient`)
+	t.P(`  urls   [`, methCnt, `]string`)
 	t.P(`}`)
 	t.P()
-	t.P(`// `, newJSONClientFunc, ` creates a JSON client that implements the `, servName, ` interface.`)
-	t.P(`// It communicates using JSON requests and responses instead of protobuf messages.`)
-	t.P(`func `, newJSONClientFunc, `(addr string, client *`, t.pkgs["http"], `.Client) `, servName, ` {`)
-	t.P(`  return &`, structName, `{`)
-	t.P(`    urlBase: urlBase(addr),`)
-	t.P(`    client:  withoutRedirects(client),`)
-	t.P(`  }`)
-	t.P(`}`)
-	t.P()
-
+	t.P(`// `, newClientFunc, ` creates a `, name, ` client that implements the `, servName, ` interface.`)
+	t.P(`// It communicates using `, name, ` and can be configured with a custom HTTPClient.`)
+	t.P(`func `, newClientFunc, `(addr string, client HTTPClient) `, servName, ` {`)
+	t.P(`  prefix := urlBase(addr) + `, pathPrefixConst)
+	t.P(`  urls := [`, methCnt, `]string{`)
 	for _, method := range service.Method {
-		methName := methodName(method)
-		inputType := t.goTypeName(method.GetInputType())
-		outputType := t.goTypeName(method.GetOutputType())
-
-		t.P(`func (c *`, structName, `) `, methName, `(ctx `, t.pkgs["context"], `.Context, in *`, inputType, `) (*`, outputType, `, error) {`)
-		t.P(`  url := c.urlBase + `, pathPrefixConst, ` + "`, methName, `"`)
-		t.P(`  out := new(`, outputType, `)`)
-		t.P(`  err := doJSONRequest(ctx, c.client, url, in, out)`)
-		t.P(`  return out, err`)
-		t.P(`}`)
-		t.P()
+		t.P(`    	prefix + "`, methodName(method), `",`)
 	}
-}
-
-func (t *twirp) generateProtobufClient(file *descriptor.FileDescriptorProto, service *descriptor.ServiceDescriptorProto) {
-	servName := serviceName(service)
-	pathPrefixConst := servName + "PathPrefix"
-	structName := unexported(servName) + "ProtobufClient"
-	newProtobufClientFunc := "New" + servName + "ProtobufClient"
-
-	t.P(`type `, structName, ` struct {`)
-	t.P(`  urlBase string`)
-	t.P(`  client *`, t.pkgs["http"], `.Client`)
-	t.P(`}`)
-	t.P()
-	t.P(`// `, newProtobufClientFunc, ` creates a Protobuf client that implements the `, servName, ` interface.`)
-	t.P(`// It communicates using protobuf messages and can be configured with a custom http.Client.`)
-	t.P(`func `, newProtobufClientFunc, `(addr string, client *`, t.pkgs["http"], `.Client) `, servName, ` {`)
+	t.P(`  }`)
+	t.P(`  if httpClient, ok := client.(*`, t.pkgs["http"], `.Client); ok {`)
+	t.P(`    return &`, structName, `{`)
+	t.P(`      client: withoutRedirects(httpClient),`)
+	t.P(`      urls:   urls,`)
+	t.P(`    }`)
+	t.P(`  }`)
 	t.P(`  return &`, structName, `{`)
-	t.P(`    urlBase: urlBase(addr),`)
-	t.P(`    client:  withoutRedirects(client),`)
+	t.P(`    client: client,`)
+	t.P(`    urls:   urls,`)
 	t.P(`  }`)
 	t.P(`}`)
 	t.P()
 
-	for _, method := range service.Method {
+	for i, method := range service.Method {
 		methName := methodName(method)
+		pkgName := pkgName(file)
 		inputType := t.goTypeName(method.GetInputType())
 		outputType := t.goTypeName(method.GetOutputType())
 
 		t.P(`func (c *`, structName, `) `, methName, `(ctx `, t.pkgs["context"], `.Context, in *`, inputType, `) (*`, outputType, `, error) {`)
-		t.P(`  url := c.urlBase + `, pathPrefixConst, ` + "`, methName, `"`)
+		t.P(`  ctx = `, t.pkgs["ctxsetters"], `.WithPackageName(ctx, "`, pkgName, `")`)
+		t.P(`  ctx = `, t.pkgs["ctxsetters"], `.WithServiceName(ctx, "`, servName, `")`)
+		t.P(`  ctx = `, t.pkgs["ctxsetters"], `.WithMethodName(ctx, "`, methName, `")`)
 		t.P(`  out := new(`, outputType, `)`)
-		t.P(`  err := doProtoRequest(ctx, c.client, url, in, out)`)
-		t.P(`  return out, err`)
+		t.P(`  err := do`, name, `Request(ctx, c.client, c.urls[`, strconv.Itoa(i), `], in, out)`)
+		t.P(`  if err != nil {`)
+		t.P(`    return nil, err`)
+		t.P(`  }`)
+		t.P(`  return out, nil`)
 		t.P(`}`)
 		t.P()
 	}
@@ -931,7 +963,12 @@ func (t *twirp) generateServerMethod(service *descriptor.ServiceDescriptorProto,
 	methName := stringutils.CamelCase(method.GetName())
 	servStruct := serviceStruct(service)
 	t.P(`func (s *`, servStruct, `) serve`, methName, `(ctx `, t.pkgs["context"], `.Context, resp `, t.pkgs["http"], `.ResponseWriter, req *`, t.pkgs["http"], `.Request) {`)
-	t.P(`  switch req.Header.Get("Content-Type") {`)
+	t.P(`  header := req.Header.Get("Content-Type")`)
+	t.P(`  i := strings.Index(header, ";")`)
+	t.P(`  if i == -1 {`)
+	t.P(`    i = len(header)`)
+	t.P(`  }`)
+	t.P(`  switch strings.TrimSpace(strings.ToLower(header[:i])) {`)
 	t.P(`  case "application/json":`)
 	t.P(`    s.serve`, methName, `JSON(ctx, resp, req)`)
 	t.P(`  case "application/protobuf":`)
@@ -950,6 +987,7 @@ func (t *twirp) generateServerMethod(service *descriptor.ServiceDescriptorProto,
 func (t *twirp) generateServerJSONMethod(service *descriptor.ServiceDescriptorProto, method *descriptor.MethodDescriptorProto) {
 	servStruct := serviceStruct(service)
 	methName := stringutils.CamelCase(method.GetName())
+	servName := serviceName(service)
 	t.P(`func (s *`, servStruct, `) serve`, methName, `JSON(ctx `, t.pkgs["context"], `.Context, resp `, t.pkgs["http"], `.ResponseWriter, req *`, t.pkgs["http"], `.Request) {`)
 	t.P(`  var err error`)
 	t.P(`  ctx = `, t.pkgs["ctxsetters"], `.WithMethodName(ctx, "`, methName, `")`)
@@ -959,7 +997,6 @@ func (t *twirp) generateServerJSONMethod(service *descriptor.ServiceDescriptorPr
 	t.P(`    return`)
 	t.P(`  }`)
 	t.P()
-	t.P(`  defer closebody(req.Body)`)
 	t.P(`  reqContent := new(`, t.goTypeName(method.GetInputType()), `)`)
 	t.P(`  unmarshaler := `, t.pkgs["jsonpb"], `.Unmarshaler{AllowUnknownFields: true}`)
 	t.P(`  if err = unmarshaler.Unmarshal(req.Body, reqContent); err != nil {`)
@@ -978,7 +1015,7 @@ func (t *twirp) generateServerJSONMethod(service *descriptor.ServiceDescriptorPr
 	t.P(`        panic(r)`)
 	t.P(`      }`)
 	t.P(`    }()`)
-	t.P(`    respContent, err = s.`, methName, `(ctx, reqContent)`)
+	t.P(`    respContent, err = s.`, servName,`.`,methName, `(ctx, reqContent)`)
 	t.P(`  }()`)
 	t.P()
 	t.P(`  if err != nil {`)
@@ -1003,8 +1040,12 @@ func (t *twirp) generateServerJSONMethod(service *descriptor.ServiceDescriptorPr
 	t.P(`  ctx = `, t.pkgs["ctxsetters"], `.WithStatusCode(ctx, `, t.pkgs["http"], `.StatusOK)`)
 	t.P(`  resp.Header().Set("Content-Type", "application/json")`)
 	t.P(`  resp.WriteHeader(`, t.pkgs["http"], `.StatusOK)`)
-	t.P(`  if _, err = resp.Write(buf.Bytes()); err != nil {`)
-	t.P(`    `, t.pkgs["log"], `.Printf("errored while writing response to client, but already sent response status code to 200: %s", err)`)
+	t.P()
+	t.P(`  respBytes := buf.Bytes()`)
+	t.P(`  if n, err := resp.Write(respBytes); err != nil {`)
+	t.P(`    msg := fmt.Sprintf("failed to write response, %d of %d bytes written: %s", n, len(respBytes), err.Error())`)
+	t.P(`    twerr := `, t.pkgs["twirp"], `.NewError(`, t.pkgs["twirp"], `.Unknown, msg)`)
+	t.P(`    callError(ctx, s.hooks, twerr)`)
 	t.P(`  }`)
 	t.P(`  callResponseSent(ctx, s.hooks)`)
 	t.P(`}`)
@@ -1014,7 +1055,7 @@ func (t *twirp) generateServerJSONMethod(service *descriptor.ServiceDescriptorPr
 func (t *twirp) generateServerProtobufMethod(service *descriptor.ServiceDescriptorProto, method *descriptor.MethodDescriptorProto) {
 	servStruct := serviceStruct(service)
 	methName := stringutils.CamelCase(method.GetName())
-
+	servName := serviceName(service)
 	t.P(`func (s *`, servStruct, `) serve`, methName, `Protobuf(ctx `, t.pkgs["context"], `.Context, resp `, t.pkgs["http"], `.ResponseWriter, req *`, t.pkgs["http"], `.Request) {`)
 	t.P(`  var err error`)
 	t.P(`  ctx = `, t.pkgs["ctxsetters"], `.WithMethodName(ctx, "`, methName, `")`)
@@ -1024,7 +1065,6 @@ func (t *twirp) generateServerProtobufMethod(service *descriptor.ServiceDescript
 	t.P(`    return`)
 	t.P(`  }`)
 	t.P()
-	t.P(`  defer closebody(req.Body)`)
 	t.P(`  buf, err := `, t.pkgs["ioutil"], `.ReadAll(req.Body)`)
 	t.P(`  if err != nil {`)
 	t.P(`    err = wrapErr(err, "failed to read request body")`)
@@ -1048,7 +1088,7 @@ func (t *twirp) generateServerProtobufMethod(service *descriptor.ServiceDescript
 	t.P(`        panic(r)`)
 	t.P(`      }`)
 	t.P(`    }()`)
-	t.P(`    respContent, err = s.`, methName, `(ctx, reqContent)`)
+	t.P(`    respContent, err = s.`, servName,`.`,methName, `(ctx, reqContent)`)
 	t.P(`  }()`)
 	t.P()
 	t.P(`  if err != nil {`)
@@ -1072,8 +1112,10 @@ func (t *twirp) generateServerProtobufMethod(service *descriptor.ServiceDescript
 	t.P(`  ctx = `, t.pkgs["ctxsetters"], `.WithStatusCode(ctx, `, t.pkgs["http"], `.StatusOK)`)
 	t.P(`  resp.Header().Set("Content-Type", "application/protobuf")`)
 	t.P(`  resp.WriteHeader(`, t.pkgs["http"], `.StatusOK)`)
-	t.P(`  if _, err = resp.Write(respBytes); err != nil {`)
-	t.P(`    `, t.pkgs["log"], `.Printf("errored while writing response to client, but already sent response status code to 200: %s", err)`)
+	t.P(`  if n, err := resp.Write(respBytes); err != nil {`)
+	t.P(`    msg := fmt.Sprintf("failed to write response, %d of %d bytes written: %s", n, len(respBytes), err.Error())`)
+	t.P(`    twerr := `, t.pkgs["twirp"], `.NewError(`, t.pkgs["twirp"], `.Unknown, msg)`)
+	t.P(`    callError(ctx, s.hooks, twerr)`)
 	t.P(`  }`)
 	t.P(`  callResponseSent(ctx, s.hooks)`)
 	t.P(`}`)

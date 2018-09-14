@@ -3,7 +3,7 @@ package store
 import (
 	"github.com/SantoDE/datahamster/types"
 	"github.com/asdine/storm"
-	"github.com/coreos/bbolt"
+	"go.etcd.io/bbolt"
 	"time"
 )
 
@@ -24,7 +24,7 @@ func NewStore(path string) (*DataStore, error) {
 
 //Open opens a database connection
 func (s *DataStore) Open() error {
-	db, err := storm.Open(s.Path, storm.BoltOptions(0600, &bolt.Options{Timeout: 1 * time.Second}))
+	db, err := storm.Open(s.Path,storm.BoltOptions(0600, &bolt.Options{Timeout: 1 * time.Second}))
 
 	if err != nil {
 		return err

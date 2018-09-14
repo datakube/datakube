@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/asdine/storm/index"
-	"github.com/coreos/bbolt"
+	bolt "go.etcd.io/bbolt"
 )
 
 // Storm tags
@@ -115,6 +115,7 @@ func extractField(value *reflect.Value, field *reflect.StructField, m *structCon
 			switch tag {
 			case "id":
 				f.IsID = true
+				f.Index = tagUniqueIdx
 			case tagUniqueIdx, tagIdx:
 				f.Index = tag
 			case tagInline:
@@ -163,6 +164,7 @@ func extractField(value *reflect.Value, field *reflect.StructField, m *structCon
 	if m.ID == nil && field.Name == "ID" {
 		if f == nil {
 			f = &fieldConfig{
+				Index:          tagUniqueIdx,
 				Name:           field.Name,
 				IsZero:         isZero(value),
 				IsInteger:      isInteger(value),

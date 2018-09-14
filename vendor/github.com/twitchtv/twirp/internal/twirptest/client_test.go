@@ -1,8 +1,22 @@
+// Copyright 2018 Twitch Interactive, Inc.  All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"). You may not
+// use this file except in compliance with the License. A copy of the License is
+// located at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// or in the "license" file accompanying this file. This file is distributed on
+// an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+// express or implied. See the License for the specific language governing
+// permissions and limitations under the License.
+
 package twirptest
 
 import (
 	"context"
 	"fmt"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -27,36 +41,94 @@ func (i *reqInspector) RoundTrip(r *http.Request) (*http.Response, error) {
 	return http.DefaultTransport.RoundTrip(r)
 }
 
+func TestClientSuccessAndErrorResponses(t *testing.T) {
+	// Service that succeeds only if requested size is 1, otherwise errors
+	h := PickyHatmaker(1)
+	s := httptest.NewServer(NewHaberdasherServer(h, nil))
+	defer s.Close()
+
+	// Clients
+	protoCli := NewHaberdasherProtobufClient(s.URL, &http.Client{})
+	jsonCli := NewHaberdasherJSONClient(s.URL, &http.Client{})
+	ctx := context.Background()
+	var resp *Hat
+	var err error
+
+	// Test proto success
+	resp, err = protoCli.MakeHat(ctx, &Size{1})
+	if err != nil {
+		t.Fatalf("Proto client method returned unexpected error: %s", err)
+	}
+	if resp == nil {
+		t.Fatalf("Proto client method expected to return non-nil response, but it is nil")
+	}
+
+	// Test proto failure
+	resp, err = protoCli.MakeHat(ctx, &Size{666})
+	if err == nil {
+		t.Fatalf("Proto client method expected to fail, but error is nil")
+	}
+	if resp != nil {
+		t.Fatalf("Proto client method expected to return nil response on error, but returned non-nil")
+	}
+
+	// Test json success
+	resp, err = jsonCli.MakeHat(ctx, &Size{1})
+	if err != nil {
+		t.Fatalf("JSON client method returned unexpected error: %s", err)
+	}
+	if resp == nil {
+		t.Fatalf("JSON client method expected to return non-nil response, but it is nil")
+	}
+
+	// Test json failure
+	resp, err = jsonCli.MakeHat(ctx, &Size{666})
+	if err == nil {
+		t.Fatalf("JSON client method expected to fail, but error is nil")
+	}
+	if resp != nil {
+		t.Fatalf("JSON client method expected to return nil response on error, but returned non-nil")
+	}
+}
+
 func TestClientSetsRequestContext(t *testing.T) {
 	// Start up a server just so we can make a working client later.
 	h := PickyHatmaker(1)
 	s := httptest.NewServer(NewHaberdasherServer(h, nil))
 	defer s.Close()
 
-	// Make a context with a key-value pair in it. We'll use this
-	// context in our MakeHat call to the client; we expect it to appear
-	// in the request's context.
-	key := "key"
-	val := "value"
-	ctx := context.WithValue(context.Background(), key, val)
-
 	// Make an *http.Client that validates that the key-value is present
 	// in the context.
 	httpClient := &http.Client{
 		Transport: &reqInspector{
 			callback: func(req *http.Request) {
-				have := req.Context().Value(key)
-				if have == nil {
-					t.Error("key not found in context")
+				ctx := req.Context()
+
+				pkgName, exists := twirp.PackageName(ctx)
+				if !exists {
+					t.Error("packageName not found in context")
 					return
 				}
-				haveStr, ok := have.(string)
-				if !ok {
-					t.Errorf("key has wrong type, have=%T, want=string", have)
+				if pkgName != "twirp.internal.twirptest" {
+					t.Errorf("packageName has wrong value, have=%s, want=%s", pkgName, "twirp.internal.twirptest")
+				}
+
+				serviceName, exists := twirp.ServiceName(ctx)
+				if !exists {
+					t.Error("serviceName not found in context")
 					return
 				}
-				if haveStr != val {
-					t.Errorf("key has wrong value, have=%s, want=%s", haveStr, val)
+				if serviceName != "Haberdasher" {
+					t.Errorf("serviceName has wrong value, have=%s, want=%s", pkgName, "Haberdasher")
+				}
+
+				methodName, exists := twirp.MethodName(ctx)
+				if !exists {
+					t.Error("methodName not found in context")
+					return
+				}
+				if methodName != "MakeHat" {
+					t.Errorf("methodName has wrong value, have=%s, want=%s", pkgName, "Haberdasher")
 				}
 			},
 		},
@@ -65,14 +137,63 @@ func TestClientSetsRequestContext(t *testing.T) {
 	// Test the JSON client and the Protobuf client.
 	client := NewHaberdasherJSONClient(s.URL, httpClient)
 
-	_, err := client.MakeHat(ctx, &Size{1})
+	_, err := client.MakeHat(context.Background(), &Size{1})
 	if err != nil {
 		t.Errorf("MakeHat err=%s", err)
 	}
 
 	client = NewHaberdasherProtobufClient(s.URL, httpClient)
 
-	_, err = client.MakeHat(ctx, &Size{1})
+	_, err = client.MakeHat(context.Background(), &Size{1})
+	if err != nil {
+		t.Errorf("MakeHat err=%s", err)
+	}
+}
+
+func TestClientSetsAcceptHeader(t *testing.T) {
+	// Start up a server just so we can make a working client later.
+	h := PickyHatmaker(1)
+	s := httptest.NewServer(NewHaberdasherServer(h, nil))
+	defer s.Close()
+
+	// Make an *http.Client that validates that the correct accept header is present
+	// in the request.
+	httpClient := &http.Client{
+		Transport: &reqInspector{
+			callback: func(req *http.Request) {
+				if req.Header.Get("Accept") != "application/json" {
+					t.Error("Accept header not found in req")
+					return
+				}
+			},
+		},
+	}
+
+	// Test the JSON client
+	client := NewHaberdasherJSONClient(s.URL, httpClient)
+
+	_, err := client.MakeHat(context.Background(), &Size{1})
+	if err != nil {
+		t.Errorf("MakeHat err=%s", err)
+	}
+
+	// Make an *http.Client that validates that the correct accept header is present
+	// in the request.
+	httpClient = &http.Client{
+		Transport: &reqInspector{
+			callback: func(req *http.Request) {
+				if req.Header.Get("Accept") != "application/protobuf" {
+					t.Error("Accept header not found in req")
+					return
+				}
+			},
+		},
+	}
+
+	// test the Protobuf client.
+	client = NewHaberdasherProtobufClient(s.URL, httpClient)
+
+	_, err = client.MakeHat(context.Background(), &Size{1})
 	if err != nil {
 		t.Errorf("MakeHat err=%s", err)
 	}
@@ -80,7 +201,7 @@ func TestClientSetsRequestContext(t *testing.T) {
 
 // If a server returns a 3xx response, give a clear error message
 func TestClientRedirectError(t *testing.T) {
-	testcase := func(code int, clientMaker func(string, *http.Client) Haberdasher) func(*testing.T) {
+	testcase := func(code int, clientMaker func(string, HTTPClient) Haberdasher) func(*testing.T) {
 		return func(t *testing.T) {
 			// Make a server that redirects all requests
 			redirecter := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -137,7 +258,7 @@ func TestClientRedirectError(t *testing.T) {
 }
 
 func TestClientIntermediaryErrors(t *testing.T) {
-	testcase := func(code int, expectedErrorCode twirp.ErrorCode, clientMaker func(string, *http.Client) Haberdasher) func(*testing.T) {
+	testcase := func(code int, expectedErrorCode twirp.ErrorCode, clientMaker func(string, HTTPClient) Haberdasher) func(*testing.T) {
 		return func(t *testing.T) {
 			// Make a server that returns invalid twirp error responses,
 			// simulating a network intermediary.
@@ -269,6 +390,47 @@ func TestClientErrorsCanBeCaused(t *testing.T) {
 	}
 }
 
+func TestCustomHTTPClientInterface(t *testing.T) {
+	// Start up a server just so we can make a working client later.
+	h := PickyHatmaker(1)
+	s := httptest.NewServer(NewHaberdasherServer(h, nil))
+	defer s.Close()
+
+	// Create a custom wrapper to wrap our default client
+	httpClient := &wrappedHTTPClient{
+		client:    http.DefaultClient,
+		wasCalled: false,
+	}
+
+	// Test the JSON client and the Protobuf client with a custom http.Client interface
+	client := NewHaberdasherJSONClient(s.URL, httpClient)
+
+	_, err := client.MakeHat(context.Background(), &Size{1})
+	if err != nil {
+		t.Errorf("MakeHat err=%s", err)
+	}
+
+	// Check if the Do function within the http.Client wrapper gets actually called
+	if !httpClient.wasCalled {
+		t.Errorf("HTTPClient.Do function was not called within the JSONClient")
+	}
+
+	// Reset bool for second test
+	httpClient.wasCalled = false
+
+	client = NewHaberdasherProtobufClient(s.URL, httpClient)
+
+	_, err = client.MakeHat(context.Background(), &Size{1})
+	if err != nil {
+		t.Errorf("MakeHat err=%s", err)
+	}
+
+	// Check if the Do function within the http.Client wrapper gets actually called
+	if !httpClient.wasCalled {
+		t.Errorf("HTTPClient.Do function was not called within the ProtobufClient")
+	}
+}
+
 // failingTransport is a http.RoundTripper which always returns an error.
 type failingTransport struct {
 	err error // the error to return
@@ -285,4 +447,67 @@ func errCause(err error) error {
 		cause = uerr.Err
 	}
 	return cause
+}
+
+// wrappedHTTPClient implements HTTPClient, but can be inspected during tests.
+type wrappedHTTPClient struct {
+	client    *http.Client
+	wasCalled bool
+}
+
+func (c *wrappedHTTPClient) Do(req *http.Request) (resp *http.Response, err error) {
+	c.wasCalled = true
+	return c.client.Do(req)
+}
+
+func TestClientReturnsCloseErrors(t *testing.T) {
+	h := PickyHatmaker(1)
+	s := httptest.NewServer(NewHaberdasherServer(h, nil))
+	defer s.Close()
+
+	httpClient := &bodyCloseErrClient{base: http.DefaultClient}
+
+	testcase := func(client Haberdasher) func(*testing.T) {
+		return func(t *testing.T) {
+			_, err := client.MakeHat(context.Background(), &Size{1})
+			if err == nil {
+				t.Error("expected an error when body fails to close, have nil")
+			} else {
+				if errors.Cause(err) != bodyCloseErr {
+					t.Errorf("got wrong root cause for error, have=%v, want=%v", err, bodyCloseErr)
+				}
+			}
+		}
+	}
+	t.Run("json client", testcase(NewHaberdasherJSONClient(s.URL, httpClient)))
+	t.Run("protobuf client", testcase(NewHaberdasherProtobufClient(s.URL, httpClient)))
+}
+
+// bodyCloseErrClient implements HTTPClient, but the response bodies it returns
+// give an error when they are closed.
+type bodyCloseErrClient struct {
+	base HTTPClient
+}
+
+func (c *bodyCloseErrClient) Do(req *http.Request) (*http.Response, error) {
+	resp, err := c.base.Do(req)
+	if resp == nil {
+		return resp, err
+	}
+	resp.Body = &errBodyCloser{resp.Body}
+	return resp, nil
+}
+
+var bodyCloseErr = errors.New("failed closing")
+
+type errBodyCloser struct {
+	base io.ReadCloser
+}
+
+func (ec *errBodyCloser) Read(p []byte) (int, error) {
+	return ec.base.Read(p)
+}
+
+func (ec *errBodyCloser) Close() error {
+	return bodyCloseErr
 }

@@ -6,12 +6,12 @@ import (
 
 	"github.com/asdine/storm/index"
 	"github.com/asdine/storm/q"
-	"github.com/coreos/bbolt"
+	bolt "go.etcd.io/bbolt"
 )
 
-// typeStore stores user defined types in BoltDB
-type typeStore interface {
-	finder
+// TypeStore stores user defined types in BoltDB.
+type TypeStore interface {
+	Finder
 	// Init creates the indexes and buckets for a given structure
 	Init(data interface{}) error
 
