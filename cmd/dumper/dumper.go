@@ -15,6 +15,7 @@ import (
 
 var cfgFile string
 var logLevel string
+var server string
 var config configuration.DumperConfiguration
 
 // RootCmd represents the base command when called without any subcommands
@@ -61,9 +62,11 @@ func init() {
 	// will be global for your application.
 	dumperCommand.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.config.toml)")
 	dumperCommand.PersistentFlags().StringVar(&logLevel, "logLevel", "error", "Dumper Application Log Level")
+	dumperCommand.PersistentFlags().StringVar(&server, "server", "error", "Server to connect to")
 
 	viper.BindPFlag("config", dumperCommand.PersistentFlags().Lookup("config"))
 	viper.BindPFlag("logLevel", dumperCommand.PersistentFlags().Lookup("logLevel"))
+	viper.BindPFlag("server", dumperCommand.PersistentFlags().Lookup("server"))
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.

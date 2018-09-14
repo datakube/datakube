@@ -15,7 +15,7 @@ import (
 //StartWorker function to start the Worker
 func StartWorker(c *configuration.DumperConfiguration) {
 
-	client := datakube.NewDatakubeProtobufClient("http://localhost:8080", &http.Client{})
+	client := datakube.NewDatakubeProtobufClient(c.Server, &http.Client{})
 
 	// Attach the headers to a context
 	ctx := context.Background()
