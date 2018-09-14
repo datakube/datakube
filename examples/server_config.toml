@@ -1,0 +1,13 @@
+logLevel = "debug"
+address = ":8080"
+
+[datastore]
+    path = "/tmp/datastore"
+
+[storage]
+    [storage.file]
+        path = "/tmp/filestorage"
+
+[file]
+dir = "/path/to/config/folder"
+file = "/path/to/config/folder/targets.toml"

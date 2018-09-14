@@ -1,0 +1,3 @@
+logLevel = "debug"
+debug    = "true"
+server   = "127.0.0.1"

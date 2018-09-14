@@ -4,12 +4,8 @@
         type = "mysql"
         host = "localhost"
         name = "test"
-        user = "root"
-        password = "root"
+        user = "user"
+        password = "password"
         port = "3306"
-        [target.db.sql]
-        tempdir = "/tmp"
     [target.schedule]
         interval = "weekly"
-        day = "2"
-        at = "03:00"
