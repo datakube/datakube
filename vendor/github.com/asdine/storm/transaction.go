@@ -1,9 +1,9 @@
 package storm
 
-import "github.com/coreos/bbolt"
+import bolt "go.etcd.io/bbolt"
 
-// tx is a transaction
-type tx interface {
+// Tx is a transaction.
+type Tx interface {
 	// Commit writes all changes to disk.
 	Commit() error
 

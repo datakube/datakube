@@ -1,3 +1,16 @@
+// Copyright 2018 Twitch Interactive, Inc.  All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"). You may not
+// use this file except in compliance with the License. A copy of the License is
+// located at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// or in the "license" file accompanying this file. This file is distributed on
+// an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+// express or implied. See the License for the specific language governing
+// permissions and limitations under the License.
+
 package twirp
 
 import (
@@ -49,11 +62,14 @@ func StatusCode(ctx context.Context) (string, bool) {
 //
 // This can be used to set custom HTTP headers like authorization tokens or
 // client IDs. But note that HTTP headers are a Twirp implementation detail,
-// only visible by middleware, not by the server implementtion.
+// only visible by middleware, not by the server implementation.
 //
 // WithHTTPRequestHeaders returns an error if the provided http.Header
 // would overwrite a header that is needed by Twirp, like "Content-Type".
 func WithHTTPRequestHeaders(ctx context.Context, h http.Header) (context.Context, error) {
+	if _, ok := h["Accept"]; ok {
+		return nil, errors.New("provided header cannot set Accept")
+	}
 	if _, ok := h["Content-Type"]; ok {
 		return nil, errors.New("provided header cannot set Content-Type")
 	}

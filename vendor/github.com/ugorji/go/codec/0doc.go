@@ -225,7 +225,7 @@ with some caveats. See Encode documentation.
 package codec
 
 // TODO:
-//   - In Go 1.10, when mid-stack inlining is enabled,
+//   - For Go 1.11, when mid-stack inlining is enabled,
 //     we should use committed functions for writeXXX and readXXX calls.
 //     This involves uncommenting the methods for decReaderSwitch and encWriterSwitch
 //     and using those (decReaderSwitch and encWriterSwitch) in all handles
@@ -235,15 +235,10 @@ package codec
 //     However, it will only  be inlined if mid-stack inlining is enabled,
 //     as we call panic to raise errors, and panic currently prevents inlining.
 //
-//   - Unexport BasicHandle.
-//     If godoc can now show the embedded options, then unexport it.
-// 
 // PUNTED:
 //   - To make Handle comparable, make extHandle in BasicHandle a non-embedded pointer,
 //     and use overlay methods on *BasicHandle to call through to extHandle after initializing
 //     the "xh *extHandle" to point to a real slice.
-//
-//   - Allow mapping a concrete type to an interface, for use during decoding.
 //
 // BEFORE EACH RELEASE:
 //   - Look through and fix padding for each type, to eliminate false sharing

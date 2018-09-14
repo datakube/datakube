@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/coreos/bbolt"
+	bolt "go.etcd.io/bbolt"
 	"github.com/stretchr/testify/require"
 )
 
@@ -684,4 +684,21 @@ func TestPrefix(t *testing.T) {
 	// Bad value
 	err = db.Prefix("Group", "group3", &users)
 	require.Equal(t, ErrNotFound, err)
+}
+
+func TestPrefixWithID(t *testing.T) {
+	db, cleanup := createDB(t)
+	defer cleanup()
+
+	type User struct {
+		ID string
+	}
+
+	require.NoError(t, db.Save(&User{ID: "1"}))
+	require.NoError(t, db.Save(&User{ID: "10"}))
+
+	var users []User
+
+	require.NoError(t, db.Prefix("ID", "1", &users))
+	require.Len(t, users, 2)
 }

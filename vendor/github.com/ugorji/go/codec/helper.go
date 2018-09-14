@@ -132,7 +132,7 @@ const (
 	// should use "runtime/internal/sys".CacheLineSize, but that is not exposed.
 	cacheLineSize = 64
 
-	wordSizeBits = strconv.IntSize
+	wordSizeBits = 32 << (^uint(0) >> 63) // strconv.IntSize
 	wordSize     = wordSizeBits / 8
 
 	maxLevelsEmbedding = 15 // use this, so structFieldInfo fits into 8 bytes
@@ -391,6 +391,10 @@ var immutableKindsSet = [32]bool{
 // Any type which implements Selfer will be able to encode or decode itself.
 // Consequently, during (en|de)code, this takes precedence over
 // (text|binary)(M|Unm)arshal or extension support.
+//
+// Note: *the first set of bytes of any value MUST NOT represent nil in the format*.
+// This is because, during each decode, we first check the the next set of bytes
+// represent nil, and if so, we just set the value to nil.
 type Selfer interface {
 	CodecEncodeSelf(*Encoder)
 	CodecDecodeSelf(*Decoder)
@@ -440,10 +444,13 @@ type BasicHandle struct {
 	RPCOptions
 
 	// ---- cache line
+
 	DecodeOptions
 
 	// ---- cache line
+
 	EncodeOptions
+
 	// noBuiltInTypeChecker
 }
 
@@ -996,6 +1003,14 @@ func baseStructRv(v reflect.Value, update bool) (v2 reflect.Value, valid bool) {
 	return v, true
 }
 
+type typeInfoFlag uint8
+
+const (
+	typeInfoFlagComparable = 1 << iota
+	typeInfoFlagIsZeroer
+	typeInfoFlagIsZeroerPtr
+)
+
 // typeInfo keeps information about each (non-ptr) type referenced in the encode/decode sequence.
 //
 // During an encode/decode sequence, we work as below:
@@ -1005,25 +1020,31 @@ func baseStructRv(v reflect.Value, update bool) (v2 reflect.Value, valid bool) {
 //   - If type is text(M/Unm)arshaler, call Text(M/Unm)arshal method
 //   - Else decode appropriately based on the reflect.Kind
 type typeInfo struct {
-	sfiSort []*structFieldInfo // sorted. Used when enc/dec struct to map.
-	sfiSrc  []*structFieldInfo // unsorted. Used when enc/dec struct to array.
 	rt      reflect.Type
-
-	// ---- cpu cache line boundary?
-	// sfis         []structFieldInfo // all sfi, in src order, as created.
-	sfiNamesSort []byte // all names, with indexes into the sfiSort
+	elem    reflect.Type
+	pkgpath string
 
 	rtid uintptr
 	// rv0  reflect.Value // saved zero value, used if immutableKind
 
 	numMeth uint16 // number of methods
+	kind    uint8
+	chandir uint8
 
-	// comparable   bool      // true if a struct, and is comparable
 	anyOmitEmpty bool      // true if a struct, and any of the fields are tagged "omitempty"
 	toArray      bool      // whether this (struct) type should be encoded as an array
 	keyType      valueType // if struct, how is the field name stored in a stream? default is string
+	mbs          bool      // base type (T or *T) is a MapBySlice
 
-	mbs bool // base type (T or *T) is a MapBySlice
+	// ---- cpu cache line boundary?
+	sfiSort []*structFieldInfo // sorted. Used when enc/dec struct to map.
+	sfiSrc  []*structFieldInfo // unsorted. Used when enc/dec struct to array.
+
+	key reflect.Type
+
+	// ---- cpu cache line boundary?
+	// sfis         []structFieldInfo // all sfi, in src order, as created.
+	sfiNamesSort []byte // all names, with indexes into the sfiSort
 
 	// format of marshal type fields below: [btj][mu]p? OR csp?
 
@@ -1035,6 +1056,7 @@ type typeInfo struct {
 	tmp bool // *T is a textMarshaler
 	tu  bool // T is a textUnmarshaler
 	tup bool // *T is a textUnmarshaler
+
 	jm  bool // T is a jsonMarshaler
 	jmp bool // *T is a jsonMarshaler
 	ju  bool // T is a jsonUnmarshaler
@@ -1042,7 +1064,15 @@ type typeInfo struct {
 	cs  bool // T is a Selfer
 	csp bool // *T is a Selfer
 
-	_ [1]uint64 // padding
+	// other flags, with individual bits representing if set.
+	flags typeInfoFlag
+
+	// _ [2]byte   // padding
+	_ [3]uint64 // padding
+}
+
+func (ti *typeInfo) isFlag(f typeInfoFlag) bool {
+	return ti.flags&f != 0
 }
 
 func (ti *typeInfo) indexForEncName(name []byte) (index int16) {
@@ -1125,7 +1155,7 @@ func (x *TypeInfos) get(rtid uintptr, rt reflect.Type) (pti *typeInfo) {
 	sp := x.infos.load()
 	var idx int
 	if sp != nil {
-		idx, pti = x.find(*sp, rtid)
+		idx, pti = x.find(sp, rtid)
 		if pti != nil {
 			return
 		}
@@ -1139,7 +1169,7 @@ func (x *TypeInfos) get(rtid uintptr, rt reflect.Type) (pti *typeInfo) {
 
 	// do not hold lock while computing this.
 	// it may lead to duplication, but that's ok.
-	ti := typeInfo{rt: rt, rtid: rtid}
+	ti := typeInfo{rt: rt, rtid: rtid, kind: uint8(rk), pkgpath: rt.PkgPath()}
 	// ti.rv0 = reflect.Zero(rt)
 
 	// ti.comparable = rt.Comparable()
@@ -1152,11 +1182,20 @@ func (x *TypeInfos) get(rtid uintptr, rt reflect.Type) (pti *typeInfo) {
 	ti.jm, ti.jmp = implIntf(rt, jsonMarshalerTyp)
 	ti.ju, ti.jup = implIntf(rt, jsonUnmarshalerTyp)
 	ti.cs, ti.csp = implIntf(rt, selferTyp)
-	if rt.Kind() == reflect.Slice {
-		ti.mbs, _ = implIntf(rt, mapBySliceTyp)
+
+	b1, b2 := implIntf(rt, iszeroTyp)
+	if b1 {
+		ti.flags |= typeInfoFlagIsZeroer
+	}
+	if b2 {
+		ti.flags |= typeInfoFlagIsZeroerPtr
+	}
+	if rt.Comparable() {
+		ti.flags |= typeInfoFlagComparable
 	}
 
-	if rk == reflect.Struct {
+	switch rk {
+	case reflect.Struct:
 		var omitEmpty bool
 		if f, ok := rt.FieldByName(structInfoFieldName); ok {
 			ti.toArray, omitEmpty, ti.keyType = parseStructInfo(x.structTag(f.Tag))
@@ -1172,6 +1211,17 @@ func (x *TypeInfos) get(rtid uintptr, rt reflect.Type) (pti *typeInfo) {
 		// ti.sfis = vv.sfis
 		ti.sfiSrc, ti.sfiSort, ti.sfiNamesSort, ti.anyOmitEmpty = rgetResolveSFI(rt, vv.sfis, pv)
 		pp.Put(pi)
+	case reflect.Map:
+		ti.elem = rt.Elem()
+		ti.key = rt.Key()
+	case reflect.Slice:
+		ti.mbs, _ = implIntf(rt, mapBySliceTyp)
+		ti.elem = rt.Elem()
+	case reflect.Chan:
+		ti.elem = rt.Elem()
+		ti.chandir = uint8(rt.ChanDir())
+	case reflect.Array, reflect.Ptr:
+		ti.elem = rt.Elem()
 	}
 	// sfi = sfiSrc
 
@@ -1179,16 +1229,17 @@ func (x *TypeInfos) get(rtid uintptr, rt reflect.Type) (pti *typeInfo) {
 	sp = x.infos.load()
 	if sp == nil {
 		pti = &ti
-		vs := append(make([]rtid2ti, 0, 16), rtid2ti{rtid, pti})
-		x.infos.store(&vs)
+		vs := []rtid2ti{{rtid, pti}}
+		x.infos.store(vs)
 	} else {
-		idx, pti = x.find(*sp, rtid)
+		idx, pti = x.find(sp, rtid)
 		if pti == nil {
 			pti = &ti
-			vs := append(*sp, rtid2ti{})
-			copy(vs[idx+1:], vs[idx:])
+			vs := make([]rtid2ti, len(sp)+1)
+			copy(vs, sp[:idx])
+			copy(vs[idx+1:], sp[idx:])
 			vs[idx] = rtid2ti{rtid, pti}
-			x.infos.store(&vs)
+			x.infos.store(vs)
 		}
 	}
 	x.mu.Unlock()
@@ -1445,6 +1496,48 @@ func implIntf(rt, iTyp reflect.Type) (base bool, indir bool) {
 	return rt.Implements(iTyp), reflect.PtrTo(rt).Implements(iTyp)
 }
 
+// isEmptyStruct is only called from isEmptyValue, and checks if a struct is empty:
+//    - does it implement IsZero() bool
+//    - is it comparable, and can i compare directly using ==
+//    - if checkStruct, then walk through the encodable fields
+//      and check if they are empty or not.
+func isEmptyStruct(v reflect.Value, tinfos *TypeInfos, deref, checkStruct bool) bool {
+	// v is a struct kind - no need to check again.
+	// We only check isZero on a struct kind, to reduce the amount of times
+	// that we lookup the rtid and typeInfo for each type as we walk the tree.
+
+	vt := v.Type()
+	rtid := rt2id(vt)
+	if tinfos == nil {
+		tinfos = defTypeInfos
+	}
+	ti := tinfos.get(rtid, vt)
+	if ti.rtid == timeTypId {
+		return rv2i(v).(time.Time).IsZero()
+	}
+	if ti.isFlag(typeInfoFlagIsZeroerPtr) && v.CanAddr() {
+		return rv2i(v.Addr()).(isZeroer).IsZero()
+	}
+	if ti.isFlag(typeInfoFlagIsZeroer) {
+		return rv2i(v).(isZeroer).IsZero()
+	}
+	if ti.isFlag(typeInfoFlagComparable) {
+		return rv2i(v) == rv2i(reflect.Zero(vt))
+	}
+	if !checkStruct {
+		return false
+	}
+	// We only care about what we can encode/decode,
+	// so that is what we use to check omitEmpty.
+	for _, si := range ti.sfiSrc {
+		sfv, valid := si.field(v, false)
+		if valid && !isEmptyValue(sfv, tinfos, deref, checkStruct) {
+			return false
+		}
+	}
+	return true
+}
+
 // func roundFloat(x float64) float64 {
 // 	t := math.Trunc(x)
 // 	if math.Abs(x-t) >= 0.5 {
@@ -1454,20 +1547,13 @@ func implIntf(rt, iTyp reflect.Type) (base bool, indir bool) {
 // }
 
 func panicToErr(h errstrDecorator, err *error) {
+	// Note: This method MUST be called directly from defer i.e. defer panicToErr ...
+	// else it seems the recover is not fully handled
 	if recoverPanicToErr {
 		if x := recover(); x != nil {
 			// fmt.Printf("panic'ing with: %v\n", x)
 			// debug.PrintStack()
 			panicValToErr(h, x, err)
-		}
-	}
-}
-
-func panicToErrs2(h errstrDecorator, err1, err2 *error) {
-	if recoverPanicToErr {
-		if x := recover(); x != nil {
-			panicValToErr(h, x, err1)
-			panicValToErr(h, x, err2)
 		}
 	}
 }
@@ -1591,7 +1677,7 @@ func (c *codecFner) get(rt reflect.Type, checkFastpath, checkCodecSelfer bool) (
 		fi.ti = ti
 	}
 
-	rk := rt.Kind()
+	rk := reflect.Kind(ti.kind)
 
 	if checkCodecSelfer && (ti.cs || ti.csp) {
 		fn.fe = (*Encoder).selferMarshal
@@ -1641,7 +1727,7 @@ func (c *codecFner) get(rt reflect.Type, checkFastpath, checkCodecSelfer bool) (
 		fi.addrE = ti.tmp
 	} else {
 		if fastpathEnabled && checkFastpath && (rk == reflect.Map || rk == reflect.Slice) {
-			if rt.PkgPath() == "" { // un-named slice or map
+			if ti.pkgpath == "" { // un-named slice or map
 				if idx := fastpathAV.index(rtid); idx != -1 {
 					fn.fe = fastpathAV[idx].encfn
 					fn.fd = fastpathAV[idx].decfn
@@ -1652,9 +1738,9 @@ func (c *codecFner) get(rt reflect.Type, checkFastpath, checkCodecSelfer bool) (
 				// use mapping for underlying type if there
 				var rtu reflect.Type
 				if rk == reflect.Map {
-					rtu = reflect.MapOf(rt.Key(), rt.Elem())
+					rtu = reflect.MapOf(ti.key, ti.elem)
 				} else {
-					rtu = reflect.SliceOf(rt.Elem())
+					rtu = reflect.SliceOf(ti.elem)
 				}
 				rtuid := rt2id(rtu)
 				if idx := fastpathAV.index(rtuid); idx != -1 {
@@ -1739,7 +1825,7 @@ func (c *codecFner) get(rt reflect.Type, checkFastpath, checkCodecSelfer bool) (
 				fn.fe = (*Encoder).kSlice
 				fi.addrF = false
 				fi.addrD = false
-				rt2 := reflect.SliceOf(rt.Elem())
+				rt2 := reflect.SliceOf(ti.elem)
 				fn.fd = func(d *Decoder, xf *codecFnInfo, xrv reflect.Value) {
 					d.cfer().get(rt2, true, false).fd(d, xf, xrv.Slice(0, xrv.Len()))
 				}

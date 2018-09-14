@@ -1,7 +1,21 @@
+// Copyright 2018 Twitch Interactive, Inc.  All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License"). You may not
+// use this file except in compliance with the License. A copy of the License is
+// located at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// or in the "license" file accompanying this file. This file is distributed on
+// an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+// express or implied. See the License for the specific language governing
+// permissions and limitations under the License.
+
 package twirptest
 
 import (
 	"bytes"
+	"context"
 	"crypto/tls"
 	"errors"
 	"io"
@@ -19,8 +33,6 @@ import (
 
 	"github.com/twitchtv/twirp"
 	"github.com/twitchtv/twirp/internal/descriptors"
-
-	"golang.org/x/net/context"
 )
 
 func TestServeJSON(t *testing.T) {
@@ -97,6 +109,50 @@ func TestServeProtobuf(t *testing.T) {
 	_, err = client.MakeHat(context.Background(), &Size{-1})
 	if err == nil {
 		t.Errorf("Protobuf Client expected err, got nil")
+	}
+}
+
+type contentTypeOverriderClient struct {
+	contentType string
+	base HTTPClient
+}
+
+func (c *contentTypeOverriderClient) Do(req *http.Request) (*http.Response, error) {
+	req.Header.Set("Content-Type", c.contentType)
+	return c.base.Do(req)
+}
+
+func TestContentTypes(t *testing.T) {
+	h := PickyHatmaker(1)
+	s := httptest.NewServer(NewHaberdasherServer(h, nil))
+	defer s.Close()
+
+	makeClientWithMimeType := func(mime string) Haberdasher {
+		return NewHaberdasherJSONClient(s.URL, &contentTypeOverriderClient{
+			contentType: mime,
+			base: http.DefaultClient,
+		})
+	}
+	expectNoError := func(t *testing.T, mime string) {
+		_, err := makeClientWithMimeType(mime).MakeHat(context.Background(), &Size{1})
+		if err != nil {
+			t.Fatalf("Client using valid mime type %s err=%q", mime, err)
+		}
+	}
+
+	validMimeTypes := []string{
+		"application/json; charset=UTF-8",
+		"application/json",
+	}
+	for _, mime := range validMimeTypes {
+		expectNoError(t, mime)
+	}
+
+	invalidMimeTypes := []string{
+		"application/jsonp",
+	}
+	for _, mime := range invalidMimeTypes {
+		expectBadRouteError(t, makeClientWithMimeType(mime))
 	}
 }
 
@@ -213,6 +269,7 @@ func recorderHooks() (*twirp.ServerHooks, *requestRecorder) {
 func TestHooks(t *testing.T) {
 	hooks, recorder := recorderHooks()
 	h := PickyHatmaker(1)
+
 	s := httptest.NewServer(NewHaberdasherServer(h, hooks))
 	defer s.Close()
 	client := NewHaberdasherProtobufClient(s.URL, http.DefaultClient)
@@ -311,6 +368,7 @@ func TestHooks(t *testing.T) {
 		rw := &reqRewriter{
 			base: http.DefaultTransport,
 			rewrite: func(r *http.Request) *http.Request {
+				r.ContentLength = 1
 				r.Body = ioutil.NopCloser(io.LimitReader(r.Body, 1))
 				return r
 			},
@@ -914,6 +972,23 @@ func TestNilResponse(t *testing.T) {
 	}
 }
 
+
+var expectBadRouteError = func(t *testing.T, client Haberdasher) {
+	_, err := client.MakeHat(context.Background(), &Size{1})
+	if err == nil {
+		t.Fatalf("err=nil, expected bad_route")
+	}
+
+	twerr, ok := err.(twirp.Error)
+	if !ok {
+		t.Fatalf("err has type=%T, expected twirp.Error", err)
+	}
+
+	if twerr.Code() != twirp.BadRoute {
+		t.Errorf("err has code=%v, expected %v", twerr.Code(), twirp.BadRoute)
+	}
+}
+
 func TestBadRoute(t *testing.T) {
 	h := PickyHatmaker(1)
 	s := httptest.NewServer(NewHaberdasherServer(h, nil))
@@ -927,22 +1002,6 @@ func TestBadRoute(t *testing.T) {
 	clients := map[string]Haberdasher{
 		"json":     NewHaberdasherJSONClient(s.URL, httpClient),
 		"protobuf": NewHaberdasherProtobufClient(s.URL, httpClient),
-	}
-
-	var expectBadRouteError = func(t *testing.T, client Haberdasher) {
-		_, err := client.MakeHat(context.Background(), &Size{1})
-		if err == nil {
-			t.Fatalf("err=nil, expected bad_route")
-		}
-
-		twerr, ok := err.(twirp.Error)
-		if !ok {
-			t.Fatalf("err has type=%T, expected twirp.Error", err)
-		}
-
-		if twerr.Code() != twirp.BadRoute {
-			t.Errorf("err has code=%v, expected %v", twerr.Code(), twirp.BadRoute)
-		}
 	}
 
 	for name, client := range clients {

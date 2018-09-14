@@ -3,11 +3,11 @@ package storm
 import (
 	"bytes"
 
-	"github.com/coreos/bbolt"
+	bolt "go.etcd.io/bbolt"
 )
 
-// A bucketScanner scans a Node for a list of buckets
-type bucketScanner interface {
+// A BucketScanner scans a Node for a list of buckets
+type BucketScanner interface {
 	// PrefixScan scans the root buckets for keys matching the given prefix.
 	PrefixScan(prefix string) []Node
 	// PrefixScan scans the buckets in this node for keys matching the given prefix.
