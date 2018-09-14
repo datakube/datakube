@@ -25,5 +25,5 @@ validate:  ## validate gofmt, golint and go vet
 	./script/make.sh validate-gofmt validate-golint
 
 test:
-	./script/make.sh test-unit
+	go test -race ./...
 
