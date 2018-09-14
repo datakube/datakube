@@ -20,7 +20,7 @@ find_dirs() {
          \) -name "$1" -print0 | xargs -0n1 dirname | sort -u
 }
 
-TESTFLAGS="-race -cover -coverprofile=cover.out ${TESTFLAGS}"
+TESTFLAGS="-race -cover -coverprofile=coverage.txt -covermode=atomic ${TESTFLAGS}"
 
 if [ -n "$VERBOSE" ]; then
     TESTFLAGS="${TESTFLAGS} -v"
