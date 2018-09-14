@@ -58,7 +58,7 @@ func (s Sql) Dump(targetName string) (types.DumpResult, error) {
 	return result, nil
 }
 
-func (s *Sql) connect() {
+func (s *Sql) connect() error {
 	// Register the mymysql driver
 	godrv.Register("SET NAMES utf8")
 
@@ -70,19 +70,23 @@ func (s *Sql) connect() {
 
 	if err != nil {
 		log.Errorf("Error connecting to MySql Datavase %s", err)
+		return err
 	}
 
 	dir, err := ioutil.TempDir("", "dump")
 
 	if err != nil {
-
+		log.Error("Error creating tempdir for dump of target db ", err)
+		return err
 	}
 
 	dumper, err := mysqldump.Register(db, dir, time.RFC3339)
 
 	if err != nil {
-
+		log.Error("Error connecting to targetdb for dump ", err)
+		return err
 	}
 
 	s.dumper = dumper
+	return nil
 }

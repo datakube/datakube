@@ -30,7 +30,13 @@ func StartWorker(c *configuration.DumperConfiguration) {
 	}
 
 	for _, job := range jobs.Jobs {
-		adapter := adapter.CreateNewAdapter(job.Target.Credentials.Host, job.Target.Credentials.Port, job.Target.Credentials.Database, job.Target.Credentials.User, job.Target.Credentials.Password, job.Target.Type)
+		adapter, err := adapter.CreateNewAdapter(job.Target.Credentials.Host, job.Target.Credentials.Port, job.Target.Credentials.Database, job.Target.Credentials.User, job.Target.Credentials.Password, job.Target.Type)
+
+		if err != nil {
+			log.Errorf("Cant execute job for target %s with error => %s", job.Target, err.Error())
+			continue;
+		}
+
 		go Run(job.Target.Type, adapter, dumps)
 	}
 
