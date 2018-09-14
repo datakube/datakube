@@ -25,6 +25,7 @@ type FileStorageConfiguration struct {
 type DumperConfiguration struct {
 	LogLevel string `mapstructure:"logLevel"`
 	Token    string `mapstructure:"token"`
+	Server   string `mapstructure:"server"`
 }
 
 type FileTargetsConfguration struct {
