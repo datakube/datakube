@@ -10,11 +10,11 @@ type MysqlDumpMock struct {
 	Success bool
 }
 
-func (m *MysqlDumpMock) Dump() (string, error) {
+func (m MysqlDumpMock) Dump(host string, port string, database string, user string, password string) ([]byte, error) {
 
 	if m.Success {
-		return "/test/file", nil
+		return []byte("Hello World"), nil
 	}
 
-	return "", errors.New("Test Dump Error")
+	return []byte(""), errors.New("Test Dump Error")
 }

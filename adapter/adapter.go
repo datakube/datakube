@@ -14,7 +14,6 @@ func CreateNewAdapter(host string, port string, database string, user string, pa
 	switch dbtype {
 	case "mysql":
 		da := newSqlAdapter(host, port, database, user, password)
-		err = da.connect()
 		adapter = da
 	}
 	return adapter, err

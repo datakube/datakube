@@ -1,9 +1,10 @@
 package adapter
 
 import (
+	"fmt"
 	"github.com/SantoDE/datahamster/internal/test"
-	"github.com/SantoDE/datahamster/types"
-	"github.com/magiconair/properties/assert"
+	"github.com/stretchr/testify/assert"
+	"io/ioutil"
 	"testing"
 )
 
@@ -19,11 +20,20 @@ func TestNewSqlAdapter(t *testing.T) {
 
 func TestSql_DumpOk(t *testing.T) {
 
+	testCreds := Credentials{
+		user: "user",
+		password: "password",
+		host: "host",
+		database: "testdb",
+		port: "3306",
+	}
+
 	mysqldumpMock := test.MysqlDumpMock{}
-	mysqldumpMock.On("Dump", "").Return(types.DumpResult{Success: true}, nil)
+	mysqldumpMock.On("Dump", testCreds).Return()
 
 	sqlAdapter := Sql{
-		dumper: &mysqldumpMock,
+		cli: &mysqldumpMock,
+		creds:testCreds,
 	}
 
 	mysqldumpMock.Success = true
@@ -32,7 +42,10 @@ func TestSql_DumpOk(t *testing.T) {
 
 	assert.Equal(t, res.Success, true)
 	assert.Equal(t, res.TargetName, "abc")
-	assert.Equal(t, res.TemporaryFile, "/test/file")
+	assert.NotNil(t, res.TemporaryFile, "")
+	data, _ := ioutil.ReadFile(res.TemporaryFile)
+	dataString := fmt.Sprintf("%s", data)
+	assert.Equal(t,"Hello World", dataString)
 
 	mysqldumpMock.Success = false
 
@@ -40,6 +53,12 @@ func TestSql_DumpOk(t *testing.T) {
 
 	assert.Equal(t, res.Success, false)
 	assert.Equal(t, res.TargetName, "")
-	assert.Equal(t, res.TemporaryFile, "")
+	assert.NotNil(t, res.TemporaryFile, "")
 	assert.Equal(t, err.Error(), "Test Dump Error")
+}
+
+func TestCreateSqlCommand(t *testing.T) {
+	res := createSqlCommandString("testhost", "testport", "testdb", "testuser", "testpw")
+
+	assert.Equal(t, "-Ptestport -htesthost -utestuser -ptestpw testdb", res)
 }
