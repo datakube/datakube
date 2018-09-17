@@ -1,27 +1,59 @@
 package handlers
 
 import (
+	"github.com/SantoDE/datahamster/storage"
+	"github.com/SantoDE/datahamster/types"
 	"github.com/gin-gonic/gin"
+	"net/http"
 )
 
+type dumpFileStore interface {
+	LoadOneDumpFileByTarget(targetName string) (types.DumpFile, error)
+}
+
 //POST function to create a new handler
-func GetFile(c *gin.Context) {
-	/*
-		targetId, err := strconv.Atoi(c.Param("targetId"))
+func GetFile(dfs dumpFileStore, storage storage.Storage) func(*gin.Context) {
+	return func(c *gin.Context) {
+		targetName := c.Param("targetName")
 
-		provider, err := h.TargetService.GetTargetById(targetId)
-
-		@TODO MAKE BETTER ERROR HANDLING
-		if err != nil {
-
+		if targetName == "" {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"message": "No Targetname provided",
+			})
+			return
 		}
 
-		filename := provider.Files[0].File.Path
+
+		dumpFile, error := dfs.LoadOneDumpFileByTarget(targetName)
+
+		if dumpFile.ID == 0 {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"message": "No Dumps for target " + targetName + " found",
+			})
+			return
+		}
+
+		if error != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"message": error.Error(),
+			})
+			return
+		}
+
+		fileName := dumpFile.File.Name
+		data, err := storage.ReadFile(dumpFile.File.Path)
+
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"message": err.Error(),
+			})
+			return
+		}
 
 		c.Header("Content-Description", "File Transfer")
 		c.Header("Content-Transfer-Encoding", "binary")
-		c.Header("Content-Disposition", "attachment; filename="+filename )
+		c.Header("Content-Disposition", "attachment; filename="+fileName )
 		c.Header("Content-Type", "application/octet-stream")
-		c.File(filename)
-	*/
+		c.Data(http.StatusOK, "application/octet-stream", data)
+	}
 }

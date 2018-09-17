@@ -20,6 +20,5 @@ type BaseStorage struct {
 // Storage Interface for all dumpers
 type Storage interface {
 	SaveFile(file types.File) (types.File, error)
-	ListFiles()
-	DeleteFile()
+	ReadFile(path string) ([]byte, error)
 }
