@@ -1,26 +1,25 @@
 package adapter
 
 import (
-	"database/sql"
 	"fmt"
-	"github.com/JamesStewy/go-mysqldump"
 	"github.com/SantoDE/datahamster/log"
 	"github.com/SantoDE/datahamster/types"
-	"github.com/ziutek/mymysql/godrv"
 	"io/ioutil"
-	"time"
+	"os/exec"
 )
 
 type mysqlDump interface {
-	Dump() (string, error)
+	Dump(host string, port string, database string, user string, password string) ([]byte, error)
 }
+
+type mysqlDumpCli struct {}
 
 type Sql struct {
-	creds  credentials
-	dumper mysqlDump
+	creds  Credentials
+	cli mysqlDump
 }
 
-type credentials struct {
+type Credentials struct {
 	host     string
 	port     string
 	database string
@@ -30,63 +29,58 @@ type credentials struct {
 
 func newSqlAdapter(host string, port string, database string, user string, password string) Sql {
 	return Sql{
-		creds: credentials{
+		creds: Credentials{
 			host:     host,
 			port:     port,
 			database: database,
 			user:     user,
 			password: password,
 		},
+		cli: new(mysqlDumpCli),
 	}
 }
 
 func (s Sql) Dump(targetName string) (types.DumpResult, error) {
 
-	dumpPath, err := s.dumper.Dump()
+	data, err := s.cli.Dump(s.creds.host, s.creds.port, s.creds.database, s.creds.user, s.creds.password)
 
 	if err != nil {
 		log.Errorf("Error Dumping MySql Dump: %s", err)
 		return types.DumpResult{Success: false}, err
 	}
 
+	tempFile, err := ioutil.TempFile("", "")
+	ioutil.WriteFile(tempFile.Name(), data, 0755)
+
 	result := types.DumpResult{
 		Success:       true,
-		TemporaryFile: dumpPath,
+		TemporaryFile: tempFile.Name(),
 		TargetName:    targetName,
 	}
 
 	return result, nil
 }
 
-func (s *Sql) connect() error {
-	// Register the mymysql driver
-	godrv.Register("SET NAMES utf8")
-
-	connectionString := fmt.Sprintf("tcp:%s:%s*%s/%s/%s", s.creds.host, s.creds.port, s.creds.database, s.creds.user, s.creds.password)
-
-	log.Debugf("Trying to connect with %s", connectionString)
-
-	db, err := sql.Open("mymysql", connectionString)
-
+func (m mysqlDumpCli) Dump(host string, port string, database string, user string, password string) ([]byte, error) {
+	cmd := exec.Command("mysqldump ", createSqlCommandString(host, port, database, user, password))
+	stdout, err := cmd.StdoutPipe()
 	if err != nil {
-		log.Errorf("Error connecting to MySql Datavase %s", err)
-		return err
+		log.Fatal(err)
 	}
 
-	dir, err := ioutil.TempDir("", "dump")
-
-	if err != nil {
-		log.Error("Error creating tempdir for dump of target db ", err)
-		return err
+	if err := cmd.Start(); err != nil {
+		log.Fatal(err)
 	}
 
-	dumper, err := mysqldump.Register(db, dir, time.RFC3339)
-
+	bytes, err := ioutil.ReadAll(stdout)
 	if err != nil {
-		log.Error("Error connecting to targetdb for dump ", err)
-		return err
+		log.Fatal(err)
 	}
 
-	s.dumper = dumper
-	return nil
+	return bytes, nil
+}
+
+func createSqlCommandString(host string, port string, database string, user string, password string) string {
+	cmd := fmt.Sprintf("%s %s %s %s %s", fmt.Sprintf("-P%s", port),fmt.Sprintf("-h%s", host), fmt.Sprintf("-u%s", user), fmt.Sprintf("-p%s", password), fmt.Sprintf("%s", database))
+	return cmd
 }
