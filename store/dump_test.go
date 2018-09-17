@@ -25,3 +25,30 @@ func TestSaveDumpFile(t *testing.T) {
 	assert.Equal(t, savedDumpFile.File.Path, "/test/file")
 	assert.Equal(t, savedDumpFile.File.Name, "testfile")
 }
+
+func TestDataStore_LoadOneDumpFileByTarget(t *testing.T) {
+	store := NewTestDataStore()
+	defer store.Close()
+
+	df := types.DumpFile{
+		File: types.File{
+			Name: "testfile",
+			Path: "/test/file",
+		},
+		Target: "testtarget",
+	}
+
+	store.SaveDumpFile(df)
+
+	df, err := store.LoadOneDumpFileByTarget("testtarget")
+	assert.Nil(t, err)
+	assert.NotNil(t, df.ID)
+	assert.Equal(t, df.Target, "testtarget")
+	assert.Equal(t, df.File.Path, "/test/file")
+	assert.Equal(t, df.File.Name, "testfile")
+
+	df2, err := store.LoadOneDumpFileByTarget("aaaa")
+	assert.NotNil(t, err)
+	assert.Equal(t,"not found", err.Error())
+	assert.Empty(t, df2)
+}

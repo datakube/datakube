@@ -43,8 +43,10 @@ func (storage *Storage) SaveFile(f types.File) (types.File, error) {
 }
 
 // ReadFile function to read a specific file
-func (*Storage) ReadFile() {
+func (*Storage) ReadFile(path string) ([]byte, error){
+	dat, err := ioutil.ReadFile(path)
 
+	return dat, err
 }
 
 // ListFiles function to list all files
