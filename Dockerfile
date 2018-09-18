@@ -12,8 +12,8 @@ RUN mkdir -p /usr/local/bin \
     && curl -fsSL -o /usr/local/bin/dep https://github.com/golang/dep/releases/download/v${DEP_VERSION}/dep-linux-amd64 \
     && chmod +x /usr/local/bin/dep
 
-WORKDIR /go/src/github.com/SantoDE/datakube/
-COPY . /go/src/github.com/SantoDE/datakube/
+WORKDIR /go/src/github.com/datakube/datakube
+COPY . /go/src/github.com/datakube/datakube
 
 RUN CGO_ENABLED=0 GOGC=off go build $FLAGS -ldflags "-X github.com/datakube/datakube/cmd/server/version.Version=$VERSION -X github.com/datakube/datakube/cmd/server/version.BuildDate=$DATE" -o dist/server ./cmd/server/
 
