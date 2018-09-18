@@ -16,6 +16,8 @@ type targetStore interface {
 type jobStore interface {
 	ListJobsByStatus(string) ([]types.Job, error)
 	DeleteJob(types.Job) error
+	GetJobById(id int) (types.Job, error)
+	SaveJob(job types.Job) (types.Job, error)
 }
 
 func New(dfs dumpfileStore, ts targetStore, js jobStore, stg storage.Storage) *rpcHandler {

@@ -6,6 +6,7 @@ import (
 
 const STATUS_QUEUED = "queued"
 const STATUS_SUCCESS = "success"
+const STATUS_IN_PROGRESS = "in_progress"
 
 type ConfigTargets struct {
 	Targets []Target `toml:"target"`

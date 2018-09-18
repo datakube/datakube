@@ -21,20 +21,12 @@ func (t TestDumpAdapter) Dump(targetName string) (types.DumpResult, error) {
 
 func TestDumpJobRunt(t *testing.T) {
 
-	events := make(chan types.DumpResult)
 	tda := new(TestDumpAdapter)
 
-	go Run("TestTarget", tda, events)
+	res := Run("TestTarget", tda)
 
-	var eventHit bool
+	assert.Equal(t, res.Success, true)
+	assert.Equal(t, res.TargetName, "TestTarget")
+	assert.Equal(t, res.TemporaryFile, "/tmp/testfile")
 
-	select {
-	case dump := <-events:
-		eventHit = true
-		assert.Equal(t, dump.Success, true)
-		assert.Equal(t, dump.TargetName, "TestTarget")
-		assert.Equal(t, dump.TemporaryFile, "/tmp/testfile")
-	}
-
-	assert.Equal(t, true, eventHit)
 }

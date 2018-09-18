@@ -75,3 +75,14 @@ func (d *DataStore) ListAllJobs() ([]types.Job, error) {
 
 	return jobs, nil
 }
+
+func (d *DataStore) GetJobById(id int) (types.Job, error) {
+	var job types.Job
+	err := d.db.One("ID", id, &job)
+
+	if err != nil {
+		log.Error("Can't get Job By Id ", err)
+	}
+
+	return job, err
+}
