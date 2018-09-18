@@ -8,4 +8,4 @@
         password = "password"
         port = "3306"
     [target.schedule]
-        interval = "weekly"
+        interval = "every_minute"

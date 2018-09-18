@@ -37,6 +37,8 @@ func ValidateJobNeededByTarget(target types.Target, store jobStore) bool {
 		nextDate = job.RunAt.AddDate(0, 0, 7)
 	case "daily":
 		nextDate = job.RunAt.AddDate(0, 0, 1)
+	case "every_minute":
+		nextDate = job.RunAt.Add(1 * time.Minute)
 	}
 
 	if nextDate.After(time.Now()) {

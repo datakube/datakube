@@ -6,14 +6,15 @@ GIT_BRANCH := $(subst heads/,,$(shell git rev-parse --abbrev-ref HEAD 2>/dev/nul
 
 default: binary
 
+images:
+	docker build -t datahamster/server .
+	docker build -f Dockerfile.agent -t datahamster/agent .
+
 binary:
 	./script/make.sh binary
 
 crossbinary:
 	./script/make.sh crossbinary
-
-image:
-	docker build -t $(WORKER_IMAGE) .
 
 lint:
 	./script/make.sh validate-golint
