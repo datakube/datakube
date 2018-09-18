@@ -37,7 +37,7 @@ func StartWorker(c *configuration.DumperConfiguration) {
 			continue;
 		}
 
-		go Run(job.Target.Type, adapter, dumps)
+		go Run(job.Target.Name, adapter, dumps)
 	}
 
 	for {

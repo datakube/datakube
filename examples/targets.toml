@@ -2,7 +2,7 @@
     name = "test_target"
     [target.db]
         type = "mysql"
-        host = "localhost"
+        host = "mariadb"
         name = "test"
         user = "user"
         password = "password"

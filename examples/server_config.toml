@@ -2,12 +2,13 @@ logLevel = "debug"
 address = ":8080"
 
 [datastore]
-    path = "/tmp/datastore"
+    path = "/var/lib/datahamster/data/bolt.db"
 
 [storage]
     [storage.file]
-        path = "/tmp/filestorage"
+        path = "/var/lib/datahamster/data/"
+
 
 [file]
-dir = "/path/to/config/folder"
-file = "/path/to/config/folder/targets.toml"
+dir = "/var/lib/datahamster/"
+file = "/var/lib/datahamster/targets.toml"
