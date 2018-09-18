@@ -38,5 +38,8 @@ know. Features planned already:
 ## Quickstart
 Have a look at the [quickstart docs](./docs/quickstart.md)
 
+## Configuration
+Best place is, to have a look at the [configuration docs](./docs/configuration)
+
 ## Examples
 Please  see the [examples](./examples) directory for configuration examples and a docker-compose setup.
