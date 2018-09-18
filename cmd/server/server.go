@@ -113,5 +113,10 @@ func initStore(dataStorePath string) *store.DataStore {
 
 	err = store.Open()
 
+	if err != nil {
+		log.Fatal(err)
+		os.Exit(15)
+	}
+
 	return store
 }

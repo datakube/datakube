@@ -26,6 +26,7 @@ type DumperConfiguration struct {
 	LogLevel string `mapstructure:"logLevel"`
 	Token    string `mapstructure:"token"`
 	Server   string `mapstructure:"server"`
+	Interval int    `mapstructure:"interval"`
 }
 
 type FileTargetsConfguration struct {

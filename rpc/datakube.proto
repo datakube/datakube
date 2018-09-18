@@ -4,14 +4,16 @@ package datakube;
 
 // The DumperService service definition.
 service datakube {
-    rpc SaveDumpFile(SaveDumpFileRequest) returns (SaveDumpFileResponse) {}
+    rpc SaveDumpFileForJob(SaveDumpFileRequest) returns (SaveDumpFileResponse) {}
     rpc ListJobs(ListJobsRequest) returns (ListJobsResponse) {}
+    rpc UpdateJob(UpdateJobRequest) returns (UpdateJobResponse) {}
 }
 
 message SaveDumpFileRequest {
     string targetname = 1;
     string filename = 2;
     bytes data = 3;
+    int32 jobId = 4;
 }
 
 message SaveDumpFileResponse {
@@ -20,6 +22,15 @@ message SaveDumpFileResponse {
 
 message ListJobsRequest {
     string status = 1;
+}
+
+message UpdateJobRequest {
+    Job job = 1;
+}
+
+message UpdateJobResponse {
+    bool success = 1;
+    Job job = 2;
 }
 
 message Target {
@@ -39,6 +50,7 @@ message Credentials {
 message Job {
     Target target = 1;
     string state = 2;
+    int32  id    = 3;
 }
 
 message ListJobsResponse {

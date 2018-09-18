@@ -169,5 +169,28 @@ func TestListAllJobs(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, jobs)
 	assert.Equal(t, len(jobs), 3)
+}
 
+func TestDataStore_GetJobById(t *testing.T) {
+	store := NewTestDataStore()
+	defer store.Close()
+
+	job1 := types.Job{
+		Target: "12345",
+	}
+
+	job2 := types.Job{
+		Target: "123456",
+	}
+
+	job1, _ = store.SaveJob(job1)
+	job2, _ = store.SaveJob(job2)
+
+	foundJob, err := store.GetJobById(job1.ID)
+	assert.Nil(t, err)
+	assert.Equal(t, job1.ID, foundJob.ID)
+
+	foundJob, err = store.GetJobById(job2.ID)
+	assert.Nil(t, err)
+	assert.Equal(t, job2.ID, foundJob.ID)
 }

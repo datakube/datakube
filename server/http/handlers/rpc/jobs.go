@@ -38,11 +38,33 @@ func (h *rpcHandler) ListJobs(ctx context.Context, in *datakube.ListJobsRequest)
 				Port:     target.DBConfig.DatabasePort,
 			},
 		}
+		j.Id = int32(job.ID)
 
 		j.State = job.Status
 		rpcJobs = append(rpcJobs, j)
 	}
 	return &datakube.ListJobsResponse{
 		Jobs: rpcJobs,
+	}, err
+}
+
+func (h *rpcHandler) UpdateJob(ctx context.Context, in *datakube.UpdateJobRequest) (*datakube.UpdateJobResponse, error) {
+
+	job, err := h.js.GetJobById(int(in.Job.Id))
+
+	if err != nil {
+		return &datakube.UpdateJobResponse{
+			Job: in.Job,
+			Success: false,
+		}, err
+	}
+
+	job.Status = in.Job.State
+
+	h.js.SaveJob(job)
+
+	return &datakube.UpdateJobResponse{
+		Job: in.Job,
+		Success: true,
 	}, err
 }

@@ -6,7 +6,7 @@ import (
 	"github.com/SantoDE/datahamster/types"
 )
 
-func Run(targetName string, adapter adapter.DumpAdapter, dumpResults chan<- types.DumpResult) {
+func Run(targetName string, adapter adapter.DumpAdapter) types.DumpResult{
 	log.Debug("Running Dump")
 	res, err := adapter.Dump(targetName)
 	log.Debug("Dump done")
@@ -14,5 +14,5 @@ func Run(targetName string, adapter adapter.DumpAdapter, dumpResults chan<- type
 		log.Debug("Error during Dump ", err.Error())
 	}
 
-	dumpResults <- res
+	return res
 }
