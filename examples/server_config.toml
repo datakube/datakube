@@ -6,9 +6,9 @@ address = ":8080"
 
 [storage]
     [storage.file]
-        path = "/var/lib/datakube//data/"
+        path = "/var/lib/datakube/data/"
 
 
 [file]
-dir = "/var/lib/datakube//"
-file = "/var/lib/datakube//targets.toml"
+dir = "/var/lib/datakube/"
+file = "/var/lib/datakube/targets.toml"
