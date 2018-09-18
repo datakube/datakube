@@ -36,7 +36,7 @@ know. Features planned already:
 - Metrics
 
 ## Quickstart
-No version is released yet. Will be updated soon!
+Have a look at the [quickstart docs](./docs/quickstart.md)
 
 ## Examples
-Please see the [examples](./examples) directory for configuration examples and a docker-compose setup.
+Please  see the [examples](./examples) directory for configuration examples and a docker-compose setup.

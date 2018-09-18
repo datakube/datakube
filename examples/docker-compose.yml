@@ -2,7 +2,7 @@ version: '2'
 
 services:
   datakube-server:
-    image: datakube/server:latest
+    image: datakube/server:0.1
     command: /bin/datakube --config /var/lib/datakube/server_config.toml
     ports:
     - 8080:8080
@@ -13,7 +13,7 @@ services:
     restart: always
 
   datakube-agent:
-    image: datakube/agent:latest
+    image: datakube/agent:0.1
     command: /bin/datakube-agent --server http://datakube-server:8080 --logLevel debug --interval 60
     restart: always
     depends_on:
