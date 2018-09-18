@@ -1,0 +1,41 @@
+version: '2'
+
+services:
+  datahamster-server:
+    image: datahamster/server:latest
+    command: /bin/datahamster --config /var/lib/datahamster/server_config.toml
+    ports:
+    - 8080:8080
+    volumes:
+    - ./server_config.toml:/var/lib/datahamster/server_config.toml
+    - ./targets.toml:/var/lib/datahamster/targets.toml
+    - ./data:/var/lib/datahamster/data
+    restart: always
+
+  datahamster-agent:
+    image: datahamster/agent:latest
+    command: /bin/datahamster-agent --server http://datahamster-server:8080 --logLevel debug
+    restart: always
+    depends_on:
+    - datahamster-server
+
+  mariadb:
+    image: mariadb
+    environment:
+      MYSQL_ROOT_PASSWORD: example
+      MYSQL_DATABASE: test
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+    volumes:
+      - db-data:/var/lib/mysql
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+    - 8081:8080
+
+volumes:
+  db-data:
+
+

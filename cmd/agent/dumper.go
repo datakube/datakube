@@ -20,7 +20,7 @@ var config configuration.DumperConfiguration
 
 // RootCmd represents the base command when called without any subcommands
 var dumperCommand = &cobra.Command{
-	Use:   "datahamster-dumper",
+	Use:   "datahamster-agent",
 	Short: "A brief description of your application",
 	Long: `A longer description that spans multiple lines and likely contains
 examples and usage of using your application. For example:

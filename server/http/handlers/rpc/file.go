@@ -2,17 +2,30 @@ package rpc
 
 import (
 	"context"
+	"errors"
 	"github.com/SantoDE/datahamster/log"
 	"github.com/SantoDE/datahamster/rpc"
 	"github.com/SantoDE/datahamster/types"
+	"strconv"
 	"time"
 )
 
 func (h *rpcHandler) SaveDumpFile(ctx context.Context, in *datakube.SaveDumpFileRequest) (*datakube.SaveDumpFileResponse, error) {
 
-	log.Debugf("Received RPC Request to save file with filename %s", in.Filename)
+	log.Debugf("Received RPC Request to save file with TargetName %s", in.Targetname)
+
+	if in.Targetname == "" {
+		err := errors.New("No proper Target passed - not accepting the request to save the file")
+		log.Error(err.Error())
+		return &datakube.SaveDumpFileResponse{
+			Success: false,
+		}, err
+	}
+
+	now :=  strconv.FormatInt(time.Now().UTC().Unix(), 10)
+
 	file := types.File{
-		Name: in.Targetname,
+		Name: in.Targetname + "_" + now,
 		Data: in.Data,
 	}
 

@@ -26,10 +26,16 @@ func TestSaveResultOk(t *testing.T) {
 	f.Name = "test_file"
 	f.Data = []byte("TEST DATA")
 
-	storage := NewFileStorage("/tmp")
-	storage.SaveFile(*f)
+	tempdir, _ := ioutil.TempDir("", "")
 
-	file, err := os.Open("/tmp/test_file")
+	defer os.RemoveAll(tempdir)
+
+	storage := NewFileStorage(tempdir)
+	savedFile, err := storage.SaveFile(*f)
+
+	assert.Nil(t, err)
+
+	file, err := os.Open(savedFile.Path)
 
 	if err != nil {
 		t.Fatalf("Error while opening the file: %s", err)

@@ -62,25 +62,14 @@ func (s Sql) Dump(targetName string) (types.DumpResult, error) {
 }
 
 func (m mysqlDumpCli) Dump(host string, port string, database string, user string, password string) ([]byte, error) {
-	cmd := exec.Command("mysqldump ", createSqlCommandString(host, port, database, user, password))
-	stdout, err := cmd.StdoutPipe()
+	cmd := exec.Command("mysqldump", fmt.Sprintf("-P%s", port),fmt.Sprintf("-h%s", host), fmt.Sprintf("-u%s", user), fmt.Sprintf("-p%s", password), fmt.Sprintf("%s", database))
+
+	log.Debugf("Created dump command %s with args %s", cmd.Path, cmd.Args)
+
+	stdoutStderr, err := cmd.CombinedOutput()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	if err := cmd.Start(); err != nil {
-		log.Fatal(err)
-	}
-
-	bytes, err := ioutil.ReadAll(stdout)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	return bytes, nil
-}
-
-func createSqlCommandString(host string, port string, database string, user string, password string) string {
-	cmd := fmt.Sprintf("%s %s %s %s %s", fmt.Sprintf("-P%s", port),fmt.Sprintf("-h%s", host), fmt.Sprintf("-u%s", user), fmt.Sprintf("-p%s", password), fmt.Sprintf("%s", database))
-	return cmd
+	return stdoutStderr, err
 }

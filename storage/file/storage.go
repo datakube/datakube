@@ -16,7 +16,7 @@ type Storage struct {
 	dir string
 }
 
-// NewFileStorage function to create new dumper
+// NewFileStorage function to create new agent
 func NewFileStorage(dir string) *Storage {
 	storage := new(Storage)
 	storage.dir = dir
@@ -27,7 +27,7 @@ func NewFileStorage(dir string) *Storage {
 func (storage *Storage) SaveFile(f types.File) (types.File, error) {
 
 	s := []string{storage.dir, f.Name}
-	path := strings.Join(s, "/")
+	path := strings.Join(s, "")
 
 	log.Debugf("Saving File to path %s", path)
 	err := ioutil.WriteFile(path, f.Data, 0644)

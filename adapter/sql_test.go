@@ -56,9 +56,3 @@ func TestSql_DumpOk(t *testing.T) {
 	assert.NotNil(t, res.TemporaryFile, "")
 	assert.Equal(t, err.Error(), "Test Dump Error")
 }
-
-func TestCreateSqlCommand(t *testing.T) {
-	res := createSqlCommandString("testhost", "testport", "testdb", "testuser", "testpw")
-
-	assert.Equal(t, "-Ptestport -htesthost -utestuser -ptestpw testdb", res)
-}
