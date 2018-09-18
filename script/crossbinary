@@ -20,8 +20,8 @@ OS_PLATFORM_ARG=(linux darwin windows)
 OS_ARCH_ARG=(386 amd64)
 for OS in ${OS_PLATFORM_ARG[@]}; do
   for ARCH in ${OS_ARCH_ARG[@]}; do
-    echo "Building binary for $OS/$ARCH..."
+    echo "Building binaries for $OS/$ARCH..."
     GOARCH=$ARCH GOOS=$OS CGO_ENABLED=0 go build -ldflags "-s -w -X github.com/datakube/datakube/cmd/agent/version.Version=$VERSION -X github.com/datakube/datakube/cmd/agent/version.BuildDate=$DATE" -o "dist/agent/datakube-agent_$OS-$ARCH" ./cmd/agent
-    GOARCH=$ARCH GOOS=$OS CGO_ENABLED=0 go build -ldflags "-s -w -X github.com/datakube/datakube/cmd/server/version.Version=$VERSION -X github.com/datakube/datakube/cmd/server/version.BuildDate=$DATE" -o "dist/server/datakube-server_$ARCH" ./cmd/server
+    GOARCH=$ARCH GOOS=$OS CGO_ENABLED=0 go build -ldflags "-s -w -X github.com/datakube/datakube/cmd/server/version.Version=$VERSION -X github.com/datakube/datakube/cmd/server/version.BuildDate=$DATE" -o "dist/server/datakube-server_$OS-$ARCH" ./cmd/server
   done
 done
