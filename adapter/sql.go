@@ -2,8 +2,8 @@ package adapter
 
 import (
 	"fmt"
-	"github.com/SantoDE/datahamster/log"
-	"github.com/SantoDE/datahamster/types"
+	"github.com/datakube/datakube/log"
+	"github.com/datakube/datakube/types"
 	"io/ioutil"
 	"os/exec"
 )

@@ -2,9 +2,9 @@ package handlers_test
 
 import (
 	"errors"
-	"github.com/SantoDE/datahamster/internal/test"
-	"github.com/SantoDE/datahamster/server/http/handlers"
-	"github.com/SantoDE/datahamster/types"
+	"github.com/datakube/datakube/internal/test"
+	"github.com/datakube/datakube/server/http/handlers"
+	"github.com/datakube/datakube/types"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"net/http"

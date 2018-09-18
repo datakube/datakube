@@ -1,7 +1,7 @@
 package store_test
 
 import (
-	"github.com/SantoDE/datahamster/store"
+	"github.com/datakube/datakube/store"
 	"io/ioutil"
 	"os"
 )

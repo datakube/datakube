@@ -1,9 +1,9 @@
 package job_test
 
 import (
-	"github.com/SantoDE/datahamster/internal/test"
-	"github.com/SantoDE/datahamster/job"
-	"github.com/SantoDE/datahamster/types"
+	"github.com/datakube/datakube/internal/test"
+	"github.com/datakube/datakube/job"
+	"github.com/datakube/datakube/types"
 	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"

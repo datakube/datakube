@@ -1,7 +1,7 @@
 package api
 
 import (
-	"github.com/SantoDE/datahamster/types"
+	"github.com/datakube/datakube/types"
 )
 
 type targetStore interface {

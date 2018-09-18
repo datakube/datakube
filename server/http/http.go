@@ -1,13 +1,13 @@
 package http
 
 import (
-	"github.com/SantoDE/datahamster/rpc"
-	"github.com/SantoDE/datahamster/server/http/handlers"
-	"github.com/SantoDE/datahamster/server/http/handlers/api"
-	"github.com/SantoDE/datahamster/server/http/handlers/rpc"
-	"github.com/SantoDE/datahamster/storage"
-	"github.com/SantoDE/datahamster/store"
-	"github.com/SantoDE/datahamster/store/target"
+	"github.com/datakube/datakube/rpc"
+	"github.com/datakube/datakube/server/http/handlers"
+	"github.com/datakube/datakube/server/http/handlers/api"
+	"github.com/datakube/datakube/server/http/handlers/rpc"
+	"github.com/datakube/datakube/storage"
+	"github.com/datakube/datakube/store"
+	"github.com/datakube/datakube/store/target"
 	"github.com/gin-gonic/gin"
 )
 

@@ -2,9 +2,9 @@ package rpc
 
 import (
 	"context"
-	"github.com/SantoDE/datahamster/log"
-	"github.com/SantoDE/datahamster/rpc"
-	"github.com/SantoDE/datahamster/types"
+	"github.com/datakube/datakube/log"
+	"github.com/datakube/datakube/rpc"
+	"github.com/datakube/datakube/types"
 )
 
 func (h *rpcHandler) ListJobs(ctx context.Context, in *datakube.ListJobsRequest) (*datakube.ListJobsResponse, error) {

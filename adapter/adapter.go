@@ -1,6 +1,6 @@
 package adapter
 
-import "github.com/SantoDE/datahamster/types"
+import "github.com/datakube/datakube/types"
 
 type DumpAdapter interface {
 	Dump(string) (types.DumpResult, error)

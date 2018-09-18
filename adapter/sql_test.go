@@ -2,7 +2,7 @@ package adapter
 
 import (
 	"fmt"
-	"github.com/SantoDE/datahamster/internal/test"
+	"github.com/datakube/datakube/internal/test"
 	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"testing"
