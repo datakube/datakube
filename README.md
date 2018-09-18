@@ -1,4 +1,4 @@
-[![Build Status](https://semaphoreci.com/api/v1/datakube/datakube/master/badge.svg)](https://semaphoreci.com/datakube/datakube)
+[![Build Status](https://semaphoreci.com/api/v1/datakube/datakube/branches/master/badge.svg)](https://semaphoreci.com/datakube/datakube)
 [![codecov](https://codecov.io/gh/datakube/datakube/branch/master/graph/badge.svg)](https://codecov.io/gh/datakube/datakube)
 
 Datakube is a modern method to backup / save your application data which are based in the cloud easily.
@@ -39,4 +39,4 @@ know. Features planned already:
 No version is released yet. Will be updated soon!
 
 ## Examples
-Please see the [examples](./examples) directory for configuration examples.
+Please see the [examples](./examples) directory for configuration examples and a docker-compose setup.
