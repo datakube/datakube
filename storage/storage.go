@@ -1,6 +1,6 @@
 package storage
 
-import "github.com/SantoDE/datahamster/types"
+import "github.com/datakube/datakube/types"
 
 // Configuration struct to hold Storage Configuration
 type Configuration struct {

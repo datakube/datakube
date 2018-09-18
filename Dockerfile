@@ -1,4 +1,4 @@
-#docker build --rm -t datahamster/server .
+#docker build --rm -t datakube//server .
 
 FROM golang:1.11-alpine as builder
 
@@ -12,15 +12,15 @@ RUN mkdir -p /usr/local/bin \
     && curl -fsSL -o /usr/local/bin/dep https://github.com/golang/dep/releases/download/v${DEP_VERSION}/dep-linux-amd64 \
     && chmod +x /usr/local/bin/dep
 
-WORKDIR /go/src/github.com/SantoDE/datahamster
-COPY . /go/src/github.com/SantoDE/datahamster
+WORKDIR /go/src/github.com/SantoDE/datakube/
+COPY . /go/src/github.com/SantoDE/datakube/
 
-RUN CGO_ENABLED=0 GOGC=off go build $FLAGS -ldflags "-X github.com/SantoDE/datahamster/cmd/server/version.Version=$VERSION -X github.com/SantoDE/datahamster/cmd/server/version.BuildDate=$DATE" -o dist/server ./cmd/server/
+RUN CGO_ENABLED=0 GOGC=off go build $FLAGS -ldflags "-X github.com/datakube/datakube/cmd/server/version.Version=$VERSION -X github.com/datakube/datakube/cmd/server/version.BuildDate=$DATE" -o dist/server ./cmd/server/
 
 FROM alpine:3.6
 
 ENV GIN_MODE=release
 
-COPY --from=builder /go/src/github.com/SantoDE/datahamster/dist/server /bin/datahamster
-ENTRYPOINT ["/bin/datahamster"]
+COPY --from=builder /go/src/github.com/datakube/datakube/dist/server /bin/datakube/
+ENTRYPOINT ["/bin/datakube/"]
 

@@ -2,7 +2,7 @@ package target
 
 import (
 	"errors"
-	"github.com/SantoDE/datahamster/types"
+	"github.com/datakube/datakube/types"
 	"sync"
 )
 

@@ -1,9 +1,9 @@
 package file
 
 import (
-	"github.com/SantoDE/datahamster/log"
-	"github.com/SantoDE/datahamster/storage"
-	"github.com/SantoDE/datahamster/types"
+	"github.com/datakube/datakube/log"
+	"github.com/datakube/datakube/storage"
+	"github.com/datakube/datakube/types"
 	"io/ioutil"
 	"strings"
 )

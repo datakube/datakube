@@ -1,8 +1,8 @@
 package rpc
 
 import (
-	"github.com/SantoDE/datahamster/storage"
-	"github.com/SantoDE/datahamster/types"
+	"github.com/datakube/datakube/storage"
+	"github.com/datakube/datakube/types"
 )
 
 type dumpfileStore interface {

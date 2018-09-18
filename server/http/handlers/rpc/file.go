@@ -3,9 +3,9 @@ package rpc
 import (
 	"context"
 	"errors"
-	"github.com/SantoDE/datahamster/log"
-	"github.com/SantoDE/datahamster/rpc"
-	"github.com/SantoDE/datahamster/types"
+	"github.com/datakube/datakube/log"
+	"github.com/datakube/datakube/rpc"
+	"github.com/datakube/datakube/types"
 	"strconv"
 	"time"
 )

@@ -1,7 +1,7 @@
 package store
 
 import (
-	"github.com/SantoDE/datahamster/types"
+	"github.com/datakube/datakube/types"
 	"github.com/asdine/storm/q"
 )
 

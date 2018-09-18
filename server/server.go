@@ -1,14 +1,14 @@
 package server
 
 import (
-	"github.com/SantoDE/datahamster/configuration"
-	"github.com/SantoDE/datahamster/job"
-	"github.com/SantoDE/datahamster/provider"
-	"github.com/SantoDE/datahamster/server/http"
-	"github.com/SantoDE/datahamster/storage/file"
-	"github.com/SantoDE/datahamster/store"
-	"github.com/SantoDE/datahamster/store/target"
-	"github.com/SantoDE/datahamster/types"
+	"github.com/datakube/datakube/configuration"
+	"github.com/datakube/datakube/job"
+	"github.com/datakube/datakube/provider"
+	"github.com/datakube/datakube/server/http"
+	"github.com/datakube/datakube/storage/file"
+	"github.com/datakube/datakube/store"
+	"github.com/datakube/datakube/store/target"
+	"github.com/datakube/datakube/types"
 	"time"
 )
 

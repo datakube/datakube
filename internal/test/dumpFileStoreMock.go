@@ -1,7 +1,7 @@
 package test
 
 import (
-	"github.com/SantoDE/datahamster/types"
+	"github.com/datakube/datakube/types"
 	"github.com/stretchr/testify/mock"
 )
 

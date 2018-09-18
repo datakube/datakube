@@ -1,8 +1,8 @@
 package job
 
 import (
-	"github.com/SantoDE/datahamster/log"
-	"github.com/SantoDE/datahamster/types"
+	"github.com/datakube/datakube/log"
+	"github.com/datakube/datakube/types"
 	"time"
 )
 

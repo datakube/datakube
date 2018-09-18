@@ -2,10 +2,10 @@ package main
 
 import (
 	"fmt"
-	"github.com/SantoDE/datahamster/configuration"
-	"github.com/SantoDE/datahamster/log"
-	"github.com/SantoDE/datahamster/server"
-	"github.com/SantoDE/datahamster/store"
+	"github.com/datakube/datakube/configuration"
+	"github.com/datakube/datakube/log"
+	"github.com/datakube/datakube/server"
+	"github.com/datakube/datakube/store"
 	"github.com/Sirupsen/logrus"
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
@@ -20,7 +20,7 @@ var config configuration.ServerConfiguration
 
 // RootCmd represents the base command when called without any subcommands
 var serverCommand = &cobra.Command{
-	Use:   "datahamster",
+	Use:   "datakube/",
 	Short: "A brief description of your application",
 	Long: `A longer description that spans multiple lines and likely contains
 examples and usage of using your application. For example:

@@ -1,23 +1,23 @@
 version: '2'
 
 services:
-  datahamster-server:
-    image: datahamster/server:latest
-    command: /bin/datahamster --config /var/lib/datahamster/server_config.toml
+  datakube-server:
+    image: datakube/server:latest
+    command: /bin/datakube --config /var/lib/datakube/server_config.toml
     ports:
     - 8080:8080
     volumes:
-    - ./server_config.toml:/var/lib/datahamster/server_config.toml
-    - ./targets.toml:/var/lib/datahamster/targets.toml
-    - ./data:/var/lib/datahamster/data
+    - ./server_config.toml:/var/lib/datakube/server_config.toml
+    - ./targets.toml:/var/lib/datakube/targets.toml
+    - ./data:/var/lib/datakube/data
     restart: always
 
-  datahamster-agent:
-    image: datahamster/agent:latest
-    command: /bin/datahamster-agent --server http://datahamster-server:8080 --logLevel debug --interval 60
+  datakube-agent:
+    image: datakube/agent:latest
+    command: /bin/datakube-agent --server http://datakube-server:8080 --logLevel debug --interval 60
     restart: always
     depends_on:
-    - datahamster-server
+    - datakube-server
 
   mariadb:
     image: mariadb

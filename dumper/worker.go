@@ -2,11 +2,11 @@ package dumper
 
 import (
 	"context"
-	"github.com/SantoDE/datahamster/adapter"
-	"github.com/SantoDE/datahamster/configuration"
-	"github.com/SantoDE/datahamster/log"
-	"github.com/SantoDE/datahamster/rpc"
-	"github.com/SantoDE/datahamster/types"
+	"github.com/datakube/datakube/adapter"
+	"github.com/datakube/datakube/configuration"
+	"github.com/datakube/datakube/log"
+	"github.com/datakube/datakube/rpc"
+	"github.com/datakube/datakube/types"
 	"io/ioutil"
 	"net/http"
 	"os"
