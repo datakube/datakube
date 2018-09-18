@@ -19,6 +19,8 @@ RUN CGO_ENABLED=0 GOGC=off go build $FLAGS -ldflags "-X github.com/SantoDE/datah
 
 FROM alpine:3.6
 
+ENV GIN_MODE=release
+
 COPY --from=builder /go/src/github.com/SantoDE/datahamster/dist/server /bin/datahamster
 ENTRYPOINT ["/bin/datahamster"]
 

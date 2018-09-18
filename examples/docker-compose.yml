@@ -14,7 +14,7 @@ services:
 
   datahamster-agent:
     image: datahamster/agent:latest
-    command: /bin/datahamster-agent --server http://datahamster-server:8080 --logLevel debug
+    command: /bin/datahamster-agent --server http://datahamster-server:8080 --logLevel debug --interval 60
     restart: always
     depends_on:
     - datahamster-server
