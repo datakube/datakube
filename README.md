@@ -1,6 +1,8 @@
 [![Build Status](https://semaphoreci.com/api/v1/datakube/datakube/branches/master/badge.svg)](https://semaphoreci.com/datakube/datakube)
 [![codecov](https://codecov.io/gh/datakube/datakube/branch/master/graph/badge.svg)](https://codecov.io/gh/datakube/datakube)
 
+![Datakube](docs/images/datakube.png)
+\
 Datakube is a modern method to backup / save your application data which are based in the cloud easily.
 
 ## Overview
