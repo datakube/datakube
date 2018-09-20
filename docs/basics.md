@@ -57,7 +57,7 @@ ls -l ${FILE}.gz
 With the amount of services and therefore datasources you have, that may become hard to maintain and manage. So let's see
 how datakube can assist on that matter
 
-![Overview](images/datakube.png)
+![Overview](images/architecture.png)
 
 Let's check out how Datakube does things internally
 
