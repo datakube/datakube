@@ -9,6 +9,7 @@ const STATUS_SUCCESS = "success"
 const STATUS_IN_PROGRESS = "in_progress"
 
 type ConfigTargets struct {
+	Provider string
 	Targets []Target `toml:"target"`
 }
 

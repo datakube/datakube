@@ -65,5 +65,6 @@ func loadTargets(file string) (types.ConfigTargets, error) {
 		return targets, err
 	}
 
+	targets.Provider = "file"
 	return targets, nil
 }

@@ -16,7 +16,11 @@ func ValidateJobNeededByTarget(target types.Target, store jobStore) bool {
 	job, err := store.GetLatestJobByTargetName(target.Name)
 
 	if err != nil {
-		log.Debug("Error fetching jobs for provider with Error", target.Name, err)
+		if err.Error() == "not found" {
+			return true
+		}
+		log.Debug("Error fetching for provider with Error ", target.Name, err)
+		return false
 	}
 
 	if &job == new(types.Job) {

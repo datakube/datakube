@@ -15,6 +15,9 @@ func (h *rpcHandler) ListJobs(ctx context.Context, in *datakube.ListJobsRequest)
 
 	if err != nil {
 		log.Error("Error fetching all queued Jobs for RPC Call", err)
+		if err.Error() == "not found" {
+			err = nil
+		}
 	}
 
 	for _, job := range jobs {
