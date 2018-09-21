@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+set -e
+
+# ROOT_PACKAGE :: the package (relative to $GOPATH/src) that is the target for code generation
+ROOT_PACKAGE="github.com/datakube/datakube"
+# CUSTOM_RESOURCE_NAME :: the name of the custom resource that we're generating client code for
+CUSTOM_RESOURCE_NAME="backuptarget"
+# CUSTOM_RESOURCE_VERSION :: the version of the resource
+CUSTOM_RESOURCE_VERSION="v1"
+
+# retrieve the code-generator scripts and bins
+go get -u k8s.io/code-generator/...
+cd $GOPATH/src/k8s.io/code-generator
+
+# run the code-generator entrypoint script
+./generate-groups.sh all github.com/datakube/datakube/pkg/client github.com/datakube/datakube/pkg/apis backuptarget:v1
+
+# view the newly generated files
+tree $GOPATH/src/$ROOT_PACKAGE/pkg/client

@@ -1,0 +1,12 @@
+apiVersion: datakube.io/v1
+kind: BackupTarget
+metadata:
+  name: hello-world-target-123
+spec:
+  host: mysql.default.svc.cluster.local
+  type: mysql
+  name: test
+  user: user
+  password: password
+  port: "3306"
+  interval: every_minute

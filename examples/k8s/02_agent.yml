@@ -1,0 +1,23 @@
+kind: Deployment
+apiVersion: extensions/v1beta1
+metadata:
+  name: datakube-agent
+  labels:
+    app: datakube-agent
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: datakube-agent
+  template:
+    metadata:
+      labels:
+        app: datakube-agent
+    spec:
+      containers:
+      - name: whoami
+        image: "datakube/agent:dev"
+        args:
+        - --server=http://host.docker.internal:8080
+        - --logLevel=debug
+        - --interval=10

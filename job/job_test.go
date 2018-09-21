@@ -1,6 +1,7 @@
 package job_test
 
 import (
+	"errors"
 	"github.com/datakube/datakube/internal/test"
 	"github.com/datakube/datakube/job"
 	"github.com/datakube/datakube/types"
@@ -43,6 +44,8 @@ func TestValidateJobNeededByTarget(t *testing.T) {
 	jobStoreMock.On("GetLatestJobByTargetName", "alreadyQueued").Return(jobAlreadyQueued, nil)
 	jobStoreMock.On("GetLatestJobByTargetName", "noExistingJob").Return(types.Job{}, nil)
 	jobStoreMock.On("GetLatestJobByTargetName", "inFuture").Return(jobInFuture, nil)
+	jobStoreMock.On("GetLatestJobByTargetName", "notFound").Return(types.Job{}, errors.New("not found"))
+	jobStoreMock.On("GetLatestJobByTargetName", "error").Return(types.Job{}, errors.New("error"))
 
 	targetWeekly := types.Target{
 		Name: "targetWeekly",
@@ -83,6 +86,14 @@ func TestValidateJobNeededByTarget(t *testing.T) {
 		},
 	}
 
+	targetNotFound := types.Target{
+		Name: "notFound",
+	}
+
+	targetError := types.Target{
+		Name: "error",
+	}
+
 	assert.True(t, job.ValidateJobNeededByTarget(targetWeekly, jobStoreMock))
 	assert.True(t, job.ValidateJobNeededByTarget(targetDaily, jobStoreMock))
 	assert.True(t, job.ValidateJobNeededByTarget(targetMonthly, jobStoreMock))
@@ -90,5 +101,7 @@ func TestValidateJobNeededByTarget(t *testing.T) {
 	assert.False(t, job.ValidateJobNeededByTarget(targetQueued, jobStoreMock))
 	assert.True(t, job.ValidateJobNeededByTarget(noPreviousJob, jobStoreMock))
 	assert.False(t, job.ValidateJobNeededByTarget(inFutureTarget, jobStoreMock))
+	assert.True(t, job.ValidateJobNeededByTarget(targetNotFound, jobStoreMock))
+	assert.False(t, job.ValidateJobNeededByTarget(targetError, jobStoreMock))
 	assert.True(t, jobStoreMock.AssertExpectations(t))
 }

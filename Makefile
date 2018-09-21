@@ -25,6 +25,9 @@ fmt:
 validate:  ## validate gofmt, golint and go vet
 	./script/make.sh validate-gofmt validate-golint
 
+crd:
+	./script/make.sh generate-crd
+
 test:
 	go test -race ./...
 

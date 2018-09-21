@@ -45,6 +45,14 @@ func (s *Server) Start(stopChan <-chan bool) {
 			}
 			ft.Provide(targetsChan, stopChan)
 		}
+
+		kp := provider.KubernetesProvider{
+			"127.0.0.1:8081",
+			"",
+			"",
+		}
+		kp.Provide(targetsChan, stopChan)
+
 	}()
 
 	s.http.Init(s.storage, s.datastore, targetStore)
