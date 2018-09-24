@@ -26,6 +26,7 @@ message ListJobsRequest {
 
 message UpdateJobRequest {
     Job job = 1;
+    string Message = 2;
 }
 
 message UpdateJobResponse {

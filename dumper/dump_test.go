@@ -6,14 +6,20 @@ import (
 	"testing"
 )
 
-type TestDumpAdapter struct{}
+type testDumpAdapter struct{
+	Success bool
+}
 
-func (t TestDumpAdapter) Dump(targetName string) (types.DumpResult, error) {
+func (t testDumpAdapter) Dump(targetName string) (types.DumpResult, error) {
 
 	result := *new(types.DumpResult)
 
-	result.Success = true
-	result.TemporaryFile = "/tmp/testfile"
+	result.Success = t.Success
+
+	if(t.Success) {
+		result.TemporaryFile = "/tmp/testfile"
+	}
+
 	result.TargetName = "TestTarget"
 
 	return result, nil
@@ -21,12 +27,19 @@ func (t TestDumpAdapter) Dump(targetName string) (types.DumpResult, error) {
 
 func TestDumpJobRunt(t *testing.T) {
 
-	tda := new(TestDumpAdapter)
+	tda := new(testDumpAdapter)
 
+	tda.Success = true
 	res := Run("TestTarget", tda)
 
-	assert.Equal(t, res.Success, true)
-	assert.Equal(t, res.TargetName, "TestTarget")
-	assert.Equal(t, res.TemporaryFile, "/tmp/testfile")
+	assert.Equal(t, true, res.Success)
+	assert.Equal(t, "TestTarget", res.TargetName )
+	assert.Equal(t, "/tmp/testfile",res.TemporaryFile )
 
+	tda.Success = false
+	res = Run("TestTarget", tda)
+
+	assert.Equal(t, false, res.Success, )
+	assert.Equal(t, "TestTarget",res.TargetName )
+	assert.Equal(t, "", res.TemporaryFile)
 }

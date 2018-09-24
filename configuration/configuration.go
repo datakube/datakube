@@ -2,11 +2,12 @@ package configuration
 
 // ServerConfiguration struct to hold Server config
 type ServerConfiguration struct {
-	Address     string                  `mapstructure:"address"`
-	LogLevel    string                  `mapstructure:"logLevel"`
-	Datastore   DatastoreConfiguration  `mapstructure:"datastore"`
-	Storage     StorageConfiguration    `mapstructure:"storage"`
-	FileTargets FileTargetsConfguration `mapstructure:"file"`
+	Address     		string                  `mapstructure:"address"`
+	LogLevel    		string                  `mapstructure:"logLevel"`
+	Datastore   		DatastoreConfiguration  `mapstructure:"datastore"`
+	Storage     		StorageConfiguration    `mapstructure:"storage"`
+	FileTargets 		FileTargetsConfguration `mapstructure:"file"`
+	KubernetesTargets	KubernetesConfiguration `mapstructure:"kubernetes"`
 }
 
 type DatastoreConfiguration struct {
@@ -32,4 +33,10 @@ type DumperConfiguration struct {
 type FileTargetsConfguration struct {
 	Dir  string `mapstructure:"dir"`
 	File string `mapstructure:"file"`
+}
+
+type KubernetesConfiguration struct {
+	Addr string `mapstructure:"addr"`
+	Token string `mapstructure:"token"`
+	CaFile string `mapstructure:"cafile"`
 }

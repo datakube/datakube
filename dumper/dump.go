@@ -9,7 +9,6 @@ import (
 func Run(targetName string, adapter adapter.DumpAdapter) types.DumpResult{
 	log.Debug("Running Dump")
 	res, err := adapter.Dump(targetName)
-	log.Debug("Dump done")
 	if err != nil {
 		log.Debug("Error during Dump ", err.Error())
 	}
