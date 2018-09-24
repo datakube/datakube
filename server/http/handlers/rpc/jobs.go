@@ -63,6 +63,7 @@ func (h *rpcHandler) UpdateJob(ctx context.Context, in *datakube.UpdateJobReques
 	}
 
 	job.Status = in.Job.State
+	job.Message = in.Message
 
 	h.js.SaveJob(job)
 

@@ -45,14 +45,14 @@ func (s *Server) Start(stopChan <-chan bool) {
 			}
 			ft.Provide(targetsChan, stopChan)
 		}
-
-		kp := provider.KubernetesProvider{
-			"127.0.0.1:8081",
-			"",
-			"",
+		if s.cfg.KubernetesTargets != (configuration.KubernetesConfiguration{}) {
+			kp := provider.KubernetesProvider{
+				s.cfg.KubernetesTargets.Addr,
+				s.cfg.KubernetesTargets.Token,
+				s.cfg.KubernetesTargets.CaFile,
+			}
+			kp.Provide(targetsChan, stopChan)
 		}
-		kp.Provide(targetsChan, stopChan)
-
 	}()
 
 	s.http.Init(s.storage, s.datastore, targetStore)

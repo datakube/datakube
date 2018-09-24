@@ -7,6 +7,7 @@ import (
 const STATUS_QUEUED = "queued"
 const STATUS_SUCCESS = "success"
 const STATUS_IN_PROGRESS = "in_progress"
+const STATUS_ERROR = "error"
 
 type ConfigTargets struct {
 	Provider string
@@ -64,12 +65,14 @@ type DumpResult struct {
 	Success       bool
 	TemporaryFile string
 	TargetName    string
+	ErrorMsg	  string
 }
 
 // Job struct to hold information about what to dump when and be the provider for the polling
 type Job struct {
-	ID     int       `storm:"id,increment"`
-	Status string    `json:"state"`
-	Target string    `json:"provider"`
-	RunAt  time.Time `json:"runAt"`
+	ID     	int       	`storm:"id,increment"`
+	Status 	string    	`json:"state"`
+	Target 	string    	`json:"provider"`
+	RunAt  	time.Time	`json:"runAt"`
+	Message string 	 	`json:"message"`
 }

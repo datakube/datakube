@@ -52,7 +52,7 @@ func TestSql_DumpOk(t *testing.T) {
 	res, err := sqlAdapter.Dump("abc")
 
 	assert.Equal(t, res.Success, false)
-	assert.Equal(t, res.TargetName, "")
+	assert.Equal(t, res.TargetName, "abc")
 	assert.NotNil(t, res.TemporaryFile, "")
 	assert.Equal(t, err.Error(), "Test Dump Error")
 }

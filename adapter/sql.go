@@ -46,7 +46,7 @@ func (s Sql) Dump(targetName string) (types.DumpResult, error) {
 
 	if err != nil {
 		log.Errorf("Error Dumping MySql Dump: %s", err)
-		return types.DumpResult{Success: false}, err
+		return types.DumpResult{Success: false, TargetName: targetName, ErrorMsg: fmt.Sprintf("%s", data)}, err
 	}
 
 	tempFile, err := ioutil.TempFile("", "")
@@ -68,7 +68,7 @@ func (m mysqlDumpCli) Dump(host string, port string, database string, user strin
 
 	stdoutStderr, err := cmd.CombinedOutput()
 	if err != nil {
-		log.Fatal(err)
+		log.Error(err)
 	}
 
 	return stdoutStderr, err

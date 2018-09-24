@@ -7,6 +7,6 @@ spec:
   type: mysql
   name: test
   user: user
-  password: password
+  password: password1
   port: "3306"
   interval: every_minute

@@ -48,18 +48,21 @@ func StartWorker(c *configuration.DumperConfiguration) {
 			res := Run(job.Target.Name, adapter)
 
 			if res.Success == false {
-				log.Debug("Something failed in job %i - returning to queue", job.Id)
-				job.State = types.STATUS_QUEUED
+				log.Debug("Something failed in job ", job.Id)
+				job.State = types.STATUS_ERROR
 				updateRequest := datakube.UpdateJobRequest{
 					Job:job,
+					Message: res.ErrorMsg,
 				}
 				client.UpdateJob(ctx, &updateRequest)
+				continue
 			}
 
 			data, err := ioutil.ReadFile(res.TemporaryFile)
 
 			if err != nil {
 				log.Debugf("Error reading temporary file to send %s", err.Error())
+				continue
 			}
 
 			req := datakube.SaveDumpFileRequest{
@@ -72,10 +75,12 @@ func StartWorker(c *configuration.DumperConfiguration) {
 
 			if err != nil {
 				log.Debugf("Error sending file to server %s", err.Error())
+				continue
 			}
 
 			if saveresult.Success != true {
 				log.Debugf("Transfered dump to Server not successful")
+				continue
 			}
 
 			log.Debugf("Transfered dump to Server successfuly - acknowling")
