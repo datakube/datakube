@@ -36,7 +36,8 @@ type FileTargetsConfguration struct {
 }
 
 type KubernetesConfiguration struct {
-	Addr string `mapstructure:"addr"`
-	Token string `mapstructure:"token"`
-	CaFile string `mapstructure:"cafile"`
+	Addr  		string `mapstructure:"addr"`
+	Token 		string `mapstructure:"token"`
+	CaFile 		string `mapstructure:"cafile"`
+	Advertise	string `mapstructure:"advertise"`
 }

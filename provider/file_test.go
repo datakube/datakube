@@ -49,7 +49,7 @@ func TestProvide(t *testing.T) {
 		tempDir,
 	}
 	testChan := make(chan types.ConfigTargets)
-	stopChan := make(chan bool)
+	stopChan := make(chan struct{})
 
 	go func() {
 		err := ft.Provide(testChan, stopChan)
@@ -59,7 +59,7 @@ func TestProvide(t *testing.T) {
 	select {
 	case config := <-testChan:
 		assert.Equal(t, len(config.Targets), 1)
-		stopChan <- true
+		stopChan <- struct{}{}
 	}
 
 	os.RemoveAll(tempDir)
@@ -87,7 +87,7 @@ func TestProvideWatch(t *testing.T) {
 	}
 
 	testChan := make(chan types.ConfigTargets)
-	stopChan := make(chan bool)
+	stopChan := make(chan struct{})
 	inChan := make(chan struct{})
 
 	go func() {
@@ -115,7 +115,7 @@ func TestProvideWatch(t *testing.T) {
 	go func() {
 		targets := <-testChan
 		assert.Equal(t, len(targets.Targets), 1)
-		stopChan <- true
+		stopChan <- struct{}{}
 		inChan <- struct{}{}
 	}()
 

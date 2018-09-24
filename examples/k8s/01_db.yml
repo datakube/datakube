@@ -1,4 +1,13 @@
 apiVersion: v1
+kind: Secret
+metadata:
+  name: mysecret
+type: Opaque
+data:
+  username: YWRtaW4=
+  password: MWYyZDFlMmU2N2Rm
+---
+apiVersion: v1
 kind: Service
 metadata:
   name: mysql
@@ -30,6 +39,12 @@ spec:
         env:
         - name: MYSQL_ROOT_PASSWORD
           value: password
+        - name: MYSQL_USER
+          value: user
+        - name: MYSQL_PASSWORD
+          value: password
+        - name: MYSQL_DATABASE
+          value: testdb
         ports:
         - containerPort: 3306
           name: mysql
