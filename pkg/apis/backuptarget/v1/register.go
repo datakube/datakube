@@ -1,11 +1,11 @@
 package v1
 
 import (
-meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-"k8s.io/apimachinery/pkg/runtime"
-"k8s.io/apimachinery/pkg/runtime/schema"
+	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 
-"github.com/datakube/datakube/pkg/apis/backuptarget"
+	"github.com/datakube/datakube/pkg/apis/backuptarget"
 )
 
 // GroupVersion is the identifier for the API which includes

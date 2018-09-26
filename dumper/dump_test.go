@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-type testDumpAdapter struct{
+type testDumpAdapter struct {
 	Success bool
 }
 
@@ -16,7 +16,7 @@ func (t testDumpAdapter) Dump(targetName string) (types.DumpResult, error) {
 
 	result.Success = t.Success
 
-	if(t.Success) {
+	if t.Success {
 		result.TemporaryFile = "/tmp/testfile"
 	}
 
@@ -33,13 +33,13 @@ func TestDumpJobRunt(t *testing.T) {
 	res := Run("TestTarget", tda)
 
 	assert.Equal(t, true, res.Success)
-	assert.Equal(t, "TestTarget", res.TargetName )
-	assert.Equal(t, "/tmp/testfile",res.TemporaryFile )
+	assert.Equal(t, "TestTarget", res.TargetName)
+	assert.Equal(t, "/tmp/testfile", res.TemporaryFile)
 
 	tda.Success = false
 	res = Run("TestTarget", tda)
 
-	assert.Equal(t, false, res.Success, )
-	assert.Equal(t, "TestTarget",res.TargetName )
+	assert.Equal(t, false, res.Success)
+	assert.Equal(t, "TestTarget", res.TargetName)
 	assert.Equal(t, "", res.TemporaryFile)
 }

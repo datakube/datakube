@@ -10,14 +10,14 @@ import (
 )
 
 type KubernetesProvider struct {
-	Addr string
-	Token string
-	CaFile string
+	Addr      string
+	Token     string
+	CaFile    string
 	Advertise string
 }
 
 type kubernetesClient interface {
-	WatchAll(namespaces []string, stopchan <- chan struct{}) (chan string, error)
+	WatchAll(namespaces []string, stopchan <-chan struct{}) (chan string, error)
 	ListTargetsByNs(ns string) []*target.BackupTarget
 	GetTargetByNamespaceAndName(ns string, name string) (*target.BackupTarget, error)
 	GetPodsByNamesapceAndSelector(ns string, selector string) ([]*v1.Pod, error)
@@ -36,7 +36,7 @@ func (k *KubernetesProvider) Provide(targetChan chan<- types.ConfigTargets, stop
 	client := NewKubernetesClient(k.Addr, k.Token, k.CaFile)
 
 	watchChan, err := client.WatchAll([]string{}, stopChan)
-	if err != nil{
+	if err != nil {
 		log.Errorf(err.Error())
 	}
 
@@ -55,7 +55,7 @@ func (k *KubernetesProvider) Provide(targetChan chan<- types.ConfigTargets, stop
 	return nil
 }
 
-func (k *KubernetesProvider) loadTargets(ns string, client kubernetesClient) types.ConfigTargets{
+func (k *KubernetesProvider) loadTargets(ns string, client kubernetesClient) types.ConfigTargets {
 	var cfgTargets types.ConfigTargets
 	cfgTargets.Provider = "kubernetes"
 	targets := client.ListTargetsByNs(ns)
@@ -65,7 +65,7 @@ func (k *KubernetesProvider) loadTargets(ns string, client kubernetesClient) typ
 		if !validateSpec(*target) {
 			targetPods, err := client.GetPodsByTarget(*target)
 
-			if err != nil  || len(targetPods) == 0{
+			if err != nil || len(targetPods) == 0 {
 				log.Debugf("Cant find any pods for target %s - skipping", target.Name)
 				continue
 			}
@@ -74,7 +74,7 @@ func (k *KubernetesProvider) loadTargets(ns string, client kubernetesClient) typ
 
 			targetDeployment, err := client.GetDeploymentByTarget(*target)
 
-			if  err != nil {
+			if err != nil {
 				log.Debugf("Cant find any deployments for target %s - skipping", target.Name)
 				continue
 			}
@@ -107,12 +107,12 @@ func (k *KubernetesProvider) loadTargets(ns string, client kubernetesClient) typ
 		cfgTarget := types.Target{
 			Name: target.Name,
 			DBConfig: types.Database{
-				DatabasePort: target.Spec.Port,
+				DatabasePort:     target.Spec.Port,
 				DatabasePassword: target.Spec.Password,
-				DatabaseName: target.Spec.Name,
-				DatabaseHost: target.Spec.Host,
+				DatabaseName:     target.Spec.Name,
+				DatabaseHost:     target.Spec.Host,
 				DatabaseUserName: target.Spec.User,
-				DatabaseType: target.Spec.Type,
+				DatabaseType:     target.Spec.Type,
 			},
 			Schedule: types.Schedule{
 				Interval: target.Spec.Interval,
@@ -125,7 +125,7 @@ func (k *KubernetesProvider) loadTargets(ns string, client kubernetesClient) typ
 	return cfgTargets
 }
 
-func prepareSettings(pod v1.Pod , deployment v12.Deployment) map[string]string {
+func prepareSettings(pod v1.Pod, deployment v12.Deployment) map[string]string {
 
 	settings := filterEnvVars(pod.Spec.Containers[0].Env)
 	settings["host"] = deployment.Name
@@ -168,7 +168,6 @@ func validateSpec(target target.BackupTarget) bool {
 
 	return true
 }
-
 
 func filterEnvVars(vars []v1.EnvVar) map[string]string {
 	var settings = make(map[string]string)

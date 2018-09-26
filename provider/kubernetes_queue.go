@@ -13,8 +13,8 @@ func NewBackupEventHandler() backupEventHandler {
 }
 
 type backupEventHandler struct {
-	queue     workqueue.RateLimitingInterface
-	Notify 	  chan string
+	queue  workqueue.RateLimitingInterface
+	Notify chan string
 }
 
 func (b backupEventHandler) OnAdd(obj interface{}) {

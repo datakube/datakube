@@ -21,19 +21,19 @@ func TestNewSqlAdapter(t *testing.T) {
 func TestSql_DumpOk(t *testing.T) {
 
 	testCreds := Credentials{
-		user: "user",
+		user:     "user",
 		password: "password",
-		host: "host",
+		host:     "host",
 		database: "testdb",
-		port: "3306",
+		port:     "3306",
 	}
 
 	mysqldumpMock := test.MysqlDumpMock{}
 	mysqldumpMock.On("Dump", testCreds).Return()
 
 	sqlAdapter := Sql{
-		cli: &mysqldumpMock,
-		creds:testCreds,
+		cli:   &mysqldumpMock,
+		creds: testCreds,
 	}
 
 	mysqldumpMock.Success = true
@@ -45,7 +45,7 @@ func TestSql_DumpOk(t *testing.T) {
 	assert.NotNil(t, res.TemporaryFile, "")
 	data, _ := ioutil.ReadFile(res.TemporaryFile)
 	dataString := fmt.Sprintf("%s", data)
-	assert.Equal(t,"Hello World", dataString)
+	assert.Equal(t, "Hello World", dataString)
 
 	mysqldumpMock.Success = false
 

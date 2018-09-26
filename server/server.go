@@ -51,7 +51,6 @@ func (s *Server) Start(stopChan <-chan struct{}) {
 				s.cfg.KubernetesTargets.Token,
 				s.cfg.KubernetesTargets.CaFile,
 				s.cfg.KubernetesTargets.Advertise,
-
 			}
 			kp.Provide(targetsChan, stopChan)
 		}

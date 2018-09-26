@@ -18,7 +18,7 @@ func GetJobs(js jobStore) func(*gin.Context) {
 		}
 
 		c.JSON(code, gin.H{
-			"jobs": jobs,
+			"jobs":  jobs,
 			"error": msg,
 		})
 	}

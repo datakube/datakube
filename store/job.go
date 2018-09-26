@@ -1,9 +1,9 @@
 package store
 
 import (
+	"github.com/asdine/storm/q"
 	"github.com/datakube/datakube/log"
 	"github.com/datakube/datakube/types"
-	"github.com/asdine/storm/q"
 )
 
 //Save function to save the given Dumper

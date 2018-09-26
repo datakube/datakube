@@ -13,8 +13,8 @@ import (
 )
 
 type jobsResponse struct {
-	Jobs []types.Job `json:"jobs"`
-	Error string `json:"error"`
+	Jobs  []types.Job `json:"jobs"`
+	Error string      `json:"error"`
 }
 
 func TestGetJobs(t *testing.T) {

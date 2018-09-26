@@ -57,7 +57,7 @@ func (h *rpcHandler) UpdateJob(ctx context.Context, in *datakube.UpdateJobReques
 
 	if err != nil {
 		return &datakube.UpdateJobResponse{
-			Job: in.Job,
+			Job:     in.Job,
 			Success: false,
 		}, err
 	}
@@ -68,7 +68,7 @@ func (h *rpcHandler) UpdateJob(ctx context.Context, in *datakube.UpdateJobReques
 	h.js.SaveJob(job)
 
 	return &datakube.UpdateJobResponse{
-		Job: in.Job,
+		Job:     in.Job,
 		Success: true,
 	}, err
 }

@@ -19,34 +19,32 @@ import (
 	"time"
 )
 
-
 var list_all = metav1.ListOptions{}
 
 const resyncPeriod = 10 * time.Minute
 
 type kubernetesClientImpl struct {
-	client kubernetes.Interface
-	dc datakubeClientSet.Interface
-	backupEventHandler backupEventHandler
-	kubeInformerFactories 	  map[string]kubeinformers.SharedInformerFactory
+	client                    kubernetes.Interface
+	dc                        datakubeClientSet.Interface
+	backupEventHandler        backupEventHandler
+	kubeInformerFactories     map[string]kubeinformers.SharedInformerFactory
 	datakubeInformerFactories map[string]datakubeInformers.SharedInformerFactory
-	isNamespaceAll bool
+	isNamespaceAll            bool
 }
 
-func NewKubernetesClient(addr string, token string,  caFile string) *kubernetesClientImpl{
+func NewKubernetesClient(addr string, token string, caFile string) *kubernetesClientImpl {
 	c, d := getKubernetesClient(addr, token, caFile)
 
 	return &kubernetesClientImpl{
-		client: c,
-		dc: d,
-		backupEventHandler: NewBackupEventHandler(),
-		kubeInformerFactories: make(map[string]kubeinformers.SharedInformerFactory),
+		client:                    c,
+		dc:                        d,
+		backupEventHandler:        NewBackupEventHandler(),
+		kubeInformerFactories:     make(map[string]kubeinformers.SharedInformerFactory),
 		datakubeInformerFactories: make(map[string]datakubeInformers.SharedInformerFactory),
 	}
 }
 
-
-func getKubernetesClient(addr string, token string,  caFile string) (kubernetes.Interface, datakubeClientSet.Interface) {
+func getKubernetesClient(addr string, token string, caFile string) (kubernetes.Interface, datakubeClientSet.Interface) {
 
 	var config *rest.Config
 
@@ -75,7 +73,7 @@ func getKubernetesClient(addr string, token string,  caFile string) (kubernetes.
 	return client, myresourceClient
 }
 
-func (k *kubernetesClientImpl) WatchAll(namespaces []string, stopChan<- chan struct{}) (chan string , error) {
+func (k *kubernetesClientImpl) WatchAll(namespaces []string, stopChan <-chan struct{}) (chan string, error) {
 
 	eventCh := make(chan string, 1)
 
@@ -119,7 +117,7 @@ func (k *kubernetesClientImpl) WatchAll(namespaces []string, stopChan<- chan str
 	return eventCh, nil
 }
 
-func  (k *kubernetesClientImpl) ListTargetsByNs(ns string) []*v1.BackupTarget{
+func (k *kubernetesClientImpl) ListTargetsByNs(ns string) []*v1.BackupTarget {
 	all, _ := labels.Parse("")
 	backups, err := k.datakubeInformerFactories[k.lookupNamespace(ns)].Datakube().V1().BackupTargets().Lister().BackupTargets(ns).List(all)
 
@@ -141,9 +139,9 @@ func (k *kubernetesClientImpl) GetTargetByNamespaceAndName(ns string, name strin
 	return backup, nil
 }
 
-func (k *kubernetesClientImpl) GetPodsByNamesapceAndSelector(namespace string, selector string) ([]*corev1.Pod, error){
+func (k *kubernetesClientImpl) GetPodsByNamesapceAndSelector(namespace string, selector string) ([]*corev1.Pod, error) {
 
-	sel, err  := labels.Parse(selector)
+	sel, err := labels.Parse(selector)
 
 	if err != nil {
 		fmt.Printf("error %s", err.Error())
@@ -160,7 +158,7 @@ func (k *kubernetesClientImpl) GetPodsByNamesapceAndSelector(namespace string, s
 	return pods, nil
 }
 
-func (k *kubernetesClientImpl) CreateDeployment(ns string, deployment v12.Deployment) (*v12.Deployment, error){
+func (k *kubernetesClientImpl) CreateDeployment(ns string, deployment v12.Deployment) (*v12.Deployment, error) {
 	deploymentClient := k.client.AppsV1().Deployments(ns)
 
 	result, err := deploymentClient.Create(&deployment)
@@ -173,7 +171,7 @@ func (k *kubernetesClientImpl) CreateDeployment(ns string, deployment v12.Deploy
 	return result, nil
 }
 
-func (k *kubernetesClientImpl) DeleteDeployment(ns string, deployment string) error{
+func (k *kubernetesClientImpl) DeleteDeployment(ns string, deployment string) error {
 	deploymentClient := k.client.AppsV1().Deployments(ns)
 
 	err := deploymentClient.Delete(deployment, nil)
@@ -181,7 +179,7 @@ func (k *kubernetesClientImpl) DeleteDeployment(ns string, deployment string) er
 	return err
 }
 
-func (k *kubernetesClientImpl) GetDeploymentByTarget(target v1.BackupTarget) (*v12.Deployment, error){
+func (k *kubernetesClientImpl) GetDeploymentByTarget(target v1.BackupTarget) (*v12.Deployment, error) {
 
 	sel, err := labels.Parse(labels.FormatLabels(target.Spec.Selector))
 
@@ -200,14 +198,14 @@ func (k *kubernetesClientImpl) GetDeploymentByTarget(target v1.BackupTarget) (*v
 
 	deployment, err := k.kubeInformerFactories[k.lookupNamespace(target.Namespace)].Apps().V1().Deployments().Lister().Deployments(target.Namespace).Get(value)
 
-	if err != nil{
+	if err != nil {
 
 	}
 
 	return deployment, err
 }
 
-func (k *kubernetesClientImpl) GetPodsByTarget(target v1.BackupTarget) ([]*corev1.Pod, error){
+func (k *kubernetesClientImpl) GetPodsByTarget(target v1.BackupTarget) ([]*corev1.Pod, error) {
 
 	sel, err := labels.Parse(labels.FormatLabels(target.Spec.Selector))
 

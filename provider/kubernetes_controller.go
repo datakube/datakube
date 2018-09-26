@@ -3,8 +3,8 @@ package provider
 import (
 	"fmt"
 	"github.com/datakube/datakube/log"
-	corev1 "k8s.io/api/core/v1"
 	appsv1 "k8s.io/api/apps/v1"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/selection"
@@ -15,23 +15,22 @@ import (
 )
 
 type kubernetesControllerImpl struct {
-	advertise 		string
-	client    		kubernetesClient
-	queue			TargetEventQueue
+	advertise string
+	client    kubernetesClient
+	queue     TargetEventQueue
 }
-
 
 type TargetEventQueue interface {
 	ShutDown()
 	Done(interface{})
-	Get()  (interface{}, bool)
+	Get() (interface{}, bool)
 }
 
 func NewKubernetesController(client kubernetesClient, advertise string, queue TargetEventQueue) kubernetesControllerImpl {
 	return kubernetesControllerImpl{
 		advertise: advertise,
-		client: client,
-		queue: queue,
+		client:    client,
+		queue:     queue,
 	}
 }
 
@@ -39,7 +38,7 @@ func (c *kubernetesControllerImpl) Setup(stopCh <-chan struct{}, advertise strin
 	c.advertise = advertise
 }
 
-func (c *kubernetesControllerImpl)  Run(stopCh <-chan struct{}) {
+func (c *kubernetesControllerImpl) Run(stopCh <-chan struct{}) {
 	// handle a panic with logging and exiting
 	defer utilruntime.HandleCrash()
 	// ignore new items in the queue but when all goroutines
@@ -84,7 +83,7 @@ func (c *kubernetesControllerImpl) processNextItem() bool {
 
 	target, err := c.client.GetTargetByNamespaceAndName(namespace, name)
 
-	if err != nil || target == nil{
+	if err != nil || target == nil {
 		c.client.DeleteDeployment(namespace, name)
 		return true
 	}
@@ -126,7 +125,7 @@ func (c *kubernetesControllerImpl) processNextItem() bool {
 	return true
 }
 
-func createDeployment(deploymentName string, image string, address string) appsv1.Deployment{
+func createDeployment(deploymentName string, image string, address string) appsv1.Deployment {
 
 	deployment := &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
@@ -151,13 +150,13 @@ func createDeployment(deploymentName string, image string, address string) appsv
 						{
 							Name:  deploymentName,
 							Image: image,
-							Args: []string{"--logLevel=debug", "--server=" + address, "--interval=10"},
-							},
+							Args:  []string{"--logLevel=debug", "--server=" + address, "--interval=10"},
 						},
 					},
 				},
 			},
-		}
+		},
+	}
 
 	fmt.Printf("%s", deployment.UID)
 	return *deployment
