@@ -41,6 +41,7 @@ func (h *Server) Start() {
 	r.GET("/files/download/:targetName/", handlers.GetFile(h.store, h.storage))
 	r.GET("/targets/", api.GetTargets(h.t))
 	r.GET("/jobs/", api.GetJobs(h.store))
+	r.GET("/dumps/", api.GetFiles(h.store))
 
 	datakubeServer := datakube.NewDatakubeServer(rpc.New(h.store, h.t, h.store, h.storage), nil)
 

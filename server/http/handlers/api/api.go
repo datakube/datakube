@@ -11,3 +11,7 @@ type targetStore interface {
 type jobStore interface {
 	ListAllJobs() ([]types.Job, error)
 }
+
+type dumpfileStore interface {
+	ListAllDumpFiles() ([]types.DumpFile, error)
+}
