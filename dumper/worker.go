@@ -34,7 +34,7 @@ func StartWorker(c *configuration.DumperConfiguration) {
 
 			job.State = types.STATUS_IN_PROGRESS
 			updateRequest := datakube.UpdateJobRequest{
-				Job:job,
+				Job: job,
 			}
 			client.UpdateJob(ctx, &updateRequest)
 
@@ -42,7 +42,7 @@ func StartWorker(c *configuration.DumperConfiguration) {
 
 			if err != nil {
 				log.Errorf("Cant execute job for target %s with error => %s", job.Target, err.Error())
-				continue;
+				continue
 			}
 
 			res := Run(job.Target.Name, adapter)
@@ -51,7 +51,7 @@ func StartWorker(c *configuration.DumperConfiguration) {
 				log.Debug("Something failed in job ", job.Id)
 				job.State = types.STATUS_ERROR
 				updateRequest := datakube.UpdateJobRequest{
-					Job:job,
+					Job:     job,
 					Message: res.ErrorMsg,
 				}
 				client.UpdateJob(ctx, &updateRequest)
@@ -68,7 +68,7 @@ func StartWorker(c *configuration.DumperConfiguration) {
 			req := datakube.SaveDumpFileRequest{
 				Targetname: res.TargetName,
 				Data:       data,
-				JobId: job.Id,
+				JobId:      job.Id,
 			}
 
 			saveresult, err := client.SaveDumpFileForJob(ctx, &req)

@@ -23,7 +23,6 @@ func GetFile(dfs dumpFileStore, storage storage.Storage) func(*gin.Context) {
 			return
 		}
 
-
 		dumpFile, error := dfs.LoadOneDumpFileByTarget(targetName)
 
 		if dumpFile.ID == 0 {
@@ -52,7 +51,7 @@ func GetFile(dfs dumpFileStore, storage storage.Storage) func(*gin.Context) {
 
 		c.Header("Content-Description", "File Transfer")
 		c.Header("Content-Transfer-Encoding", "binary")
-		c.Header("Content-Disposition", "attachment; filename="+fileName )
+		c.Header("Content-Disposition", "attachment; filename="+fileName)
 		c.Header("Content-Type", "application/octet-stream")
 		c.Data(http.StatusOK, "application/octet-stream", data)
 	}

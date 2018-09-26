@@ -49,6 +49,6 @@ func TestDataStore_LoadOneDumpFileByTarget(t *testing.T) {
 
 	df2, err := store.LoadOneDumpFileByTarget("aaaa")
 	assert.NotNil(t, err)
-	assert.Equal(t,"not found", err.Error())
+	assert.Equal(t, "not found", err.Error())
 	assert.Empty(t, df2)
 }

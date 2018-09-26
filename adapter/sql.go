@@ -12,11 +12,11 @@ type mysqlDump interface {
 	Dump(host string, port string, database string, user string, password string) ([]byte, error)
 }
 
-type mysqlDumpCli struct {}
+type mysqlDumpCli struct{}
 
 type Sql struct {
-	creds  Credentials
-	cli mysqlDump
+	creds Credentials
+	cli   mysqlDump
 }
 
 type Credentials struct {
@@ -62,7 +62,7 @@ func (s Sql) Dump(targetName string) (types.DumpResult, error) {
 }
 
 func (m mysqlDumpCli) Dump(host string, port string, database string, user string, password string) ([]byte, error) {
-	cmd := exec.Command("mysqldump", fmt.Sprintf("-P%s", port),fmt.Sprintf("-h%s", host), fmt.Sprintf("-u%s", user), fmt.Sprintf("-p%s", password), fmt.Sprintf("%s", database))
+	cmd := exec.Command("mysqldump", fmt.Sprintf("-P%s", port), fmt.Sprintf("-h%s", host), fmt.Sprintf("-u%s", user), fmt.Sprintf("-p%s", password), fmt.Sprintf("%s", database))
 
 	log.Debugf("Created dump command %s with args %s", cmd.Path, cmd.Args)
 

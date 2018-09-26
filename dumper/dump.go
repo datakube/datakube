@@ -6,7 +6,7 @@ import (
 	"github.com/datakube/datakube/types"
 )
 
-func Run(targetName string, adapter adapter.DumpAdapter) types.DumpResult{
+func Run(targetName string, adapter adapter.DumpAdapter) types.DumpResult {
 	log.Debug("Running Dump")
 	res, err := adapter.Dump(targetName)
 	if err != nil {

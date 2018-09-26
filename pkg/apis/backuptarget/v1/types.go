@@ -11,7 +11,7 @@ import (
 // BackupTarget describes a BackupTarget resource
 type BackupTarget struct {
 	// TypeMeta is the metadata for the resource, like kind and apiversion
-	meta_v1.TypeMeta `json:",inline"`
+	meta_v1.TypeMeta   `json:",inline"`
 	meta_v1.ObjectMeta `json:"metadata,omitempty"`
 	// Spec is the custom resource spec
 	Spec BackupTargetSpec `json:"spec"`
@@ -23,13 +23,13 @@ type BackupTargetSpec struct {
 	// Message and SomeValue are example custom spec fields
 	//
 	// this is where you would put your custom resource data
-	Host   		string `json:"host"`
-	Type   		string `json:"type"`
-	Name   		string `json:"name"`
-	User   		string `json:"user"`
-	Password	string `json:"password"`
-	Port   		string `json:"port"`
-	Interval   	string `json:"interval"`
+	Host     string `json:"host"`
+	Type     string `json:"type"`
+	Name     string `json:"name"`
+	User     string `json:"user"`
+	Password string `json:"password"`
+	Port     string `json:"port"`
+	Interval string `json:"interval"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

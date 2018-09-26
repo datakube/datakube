@@ -2,11 +2,11 @@ package main
 
 import (
 	"fmt"
+	"github.com/Sirupsen/logrus"
 	"github.com/datakube/datakube/configuration"
 	"github.com/datakube/datakube/log"
 	"github.com/datakube/datakube/server"
 	"github.com/datakube/datakube/store"
-	"github.com/Sirupsen/logrus"
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"

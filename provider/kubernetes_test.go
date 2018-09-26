@@ -2,12 +2,12 @@ package provider
 
 import (
 	"github.com/datakube/datakube/internal/test"
+	target "github.com/datakube/datakube/pkg/apis/backuptarget/v1"
 	"github.com/magiconair/properties/assert"
 	v13 "k8s.io/api/apps/v1"
 	v12 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	"testing"
-	target "github.com/datakube/datakube/pkg/apis/backuptarget/v1"
 )
 
 func TestKubernetesProvider_loadTargetsAllGiven(t *testing.T) {
@@ -23,17 +23,17 @@ func TestKubernetesProvider_loadTargetsAllGiven(t *testing.T) {
 
 	targetMock := target.BackupTarget{
 		ObjectMeta: v1.ObjectMeta{
-			Name: "test-target",
+			Name:      "test-target",
 			Namespace: "test",
 		},
 		Spec: target.BackupTargetSpec{
 			Interval: "test",
-			Type: "mysql",
-			User: "user",
-			Host: "localhost",
-			Port: "3306",
+			Type:     "mysql",
+			User:     "user",
+			Host:     "localhost",
+			Port:     "3306",
 			Password: "password",
-			Name: "dbname",
+			Name:     "dbname",
 		},
 	}
 
@@ -68,14 +68,14 @@ func TestKubernetesProvider_loadTargetsLookUp(t *testing.T) {
 
 	targetMock := target.BackupTarget{
 		ObjectMeta: v1.ObjectMeta{
-			Name: "test-target",
+			Name:      "test-target",
 			Namespace: "test",
 		},
 		Spec: target.BackupTargetSpec{
 			Interval: "test",
-			Type: "mysql",
-			Port: "3306",
-			Selector: map[string]string{"app":"mysql"},
+			Type:     "mysql",
+			Port:     "3306",
+			Selector: map[string]string{"app": "mysql"},
 		},
 	}
 
@@ -87,15 +87,15 @@ func TestKubernetesProvider_loadTargetsLookUp(t *testing.T) {
 				{
 					Env: []v12.EnvVar{
 						{
-							Name: "MYSQL_USER",
+							Name:  "MYSQL_USER",
 							Value: "user",
 						},
 						{
-							Name: "MYSQL_PASSWORD",
+							Name:  "MYSQL_PASSWORD",
 							Value: "password",
 						},
 						{
-							Name: "MYSQL_DATABASE",
+							Name:  "MYSQL_DATABASE",
 							Value: "testdb",
 						},
 					},

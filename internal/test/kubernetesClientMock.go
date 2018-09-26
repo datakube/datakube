@@ -12,7 +12,7 @@ type KuberntesClientMock struct {
 	Emit bool
 }
 
-func (k KuberntesClientMock) WatchAll(namespaces []string, stopchan <- chan struct{}) (chan string, error) {
+func (k KuberntesClientMock) WatchAll(namespaces []string, stopchan <-chan struct{}) (chan string, error) {
 	return make(chan string), nil
 }
 

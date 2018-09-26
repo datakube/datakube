@@ -11,7 +11,7 @@ const STATUS_ERROR = "error"
 
 type ConfigTargets struct {
 	Provider string
-	Targets []Target `toml:"target"`
+	Targets  []Target `toml:"target"`
 }
 
 // Target struct to hold Target config
@@ -65,14 +65,14 @@ type DumpResult struct {
 	Success       bool
 	TemporaryFile string
 	TargetName    string
-	ErrorMsg	  string
+	ErrorMsg      string
 }
 
 // Job struct to hold information about what to dump when and be the provider for the polling
 type Job struct {
-	ID     	int       	`storm:"id,increment"`
-	Status 	string    	`json:"state"`
-	Target 	string    	`json:"provider"`
-	RunAt  	time.Time	`json:"runAt"`
-	Message string 	 	`json:"message"`
+	ID      int       `storm:"id,increment"`
+	Status  string    `json:"state"`
+	Target  string    `json:"provider"`
+	RunAt   time.Time `json:"runAt"`
+	Message string    `json:"message"`
 }

@@ -31,7 +31,7 @@ func (h *rpcHandler) SaveDumpFileForJob(ctx context.Context, in *datakube.SaveDu
 		}, err
 	}
 
-	now :=  strconv.FormatInt(time.Now().UTC().Unix(), 10)
+	now := strconv.FormatInt(time.Now().UTC().Unix(), 10)
 
 	file := types.File{
 		Name: in.Targetname + "_" + now,
