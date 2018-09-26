@@ -16,6 +16,11 @@ func (m DumpFileStoreMock) LoadOneDumpFileByTarget(targetName string) (types.Dum
 	return args.Get(0).(types.DumpFile), args.Error(1)
 }
 
+func (m DumpFileStoreMock) LoadOneDumpFileByName(targetName string) (types.DumpFile, error) {
+	args := m.Called(targetName)
+	return args.Get(0).(types.DumpFile), args.Error(1)
+}
+
 func (m DumpFileStoreMock) ListAllDumpFiles() ([]types.DumpFile, error) {
 
 	if !m.Success {
