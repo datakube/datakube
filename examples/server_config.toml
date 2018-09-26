@@ -2,7 +2,7 @@ logLevel = "debug"
 address = ":8080"
 
 [datastore]
-    path = "/var/lib/datakube//data/bolt.db"
+    path = "/var/lib/datakube/data/bolt.db"
 
 [storage]
     [storage.file]

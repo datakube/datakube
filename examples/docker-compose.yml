@@ -1,9 +1,10 @@
 version: '2'
-
+#docker run --rm -it --entrypoint bin/sh datakube/server:latest
 services:
   datakube-server:
-    image: datakube/server:0.1
-    command: /bin/datakube --config /var/lib/datakube/server_config.toml
+    #image: datakube/server:latest
+    image: tmp
+    command: --config /var/lib/datakube/server_config.toml
     ports:
     - 8080:8080
     volumes:
