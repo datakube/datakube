@@ -67,6 +67,7 @@ func (m mysqlDumpCli) Dump(host string, port string, database string, user strin
 	log.Debugf("Created dump command %s with args %s", cmd.Path, cmd.Args)
 
 	stdoutStderr, err := cmd.CombinedOutput()
+
 	if err != nil {
 		log.Error(err)
 	}

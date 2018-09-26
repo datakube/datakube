@@ -12,21 +12,14 @@ import (
 type BackupTarget struct {
 	// TypeMeta is the metadata for the resource, like kind and apiversion
 	meta_v1.TypeMeta `json:",inline"`
-	// ObjectMeta contains the metadata for the particular object, including
-	// things like...
-	//  - name
-	//  - namespace
-	//  - self link
-	//  - labels
-	//  - ... etc ...
 	meta_v1.ObjectMeta `json:"metadata,omitempty"`
-
 	// Spec is the custom resource spec
 	Spec BackupTargetSpec `json:"spec"`
 }
 
 // MyResourceSpec is the spec for a MyResource resource
 type BackupTargetSpec struct {
+	Selector map[string]string `json:"selector,omitempty" protobuf:"bytes,2,rep,name=selector"`
 	// Message and SomeValue are example custom spec fields
 	//
 	// this is where you would put your custom resource data

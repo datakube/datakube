@@ -3,10 +3,8 @@ kind: BackupTarget
 metadata:
   name: hello-world-target-123
 spec:
-  host: mysql.default.svc.cluster.local
+  selector:
+    app: mysql
   type: mysql
-  name: test
-  user: user
-  password: password1
   port: "3306"
   interval: every_minute

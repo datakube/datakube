@@ -30,7 +30,7 @@ func NewServer(c configuration.ServerConfiguration, dataStore *store.DataStore) 
 	return s
 }
 
-func (s *Server) Start(stopChan <-chan bool) {
+func (s *Server) Start(stopChan <-chan struct{}) {
 
 	var targetsChan = make(chan types.ConfigTargets)
 
@@ -50,6 +50,8 @@ func (s *Server) Start(stopChan <-chan bool) {
 				s.cfg.KubernetesTargets.Addr,
 				s.cfg.KubernetesTargets.Token,
 				s.cfg.KubernetesTargets.CaFile,
+				s.cfg.KubernetesTargets.Advertise,
+
 			}
 			kp.Provide(targetsChan, stopChan)
 		}

@@ -12,7 +12,7 @@ type FileTargets struct {
 	Dir        string
 }
 
-func (f *FileTargets) Provide(targetChan chan<- types.ConfigTargets, stopChan <-chan bool) error {
+func (f *FileTargets) Provide(targetChan chan<- types.ConfigTargets, stopChan <-chan struct{}) error {
 
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
