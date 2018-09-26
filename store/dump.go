@@ -1,6 +1,7 @@
 package store
 
 import (
+	"errors"
 	"github.com/asdine/storm/q"
 	"github.com/datakube/datakube/types"
 )
@@ -27,6 +28,25 @@ func (d *DataStore) LoadOneDumpFileByTarget(targetName string) (types.DumpFile, 
 	}
 
 	return df, nil
+}
+
+func (d *DataStore) LoadOneDumpFileByName(fileName string) (types.DumpFile, error) {
+
+	var dfs []types.DumpFile
+
+	err := d.db.Select().Find(&dfs)
+
+	if err != nil {
+		return *new(types.DumpFile), err
+	}
+
+	for _ , df := range dfs {
+		if df.File.Name == fileName {
+			return df, nil
+		}
+	}
+
+	return types.DumpFile{}, errors.New("No file found by given filename")
 }
 
 func (d *DataStore) ListAllDumpFiles() ([]types.DumpFile, error) {

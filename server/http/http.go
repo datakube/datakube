@@ -38,7 +38,8 @@ func (h *Server) Init(storage storage.Storage, store *store.DataStore, t *target
 func (h *Server) Start() {
 	r := gin.Default()
 	r.GET("/ping", handlers.GetPing)
-	r.GET("/files/download/:targetName/", handlers.GetFile(h.store, h.storage))
+	r.GET("/files/download/:fileName/", handlers.GetFile(h.store, h.storage))
+	r.GET("/files/download/:targetName/latest", handlers.GetLatestFile(h.store, h.storage))
 	r.GET("/targets/", api.GetTargets(h.t))
 	r.GET("/jobs/", api.GetJobs(h.store))
 	r.GET("/dumps/", api.GetFiles(h.store))
