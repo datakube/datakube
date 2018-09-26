@@ -52,3 +52,38 @@ func TestDataStore_LoadOneDumpFileByTarget(t *testing.T) {
 	assert.Equal(t, "not found", err.Error())
 	assert.Empty(t, df2)
 }
+
+func TestDataStore_ListAllDumpFiles(t *testing.T) {
+	store := NewTestDataStore()
+	defer store.Close()
+
+	df1 := types.DumpFile{
+		File: types.File{
+			Name: "testfile",
+			Path: "/test/file",
+		},
+		Target: "testtarget",
+	}
+	df2 := types.DumpFile{
+		File: types.File{
+			Name: "testfile",
+			Path: "/test/file",
+		},
+		Target: "testtarget2",
+	}
+
+	store.SaveDumpFile(df1)
+	store.SaveDumpFile(df2)
+
+	dfs, err := store.ListAllDumpFiles()
+	assert.Nil(t, err)
+	assert.Equal(t, 2, len(dfs))
+	assert.NotNil(t, dfs[0].ID)
+	assert.Equal(t, dfs[0].Target, "testtarget")
+	assert.Equal(t, dfs[0].File.Path, "/test/file")
+	assert.Equal(t, dfs[0].File.Name, "testfile")
+	assert.NotNil(t, dfs[1].ID)
+	assert.Equal(t, dfs[1].Target, "testtarget2")
+	assert.Equal(t, dfs[1].File.Path, "/test/file")
+	assert.Equal(t, dfs[1].File.Name, "testfile")
+}

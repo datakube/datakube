@@ -28,3 +28,15 @@ func (d *DataStore) LoadOneDumpFileByTarget(targetName string) (types.DumpFile, 
 
 	return df, nil
 }
+
+func (d *DataStore) ListAllDumpFiles() ([]types.DumpFile, error) {
+
+	var dfs []types.DumpFile
+	err := d.db.All(&dfs)
+
+	if err != nil {
+		return []types.DumpFile{}, err
+	}
+
+	return dfs, nil
+}
