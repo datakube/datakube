@@ -4,6 +4,7 @@ WORKDIR /app
 COPY webui/package*.json ./
 RUN yarn install
 COPY webui/ .
+RUN pwd && ls -al
 RUN yarn run build
 
 ####
