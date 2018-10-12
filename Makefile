@@ -6,7 +6,8 @@ GIT_BRANCH := $(subst heads/,,$(shell git rev-parse --abbrev-ref HEAD 2>/dev/nul
 
 default: binary
 
-images:docker build -t datakube/server .
+images:
+	docker build -t datakube/server .
 	docker build -f Dockerfile.agent -t datakube/agent .
 
 binary:
