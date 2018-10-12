@@ -1,6 +1,7 @@
 package store
 
 import (
+	"github.com/asdine/storm"
 	"github.com/asdine/storm/q"
 	"github.com/datakube/datakube/log"
 	"github.com/datakube/datakube/types"
@@ -66,7 +67,7 @@ func (d *DataStore) ListJobsByStatus(status string) ([]types.Job, error) {
 func (d *DataStore) ListAllJobs() ([]types.Job, error) {
 	var jobs []types.Job
 
-	err := d.db.All(&jobs)
+	err := d.db.AllByIndex("ID", &jobs, storm.Reverse())
 
 	if err != nil {
 		log.Error("Can't list all Jobs ", err)

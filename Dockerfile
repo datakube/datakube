@@ -1,11 +1,18 @@
-#docker build --rm -t datakube//server .
+#docker build --rm -t datakube/server .
+FROM node:9.11.1-alpine as build-webui
+WORKDIR /app
+COPY webui/package*.json ./
+RUN yarn install
+COPY webui/ .
+RUN yarn run build
 
-FROM golang:1.11-alpine as builder
+####
+FROM golang:1.11-alpine as build-server
 
 ARG DEP_VERSION=0.4.1
 
 RUN apk --update upgrade \
-    && apk --no-cache --no-progress add git bash gcc musl-dev curl tar \
+    && apk --no-cache --no-progress add git bash gcc musl-dev curl tar make\
     && rm -rf /var/cache/apk/*
 
 RUN mkdir -p /usr/local/bin \
@@ -14,13 +21,17 @@ RUN mkdir -p /usr/local/bin \
 
 WORKDIR /go/src/github.com/datakube/datakube
 COPY . /go/src/github.com/datakube/datakube
+COPY --from=build-webui /app/dist /go/src/github.com/datakube/datakube/dist
+RUN go get github.com/rakyll/statik && \
+    go generate && \
+    CGO_ENABLED=0 GOGC=off go build -o dist/server ./cmd/server/
 
-RUN CGO_ENABLED=0 GOGC=off go build $FLAGS -ldflags "-X github.com/datakube/datakube/cmd/server/version.Version=$VERSION -X github.com/datakube/datakube/cmd/server/version.BuildDate=$DATE" -o dist/server ./cmd/server/
-
+#####
 FROM alpine:3.6
 
+EXPOSE 8080
 ENV GIN_MODE=release
 
-COPY --from=builder /go/src/github.com/datakube/datakube/dist/server /bin/datakube/
-ENTRYPOINT ["/bin/datakube/"]
+COPY --from=build-server /go/src/github.com/datakube/datakube/dist/server /bin/datakube
+ENTRYPOINT ["/bin/datakube"]
 

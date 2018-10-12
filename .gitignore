@@ -10,7 +10,6 @@ _test
 .dev
 *data
 
-
 # Coverage files
 *cover.out
 

@@ -43,7 +43,8 @@ func TestGetLatestFile(t *testing.T) {
 	storageMock.On("ReadFile", "").Return([]byte(""), errors.New("no path"))
 
 	r := gin.Default()
-	r.GET("/files/download/:targetName/latest", handlers.GetLatestFile(dfsMock, storageMock))
+	fileRoutes := r.Group("/files/download/")
+	fileRoutes.GET("/:name/latest", handlers.GetLatestFile(dfsMock, storageMock))
 
 	wOk := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/files/download/testTarget/latest", nil)
@@ -96,7 +97,8 @@ func TestGetFile(t *testing.T) {
 	storageMock.On("ReadFile", "").Return([]byte(""), errors.New("no path"))
 
 	r := gin.Default()
-	r.GET("/files/download/:fileName", handlers.GetFile(dfsMock, storageMock))
+	fileRoutes := r.Group("/files/download/")
+	fileRoutes.GET("/:name", handlers.GetFile(dfsMock, storageMock))
 
 	wOk := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/files/download/testfile.sql", nil)

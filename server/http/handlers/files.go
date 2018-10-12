@@ -15,7 +15,7 @@ type dumpFileStore interface {
 //POST function to create a new handler
 func GetFile(dfs dumpFileStore, storage storage.Storage) func(*gin.Context) {
 	return func(c *gin.Context) {
-		fileName := c.Param("fileName")
+		fileName := c.Param("name")
 
 		if fileName == "" {
 			c.JSON(http.StatusBadRequest, gin.H{
@@ -59,7 +59,7 @@ func GetFile(dfs dumpFileStore, storage storage.Storage) func(*gin.Context) {
 
 func GetLatestFile(dfs dumpFileStore, storage storage.Storage) func(*gin.Context) {
 	return func(c *gin.Context) {
-		targetName := c.Param("targetName")
+		targetName := c.Param("name")
 
 		if targetName == "" {
 			c.JSON(http.StatusBadRequest, gin.H{
