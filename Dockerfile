@@ -22,7 +22,7 @@ RUN mkdir -p /usr/local/bin \
 
 WORKDIR /go/src/github.com/datakube/datakube
 COPY . /go/src/github.com/datakube/datakube
-COPY --from=build-webui /app/dist /go/src/github.com/datakube/datakube/dist
+COPY --from=build-webui /app/dist /go/src/github.com/datakube/datakube/webui/dist
 RUN go get github.com/rakyll/statik && \
     go generate && \
     CGO_ENABLED=0 GOGC=off go build -o dist/server ./cmd/server/
