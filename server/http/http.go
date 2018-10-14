@@ -12,6 +12,7 @@ import (
 	"github.com/datakube/datakube/store/target"
 	"github.com/gin-gonic/gin"
 	"github.com/rakyll/statik/fs"
+	"net/http"
 )
 
 //Server struct to hold HTTP Server Information
@@ -48,22 +49,20 @@ func (h *Server) Start() {
 
 	r := gin.Default()
 	r.GET("/ping", handlers.GetPing)
-	fileRoutes := r.Group("/files/download/")
+	fileRoutes := r.Group("/files/download")
 	fileRoutes.GET("/:name/", handlers.GetFile(h.store, h.storage))
 	fileRoutes.GET("/:name/latest", handlers.GetLatestFile(h.store, h.storage))
 
 	apiRouters := r.Group("/api")
-	apiRouters.GET("/targets/", api.GetTargets(h.t))
-	apiRouters.GET("/jobs/", api.GetJobs(h.store))
-	apiRouters.GET("/dumps/", api.GetFiles(h.store))
+	apiRouters.GET("/targets", api.GetTargets(h.t))
+	apiRouters.GET("/jobs", api.GetJobs(h.store))
+	apiRouters.GET("/dumps", api.GetFiles(h.store))
 
 	r.GET("/", func(c *gin.Context) {
-		c.Request.URL.Path = "/dashboard/"
-		r.HandleContext(c)
+		c.Redirect(http.StatusMovedPermanently, "/dashboard")
 	})
 
-
-	r.StaticFS("/dashboard/", statikFS)
+	r.StaticFS("/dashboard", statikFS)
 
 	datakubeServer := datakube.NewDatakubeServer(rpc.New(h.store, h.t, h.store, h.storage), nil)
 
